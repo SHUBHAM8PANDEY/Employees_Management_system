@@ -7,10 +7,20 @@ const {
     calculateAttendanceStatus,
     shouldAutoPunchOut,
     getWorkDayStatus,
-    isAfterTime
+    isAfterTime, attendanceDate, autoPunchTime
 } = require('../utils/attendanceRules');
 
-const getTodayStr = () => new Date().toISOString().split('T')[0];
+const getTodayStr = () => attendanceDate(new Date());
+const photos = ['punch_in_photo', 'punch_out_photo'];
+
+function punchEvidence(body) {
+    const { latitude, longitude, photo } = body;
+    if (typeof latitude !== 'number' || !Number.isFinite(latitude) || Math.abs(latitude) > 90 ||
+        typeof longitude !== 'number' || !Number.isFinite(longitude) || Math.abs(longitude) > 180 ||
+        typeof photo !== 'string' || photo.length > 1400000 ||
+        !/^data:image\/jpeg;base64,\/9j\/[A-Za-z0-9+/]+={0,2}$/.test(photo)) return null;
+    return { latitude, longitude, photo };
+}
 
 const buildSummary = (records) => {
     const summary = {
@@ -40,7 +50,12 @@ const punchIn = async (req, res) => {
     try {
         const employeeCode = req.user.employee_code;
         const today = getTodayStr();
-        const { punch_in_type = 'Office', location, notes } = req.body;
+        const { punch_in_type = 'Office', notes } = req.body;
+        const evidence = punchEvidence(req.body);
+        if (!evidence) return res.status(400).json({ error: 'Take a selfie and allow location before punching in.' });
+        const { latitude, longitude, photo } = evidence;
+        const location = latitude.toFixed(5) + ', ' + longitude.toFixed(5);
+        if (new Date() >= autoPunchTime(today)) return res.status(400).json({ error: 'Punch-in closes at 9:30 PM IST.' });
 
         const existing = await Attendance.findOne({
             where: { employee_code: employeeCode, date: today }
@@ -58,7 +73,10 @@ const punchIn = async (req, res) => {
         if (existing) {
             existing.punch_in = now;
             existing.punch_in_type = punch_in_type;
-            existing.location = location || null;
+            existing.location = location;
+            existing.latitude = latitude;
+            existing.longitude = longitude;
+            existing.punch_in_photo = photo;
             existing.notes = notes || null;
             existing.status = 'Present';
             existing.ip_address = req.ip || req.connection?.remoteAddress;
@@ -71,7 +89,7 @@ const punchIn = async (req, res) => {
                 date: today,
                 punch_in: now,
                 punch_in_type,
-                location: location || null,
+                location, latitude, longitude, punch_in_photo: photo,
                 notes: notes || null,
                 status: 'Present',
                 ip_address: req.ip || req.connection?.remoteAddress,
@@ -90,7 +108,7 @@ const punchIn = async (req, res) => {
         });
 
         res.json({
-            message: isLate ? 'Punched in after 9:30 AM - may count as Short Leave' : 'Punch in successful',
+            message: isLate ? 'Late punch-in recorded (after 9:30 AM IST)' : 'Punch in successful',
             isLate,
             attendance,
             statusInfo
@@ -118,14 +136,27 @@ const punchOut = async (req, res) => {
             return res.status(400).json({ error: 'Already punched out today!' });
         }
 
-        const now = new Date();
+        const evidence = punchEvidence(req.body);
+        const cutoff = autoPunchTime(today);
+        const current = new Date();
+        const auto = current >= cutoff;
+        if (!auto && !evidence) return res.status(400).json({ error: 'Take a selfie and allow location before punching out.' });
+        const now = auto ? cutoff : current;
         const result = calculateAttendanceStatus(attendance.punch_in, now);
 
         attendance.punch_out = now;
-        attendance.punch_out_type = 'Manual';
+        attendance.punch_out_type = auto ? 'Auto' : 'Manual';
+        if (!auto) {
+            attendance.punch_out_photo = evidence.photo;
+            attendance.punch_out_latitude = evidence.latitude;
+            attendance.punch_out_longitude = evidence.longitude;
+        }
         attendance.total_hours = result.totalHours;
         attendance.status = result.status;
-        await attendance.save();
+        const [updated] = await Attendance.update(attendance.get({ plain: true }), {
+            fields: attendance.changed(), where: { id: attendance.id, punch_out: null }
+        });
+        if (!updated) return res.status(409).json({ error: 'Already punched out today.' });
 
         await auditLogger.log({
             employee_code: employeeCode,
@@ -209,6 +240,7 @@ const getAttendanceHistory = async (req, res) => {
         if (status) where.status = status;
 
         const { count, rows } = await Attendance.findAndCountAll({
+            attributes: { exclude: photos },
             where,
             order: [['date', 'DESC']],
             limit,
@@ -311,6 +343,28 @@ const getAttendanceStats = async (req, res) => {
     }
 };
 
+async function getTeamAttendance(targetDate) {
+    const [employees, records, leaves] = await Promise.all([
+        Employee.findAll({ attributes: ['employee_code', 'first_name', 'last_name', 'email', 'joining_date'], order: [['first_name', 'ASC'], ['employee_code', 'ASC']] }),
+        Attendance.findAll({ where: { date: targetDate }, attributes: { exclude: photos } }),
+        db.LeaveRequest.findAll({ attributes: ['employee_code'], where: {
+            status: 'Approved', start_date: { [Op.lte]: targetDate }, end_date: { [Op.gte]: targetDate }
+        } })
+    ]);
+    const byEmployee = new Map(records.map(record => [record.employee_code, record]));
+    const onLeave = new Set(leaves.map(leave => leave.employee_code));
+    const sunday = new Date(targetDate + 'T00:00:00Z').getUTCDay() === 0;
+    return employees.filter(employee => byEmployee.has(employee.employee_code) ||
+        !employee.joining_date || employee.joining_date <= targetDate).map(employee => {
+        const record = byEmployee.get(employee.employee_code)?.get({ plain: true });
+        return {
+            ...record, employee, employee_code: employee.employee_code, date: targetDate,
+            status: record?.punch_in ? record.status : onLeave.has(employee.employee_code) ? 'On Leave' : record?.status ?? (sunday ? 'Holiday' : 'Absent'),
+            late: record?.punch_in ? isAfterTime(record.punch_in, '09:30') : false
+        };
+    });
+}
+
 const getAllEmployeeAttendance = async (req, res) => {
     try {
         const page = parseInt(req.query.page, 10) || 1;
@@ -318,34 +372,16 @@ const getAllEmployeeAttendance = async (req, res) => {
         const offset = (page - 1) * limit;
         const { date, status } = req.query;
         const targetDate = date || getTodayStr();
+        const parsed = typeof targetDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(targetDate) ? new Date(targetDate) : null;
+        if (!parsed || !Number.isFinite(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== targetDate) {
+            return res.status(400).json({ error: 'Choose a valid attendance date.' });
+        }
 
-        const where = { date: targetDate };
-        if (status) where.status = status;
-
-        const { count, rows } = await Attendance.findAndCountAll({
-            where,
-            include: [{
-                model: Employee,
-                as: 'employee',
-                attributes: ['first_name', 'last_name', 'email', 'employee_code']
-            }],
-            order: [['punch_in', 'DESC']],
-            limit,
-            offset
-        });
-
-        const allForDate = await Attendance.findAll({ where: { date: targetDate } });
-        const summary = buildSummary(allForDate);
-        summary.total = allForDate.length;
-
+        const allForDate = await getTeamAttendance(targetDate);
+        const filtered = status ? allForDate.filter(record => record.status === status) : allForDate;
         res.json({
-            data: rows,
-            summary,
-            pagination: {
-                page,
-                total: count,
-                totalPages: Math.ceil(count / limit) || 1
-            }
+            data: filtered.slice(offset, offset + limit), summary: buildSummary(allForDate),
+            pagination: { page, total: filtered.length, totalPages: Math.ceil(filtered.length / limit) || 1 }
         });
     } catch (error) {
         console.error('Get all attendance error:', error);
@@ -450,6 +486,7 @@ const markAttendance = async (req, res) => {
 };
 
 module.exports = {
+    getTeamAttendance,
     punchIn,
     punchOut,
     getTodayAttendance,

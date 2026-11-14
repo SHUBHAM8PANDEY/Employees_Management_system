@@ -44,6 +44,12 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: 'Absent',
             field: 'status'
         },
+        latitude: DataTypes.DECIMAL(10, 8),
+        longitude: DataTypes.DECIMAL(11, 8),
+        punch_in_photo: DataTypes.TEXT,
+        punch_out_photo: DataTypes.TEXT,
+        punch_out_latitude: DataTypes.DECIMAL(10, 8),
+        punch_out_longitude: DataTypes.DECIMAL(11, 8),
         total_hours: {
             type: DataTypes.FLOAT,
             allowNull: true,

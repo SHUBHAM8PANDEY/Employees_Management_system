@@ -22,6 +22,7 @@ router.get('/export/pdf', verifyToken, attendanceExportController.exportAttendan
 // ============================================
 // HR/ADMIN ROUTES
 // ============================================
+router.get('/admin/export/team', verifyToken, authorizeAdmin, attendanceExportController.exportTeamAttendance);
 router.get('/admin/all', verifyToken, authorizeAdmin, attendanceController.getAllEmployeeAttendance);
 router.put('/admin/edit/:id', verifyToken, authorizeAdmin, attendanceController.editAttendance);
 router.post('/admin/mark', verifyToken, authorizeAdmin, attendanceController.markAttendance);

@@ -7,7 +7,7 @@ const notificationHelper = require('../utils/notificationHelper');
 const auditLogger = require('../utils/auditLogger');
 const {
     ATTENDANCE_RULES,
-    calculateAttendanceStatus,
+    calculateAttendanceStatus, attendanceDate, autoPunchTime,
     getTimeString,
     shouldAutoPunchOut
 } = require('../utils/attendanceRules');
@@ -16,20 +16,20 @@ const {
 // AUTO PUNCH OUT - Runs at 9:30 PM Daily
 // ============================================
 const autoPunchOut = async () => {
-    console.log(`⏰ Auto Punch Out Job started at ${new Date().toISOString()}`);
 
     try {
         const today = new Date();
-        const todayStr = today.toISOString().split('T')[0];
+        const todayStr = attendanceDate(today);
 
         const attendances = await Attendance.findAll({
             where: {
-                date: todayStr,
+                date: { [db.Sequelize.Op.lte]: todayStr },
                 punch_in: {
                     [db.Sequelize.Op.ne]: null
                 },
                 punch_out: null
             },
+            attributes: { exclude: ['punch_in_photo', 'punch_out_photo'] },
             include: [{
                 model: Employee,
                 as: 'employee',
@@ -51,17 +51,17 @@ const autoPunchOut = async () => {
         for (const attendance of attendances) {
             try {
                 const punchInTime = new Date(attendance.punch_in);
-                const punchOutTime = new Date();
+                const punchOutTime = autoPunchTime(attendance.date);
+                if (punchInTime > punchOutTime || new Date() < punchOutTime) continue;
                 
                 // ✅ Calculate status using rules
                 const result = calculateAttendanceStatus(punchInTime, punchOutTime);
 
-                attendance.punch_out = punchOutTime;
-                attendance.punch_out_type = 'Auto';
-                attendance.total_hours = result.totalHours || 0;
-                attendance.status = result.status;
-
-                await attendance.save();
+                const [updated] = await Attendance.update({
+                    punch_out: punchOutTime, punch_out_type: 'Auto',
+                    status: result.status, total_hours: result.totalHours
+                }, { where: { id: attendance.id, punch_out: null } });
+                if (!updated) continue;
 
                 // ✅ Update summary
                 if (statusSummary[result.status] !== undefined) {
@@ -160,14 +160,14 @@ const autoPunchOut = async () => {
 // ============================================
 const startAutoPunchOutJob = () => {
     // ✅ Run at 9:30 PM every day
-    cron.schedule('30 21 * * *', async () => {
-        console.log('⏰ Auto Punch Out Cron triggered at 9:30 PM');
+    cron.schedule('*/5 * * * *', async () => {
         await autoPunchOut();
     }, {
-        scheduled: true,
+        noOverlap: true,
         timezone: "Asia/Kolkata"
     });
 
+    void autoPunchOut();
     console.log('✅ Auto Punch Out cron job scheduled successfully!');
     console.log('📅 Will run at 9:30 PM every day');
 };

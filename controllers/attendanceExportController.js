@@ -4,6 +4,41 @@ const Employee = db.Employee;
 const { Op, cast, col, where: sqlWhere } = require('sequelize');
 const XLSX = require('xlsx');
 const PDFDocument = require('pdfkit');
+const { getTeamAttendance } = require('./attendanceController');
+const { getTimeString } = require('../utils/attendanceRules');
+
+async function exportTeamAttendance(req, res) {
+    const { date, format } = req.query;
+    const parsed = typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date) ? new Date(date) : null;
+    if (!parsed || !Number.isFinite(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== date) {
+        return res.status(400).json({ error: 'Choose a valid report date.' });
+    }
+    const records = await getTeamAttendance(date);
+    const rows = records.map(record => ({
+        Employee: record.employee.first_name + ' ' + record.employee.last_name,
+        Code: record.employee_code, Status: record.status,
+        'Punch in (IST)': record.punch_in ? getTimeString(record.punch_in) : '',
+        'Punch out (IST)': record.punch_out ? getTimeString(record.punch_out) : '',
+        Late: record.late ? 'Yes' : '', Hours: record.total_hours ?? ''
+    }));
+    if (format === 'pdf') {
+        const doc = new PDFDocument({ margin: 45 });
+        res.attachment(`team-attendance-${date}.pdf`);
+        doc.pipe(res);
+        doc.fontSize(18).text(`Team attendance | ${date}`);
+        doc.moveDown();
+        for (const row of rows) {
+            doc.fontSize(11).text(`${row.Employee} (${row.Code}) | ${row.Status}${row.Late ? ' | Late' : ''}`);
+            doc.fontSize(9).text(`In ${row['Punch in (IST)'] || '-'} | Out ${row['Punch out (IST)'] || '-'} | Hours ${row.Hours || '-'}`);
+            doc.moveDown(.6);
+        }
+        doc.end();
+        return;
+    }
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(rows), 'Team Attendance');
+    res.attachment(`team-attendance-${date}.xlsx`).send(XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' }));
+}
 
 const MONTH_NAMES = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -80,6 +115,7 @@ const fetchAttendanceForExport = async (employeeCode, query) => {
     const where = { employee_code: employeeCode, ...buildDateFilter(query) };
     return Attendance.findAll({
         where,
+        attributes: { exclude: ['punch_in_photo', 'punch_out_photo'] },
         order: [['date', 'ASC']]
     });
 };
@@ -146,7 +182,7 @@ const exportAttendancePDF = async (req, res) => {
             doc.text('No attendance records found.');
         } else {
             records.forEach((r) => {
-                doc.fontSize(11).text(`${r.date} | ${r.status} | IN: ${r.punch_in ? new Date(r.punch_in).toLocaleTimeString('en-IN') : '-'} | OUT: ${r.punch_out ? new Date(r.punch_out).toLocaleTimeString('en-IN') : '-'} | ${r.total_hours || 0} hrs`);
+                doc.fontSize(11).text(`${r.date} | ${r.status} | IN: ${r.punch_in ? getTimeString(r.punch_in) : '-'} | OUT: ${r.punch_out ? getTimeString(r.punch_out) : '-'} | ${r.total_hours || 0} hrs`);
             });
         }
 
@@ -158,6 +194,7 @@ const exportAttendancePDF = async (req, res) => {
 };
 
 module.exports = {
+    exportTeamAttendance,
     getExportOptions,
     exportAttendanceExcel,
     exportAttendancePDF

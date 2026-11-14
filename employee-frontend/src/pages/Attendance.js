@@ -1,9 +1,14 @@
 import { API_BASE } from '../config';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import styles from './Attendance.module.css';
 import AttendanceExport from '../components/AttendanceExport';
+
+const indiaDate = () => new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Kolkata' }).format();
+const indiaTime = value => value ? new Date(value).toLocaleTimeString('en-IN', {
+    timeZone: 'Asia/Kolkata', hour: 'numeric', minute: '2-digit'
+}) : '—';
 
 const Attendance = () => {
     const navigate = useNavigate();
@@ -16,7 +21,6 @@ const Attendance = () => {
     const [todayAttendance, setTodayAttendance] = useState(null);
     const [isPunchedIn, setIsPunchedIn] = useState(false);
     const [isPunchedOut, setIsPunchedOut] = useState(false);
-    const [shouldAutoPunchOut, setShouldAutoPunchOut] = useState(false);
     const [statusInfo, setStatusInfo] = useState(null);
     const [history, setHistory] = useState([]);
     const [pagination, setPagination] = useState({ page: 1, total: 0, totalPages: 0 });
@@ -31,7 +35,62 @@ const Attendance = () => {
     const [monthlyStats, setMonthlyStats] = useState([]);
     const [summary, setSummary] = useState({ present: 0, absent: 0, halfDay: 0, shortLeave: 0, onLeave: 0, holiday: 0, total: 0 });
     const [punchInType, setPunchInType] = useState('Office');
-    const [location, setLocation] = useState('');
+    const [photo, setPhoto] = useState('');
+    const [cameraOpen, setCameraOpen] = useState(false);
+    const [teamView, setTeamView] = useState(false);
+    const [notice, setNotice] = useState('');
+    const camera = useRef(null);
+    const video = useRef(null);
+    const cameraRequest = useRef(0);
+    const canSeeTeam = ['Admin', 'HR'].includes(userRole);
+
+    useEffect(() => () => {
+        cameraRequest.current++;
+        camera.current?.getTracks().forEach(track => track.stop());
+    }, []);
+
+    useEffect(() => {
+        if (cameraOpen && video.current) video.current.srcObject = camera.current;
+    }, [cameraOpen]);
+
+    const startCamera = async () => {
+        const request = ++cameraRequest.current;
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+            if (request !== cameraRequest.current) {
+                stream.getTracks().forEach(track => track.stop());
+                return;
+            }
+            camera.current?.getTracks().forEach(track => track.stop());
+            camera.current = stream;
+            setCameraOpen(true);
+            setError('');
+        } catch {
+            setError('Camera unavailable. Open the app over HTTPS or localhost and allow camera access.');
+        }
+    };
+
+    const takePhoto = () => {
+        if (!video.current?.videoWidth) return;
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.min(640, video.current.videoWidth);
+        canvas.height = Math.round(video.current.videoHeight * canvas.width / video.current.videoWidth);
+        canvas.getContext('2d').drawImage(video.current, 0, 0, canvas.width, canvas.height);
+        setPhoto(canvas.toDataURL('image/jpeg', .8));
+        camera.current.getTracks().forEach(track => track.stop());
+        setCameraOpen(false);
+    };
+
+    const getEvidence = async () => {
+        if (!photo) throw new Error('Take a selfie before submitting attendance.');
+        return new Promise((resolve, reject) => {
+            if (!navigator.geolocation) return reject(new Error('Location is unavailable on this device.'));
+            navigator.geolocation.getCurrentPosition(({ coords }) => resolve({
+                latitude: coords.latitude, longitude: coords.longitude, photo
+            }), () => reject(new Error('Allow location access and try again.')),
+            { enableHighAccuracy: true, timeout: 15000 });
+        });
+    };
     const [notes, setNotes] = useState('');
     const [processing, setProcessing] = useState(false);
     const [startDate, setStartDate] = useState('');
@@ -40,7 +99,7 @@ const Attendance = () => {
     // ============ HR/ADMIN STATES ============
     const [allAttendance, setAllAttendance] = useState([]);
     const [adminSummary, setAdminSummary] = useState({ total: 0, present: 0, absent: 0, halfDay: 0, shortLeave: 0, onLeave: 0, holiday: 0 });
-    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+    const [selectedDate, setSelectedDate] = useState(indiaDate());
     const [editingAttendance, setEditingAttendance] = useState(null);
     const [showEditModal, setShowEditModal] = useState(false);
     const [editForm, setEditForm] = useState({
@@ -65,7 +124,7 @@ const Attendance = () => {
         const headers = { Authorization: `Bearer ${token}` };
 
         try {
-            if (userRole === 'Admin' || userRole === 'HR') {
+            if (canSeeTeam && teamView) {
                 const params = new URLSearchParams({
                     date: selectedDate,
                     page: pagination.page || 1,
@@ -103,7 +162,6 @@ const Attendance = () => {
                 setTodayAttendance(todayRes.data.data);
                 setIsPunchedIn(todayRes.data.isPunchedIn || false);
                 setIsPunchedOut(todayRes.data.isPunchedOut || false);
-                setShouldAutoPunchOut(todayRes.data.shouldAutoPunchOut || false);
                 setStatusInfo(todayRes.data.statusInfo || null);
                 setStats(statsRes.data.monthlyStats || { present: 0, absent: 0, halfDay: 0, shortLeave: 0, onLeave: 0 });
                 setLast7Days(statsRes.data.last7Days || []);
@@ -125,7 +183,7 @@ const Attendance = () => {
 
     useEffect(() => {
         fetchData();
-    }, [pagination.page, filterStatus, selectedDate, selectedYear, selectedMonth, selectedDay, startDate, endDate]);
+    }, [teamView, pagination.page, filterStatus, selectedDate, selectedYear, selectedMonth, selectedDay, startDate, endDate]);
 
     // ============ PUNCH IN ============
     const handlePunchIn = async () => {
@@ -133,22 +191,18 @@ const Attendance = () => {
         try {
             const response = await axios.post(
                 `${API_BASE}/api/attendance/punch-in`,
-                { punch_in_type: punchInType, location, notes },
+                { punch_in_type: punchInType, notes, ...await getEvidence() },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             
-            if (response.data.isLate) {
-                alert(`⚠️ ${response.data.message}`);
-            } else {
-                alert('✅ Punch In successful!');
-            }
-            
+            setNotice(response.data.message);
+            setPhoto('');
             setTodayAttendance(response.data.attendance);
             setIsPunchedIn(true);
             fetchData();
         } catch (err) {
-            const msg = err.response?.data?.error || 'Failed to punch in!';
-            alert(`❌ ${msg}`);
+            const msg = err.response?.data?.error || err.message || 'Failed to punch in!';
+            setError(msg);
         }
         setProcessing(false);
     };
@@ -159,26 +213,18 @@ const Attendance = () => {
         try {
             const response = await axios.post(
                 `${API_BASE}/api/attendance/punch-out`,
-                {},
+                await getEvidence(),
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             
-            const { status, totalHours, reason } = response.data;
-            const statusEmoji = {
-                'Present': '✅',
-                'Short Leave': '⏳',
-                'Half Day': '🌓',
-                'Absent': '❌'
-            };
-            
-            alert(`✅ Punch Out successful!\nStatus: ${statusEmoji[status] || '📌'} ${status}\nTotal Hours: ${totalHours} hrs\n${reason}`);
-            
+            setNotice(`Punch out recorded · ${response.data.status} · ${response.data.totalHours} hours`);
+            setPhoto('');
             setTodayAttendance(response.data.attendance);
             setIsPunchedOut(true);
             fetchData();
         } catch (err) {
-            const msg = err.response?.data?.error || 'Failed to punch out!';
-            alert(`❌ ${msg}`);
+            const msg = err.response?.data?.error || err.message || 'Failed to punch out!';
+            setError(msg);
         }
         setProcessing(false);
     };
@@ -232,11 +278,40 @@ const Attendance = () => {
     // ============================================
     // HR/ADMIN VIEW
     // ============================================
-    if (userRole === 'Admin' || userRole === 'HR') {
+    const downloadTeam = async (format) => {
+        try {
+            const { data } = await axios.get(`${API_BASE}/api/attendance/admin/export/team`, {
+                params: { date: selectedDate, format }, responseType: 'blob',
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const url = URL.createObjectURL(data);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `team-attendance-${selectedDate}.${format === 'pdf' ? 'pdf' : 'xlsx'}`;
+            link.click();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        } catch {
+            setError('Could not download team attendance.');
+        }
+    };
+
+    const switchView = () => {
+        camera.current?.getTracks().forEach(track => track.stop());
+        cameraRequest.current++;
+        setCameraOpen(false);
+        setPhoto('');
+        setFilterStatus('');
+        setPagination({ page: 1 });
+        setTeamView(!teamView);
+    };
+
+    if (canSeeTeam && teamView) {
         return (
             <div className={styles.attendancePage}>
                 <div className={styles.pageActions}>
-                    <button className={styles.exportBtn} onClick={() => setShowExportModal(true)}>Export Report</button>
+                    <button type="button" className={styles.exportBtn} onClick={switchView}>Mark Attendance</button>
+                    <button className={styles.exportBtn} onClick={() => downloadTeam('pdf')}>Team PDF</button>
+                    <button className={styles.exportBtn} onClick={() => downloadTeam('excel')}>Team Excel</button>
                 </div>
 
                 {error && <div className={styles.error}>❌ {error}</div>}
@@ -316,11 +391,11 @@ const Attendance = () => {
                                 </thead>
                                 <tbody>
                                     {allAttendance.map((item) => (
-                                        <tr key={item.id}>
+                                        <tr key={item.id || item.employee_code}>
                                             <td>{item.employee?.first_name} {item.employee?.last_name}</td>
                                             <td>{formatDateOnly(item.date)}</td>
-                                            <td>{item.punch_in ? new Date(item.punch_in).toLocaleTimeString() : '—'}</td>
-                                            <td>{item.punch_out ? new Date(item.punch_out).toLocaleTimeString() : '—'}</td>
+                                            <td>{indiaTime(item.punch_in)}{item.late && ' · Late'}</td>
+                                            <td>{indiaTime(item.punch_out)}</td>
                                             <td>{item.punch_in_type || 'Office'}</td>
                                             <td>{item.total_hours || 0}</td>
                                             <td><span className={`${styles.badge} ${styles[getStatusBadge(item.status)]}`}>
@@ -357,7 +432,8 @@ const Attendance = () => {
     return (
         <div className={styles.attendancePage}>
             <div className={styles.pageActions}>
-                <button className={styles.exportBtn} onClick={() => setShowExportModal(true)}>Export Report</button>
+                {canSeeTeam && <button type="button" className={styles.exportBtn} onClick={switchView}>Team Attendance</button>}
+                <button className={styles.exportBtn} onClick={() => setShowExportModal(true)}>Download PDF / Excel</button>
             </div>
 
             {error && <div className={styles.error}>❌ {error}</div>}
@@ -406,12 +482,22 @@ const Attendance = () => {
                 )}
 
                 
-{shouldAutoPunchOut && !isPunchedOut && (
+{(
     <div className={styles.autoPunchoutWarning}>
-        ⏰ Auto punch out at 9:30 PM. Please punch out manually if leaving early.
+        9:30 AM IST cutoff · 9 hours for full day · Auto punch-out at 9:30 PM IST
     </div>
 )}
 
+                {notice && <p role="status" className={styles.attendanceNotice}>{notice}</p>}
+                {!isPunchedOut && <div className={styles.evidencePanel}>
+                    <strong>Selfie and location</strong>
+                    <p>Take a selfie. Location will be captured when you submit your punch.</p>
+                    {cameraOpen && <video ref={video} autoPlay playsInline muted />}
+                    {photo && <img src={photo} alt="Attendance selfie preview" />}
+                    <button type="button" className={styles.exportBtn} onClick={cameraOpen ? takePhoto : startCamera}>
+                        {cameraOpen ? 'Capture selfie' : photo ? 'Retake selfie' : 'Open camera'}
+                    </button>
+                </div>}
                 <div className={styles.punchActions}>
                     {!isPunchedIn ? (
                         <div className={styles.punchInForm}>
@@ -420,14 +506,13 @@ const Attendance = () => {
                                 <option value="Client">🤝 Client</option>
                                 <option value="Remote">🏠 Remote</option>
                             </select>
-                            <input type="text" placeholder="Location" value={location} onChange={(e) => setLocation(e.target.value)} className={styles.textInput} />
                             <input type="text" placeholder="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} className={styles.textInput} />
-                            <button className={styles.punchInBtn} onClick={handlePunchIn} disabled={processing}>
+                            <button className={styles.punchInBtn} onClick={handlePunchIn} disabled={processing || !photo}>
                                 {processing ? '⏳ Processing...' : '✅ Punch In'}
                             </button>
                         </div>
                     ) : !isPunchedOut ? (
-                        <button className={styles.punchOutBtn} onClick={handlePunchOut} disabled={processing}>
+                        <button className={styles.punchOutBtn} onClick={handlePunchOut} disabled={processing || !photo}>
                             {processing ? '⏳ Processing...' : '❌ Punch Out'}
                         </button>
                     ) : (
@@ -468,8 +553,8 @@ const Attendance = () => {
                         <div key={i} className={`${styles.dayCard} ${styles[getStatusBadge(day.status)]}`}>
                             <div className={styles.dayDate}>{formatDateOnly(day.date)}</div>
                             <div className={styles.dayStatus}>{getStatusEmoji(day.status)} {day.status}</div>
-                            {day.punch_in && <div className={styles.dayTime}>IN: {new Date(day.punch_in).toLocaleTimeString()}</div>}
-                            {day.punch_out && <div className={styles.dayTime}>OUT: {new Date(day.punch_out).toLocaleTimeString()}</div>}
+                            {day.punch_in && <div className={styles.dayTime}>IN: {indiaTime(day.punch_in)}</div>}
+                            {day.punch_out && <div className={styles.dayTime}>OUT: {indiaTime(day.punch_out)}</div>}
                         </div>
                     ))}
                 </div>
@@ -674,11 +759,11 @@ const Attendance = () => {
                                 </thead>
                                 <tbody>
                                     {history.map((item) => (
-                                        <tr key={item.id}>
+                                        <tr key={item.id || item.employee_code}>
                                             <td>{formatDateOnly(item.date)}</td>
                                             <td>{new Date(item.date).toLocaleDateString('en-IN', { weekday: 'long' })}</td>
-                                            <td>{item.punch_in ? new Date(item.punch_in).toLocaleTimeString() : '—'}</td>
-                                            <td>{item.punch_out ? new Date(item.punch_out).toLocaleTimeString() : '—'}</td>
+                                            <td>{indiaTime(item.punch_in)}{item.late && ' · Late'}</td>
+                                            <td>{indiaTime(item.punch_out)}</td>
                                             <td>{item.punch_in_type || 'Office'}</td>
                                             <td>{item.total_hours || 0}</td>
                                             <td><span className={`${styles.badge} ${styles[getStatusBadge(item.status)]}`}>

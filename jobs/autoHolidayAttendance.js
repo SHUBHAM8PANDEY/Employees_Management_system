@@ -1,3 +1,4 @@
+const { attendanceDate } = require('../utils/attendanceRules');
 const cron = require('node-cron');
 const db = require('../models');
 const Attendance = db.Attendance;
@@ -15,7 +16,7 @@ const autoHolidayAttendance = async () => {
 
     try {
         const today = new Date();
-        const todayStr = today.toISOString().split('T')[0];
+        const todayStr = attendanceDate(today);
         const dayOfWeek = today.getDay(); // 0 = Sunday
 
         // ✅ Only run on Sunday

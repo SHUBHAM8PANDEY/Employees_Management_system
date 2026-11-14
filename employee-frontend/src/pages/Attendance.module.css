@@ -648,3 +648,23 @@
         padding: 4px 10px;
     }
 }
+.evidencePanel {
+    display: grid;
+    justify-items: start;
+    gap: .65rem;
+    margin: 1rem 0;
+    padding: 1rem;
+    border: 1px solid #8294bb55;
+    border-radius: 14px;
+}
+.evidencePanel p { margin: 0; }
+.evidencePanel video, .evidencePanel img {
+    max-width: min(100%, 300px);
+    border-radius: 12px;
+}
+.attendanceNotice {
+    padding: .75rem 1rem;
+    border-radius: .65rem;
+    background: #e6f7ef;
+    color: #18593a;
+}

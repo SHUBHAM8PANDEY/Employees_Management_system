@@ -137,13 +137,7 @@ app.use((err, req, res, next) => {
 // ============================================
 // START AUTO PUNCH OUT JOB (9:30 PM)
 // ============================================
-try {
-    const { startAutoPunchOutJob } = require('./jobs/autoPunchOut');
-    startAutoPunchOutJob();
-    console.log('✅ Auto Punch Out job initialized (9:30 PM)');
-} catch (error) {
-    console.log('⚠️ Auto Punch Out job not loaded:', error.message);
-}
+
 
 // ============================================
 // ✅ AUTO ATTENDANCE REMOVED - Employees do punch in manually
@@ -214,6 +208,9 @@ db.sequelize.authenticate()
             message_id integer PRIMARY KEY REFERENCES public.chat_messages(id) ON DELETE CASCADE,
             content bytea NOT NULL
         );
+        ALTER TABLE public.attendances
+            ALTER COLUMN punch_in_photo TYPE text,
+            ALTER COLUMN punch_out_photo TYPE text;
         ALTER TABLE public.employees
             ADD COLUMN IF NOT EXISTS date_of_birth date,
             ADD COLUMN IF NOT EXISTS joining_date date;
@@ -225,6 +222,7 @@ db.sequelize.authenticate()
         )
     `))
     .then(() => server.listen(PORT, () => {
+    require('./jobs/autoPunchOut').startAutoPunchOutJob();
     require('./jobs/employeeGreetings').startEmployeeGreetings();
     console.log(`\n🚀 Server running on port ${PORT}`);
     console.log(`\n🔐 Security Features:`);
