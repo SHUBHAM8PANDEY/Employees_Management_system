@@ -10,6 +10,16 @@ const indiaTime = value => value ? new Date(value).toLocaleTimeString('en-IN', {
     timeZone: 'Asia/Kolkata', hour: 'numeric', minute: '2-digit'
 }) : '—';
 
+function PunchLocation({ latitude, longitude, fallback }) {
+    if (latitude == null || longitude == null || latitude === '' || longitude === '') return fallback || '—';
+    const lat = Number(latitude);
+    const lng = Number(longitude);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return fallback || '—';
+    const coordinates = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+    return <a className={styles.mapLink} href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(coordinates)}`}
+        target="_blank" rel="noreferrer" aria-label={`Open map at ${coordinates}`}>{coordinates} ↗</a>;
+}
+
 const Attendance = () => {
     const navigate = useNavigate();
     const userRole = localStorage.getItem('role') || 'Employee';
@@ -20,6 +30,7 @@ const Attendance = () => {
     // ============ EMPLOYEE STATES ============
     const [todayAttendance, setTodayAttendance] = useState(null);
     const [isPunchedIn, setIsPunchedIn] = useState(false);
+    const [weeklyOff, setWeeklyOff] = useState(false);
     const [isPunchedOut, setIsPunchedOut] = useState(false);
     const [statusInfo, setStatusInfo] = useState(null);
     const [history, setHistory] = useState([]);
@@ -164,6 +175,7 @@ const Attendance = () => {
 
                 setTodayAttendance(todayRes.data.data);
                 setIsPunchedIn(todayRes.data.isPunchedIn || false);
+                setWeeklyOff(Boolean(todayRes.data.weeklyOff));
                 setIsPunchedOut(todayRes.data.isPunchedOut || false);
                 setStatusInfo(todayRes.data.statusInfo || null);
                 setStats(statsRes.data.monthlyStats || { present: 0, absent: 0, halfDay: 0, shortLeave: 0, onLeave: 0 });
@@ -396,9 +408,9 @@ const Attendance = () => {
                                     <tr>
                                         <th>Employee</th>
                                         <th>Date</th>
-                                        <th>Punch In</th>
-                                        <th>Punch Out</th>
-                                        <th>Type</th>
+                                        <th>Punch In · IST</th>
+                                        <th>Punch Out · IST</th>
+                                        <th>Work mode</th>
                                         <th>Hours</th>
                                         <th>Status</th>
                                     </tr>
@@ -406,14 +418,19 @@ const Attendance = () => {
                                 <tbody>
                                     {allAttendance.map((item) => (
                                         <tr key={item.id || `${item.employee_code}-${item.date}`}>
-                                            <td>{item.employee?.first_name} {item.employee?.last_name}</td>
+                                            <td><strong>{item.employee?.first_name} {item.employee?.last_name}</strong><small className={styles.punchDetail}>{item.employee_code}</small></td>
                                             <td>{formatDateOnly(item.date)}</td>
-                                            <td>{indiaTime(item.punch_in)}{item.late && ' · Late'}</td>
-                                            <td>{indiaTime(item.punch_out)}</td>
-                                            <td>{item.punch_in_type || 'Office'}</td>
+                                            <td><strong>{indiaTime(item.punch_in)}{item.late && ' · Late'}</strong>
+                                                {item.punch_in && <small className={styles.punchDetail}><PunchLocation latitude={item.latitude} longitude={item.longitude} fallback={item.location} /></small>}
+                                            </td>
+                                            <td><strong>{indiaTime(item.punch_out)}</strong>
+                                                {item.punch_out && <small className={styles.punchDetail}>{item.punch_out_type === 'Auto' ? 'Auto punch-out' :
+                                                    <PunchLocation latitude={item.punch_out_latitude} longitude={item.punch_out_longitude} fallback={item.punch_out_location} />}</small>}
+                                            </td>
+                                            <td>{item.punch_in ? item.punch_in_type || 'Office' : '—'}</td>
                                             <td>{item.total_hours || 0}</td>
                                             <td><span className={`${styles.badge} ${styles[getStatusBadge(item.status)]}`}>
-                                                {getStatusEmoji(item.status)} {item.status}
+                                                {getStatusEmoji(item.status)} {item.status === 'Holiday' && new Date(item.date + 'T00:00:00Z').getUTCDay() === 0 ? 'Weekly Off' : item.status}
                                             </span></td>
                                         </tr>
                                     ))}
@@ -460,7 +477,7 @@ const Attendance = () => {
                         {new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                     </div>
                     <div className={styles.statusInfo}>
-                        {!isPunchedIn ? (
+                        {!isPunchedIn && weeklyOff ? null : !isPunchedIn ? (
                             <span className={styles.statusAbsent}>❌ Not Punched In</span>
                         ) : isPunchedOut ? (
                             <span className={styles.statusPresent}>✅ Punched Out</span>
@@ -502,6 +519,7 @@ const Attendance = () => {
     </div>
 )}
 
+                {weeklyOff && !isPunchedIn && <p role="status" className={styles.attendanceNotice}>Sunday · Weekly Off</p>}
                 {notice && <p role="status" className={styles.attendanceNotice}>{notice}</p>}
                 {captureOpen && !isPunchedOut && <div className={styles.evidencePanel}>
                     <strong>Selfie and location</strong>
@@ -524,7 +542,7 @@ const Attendance = () => {
                     }}>Cancel</button>
                 </div>}
                 <div className={styles.punchActions}>
-                    {!isPunchedIn ? (
+                    {!isPunchedIn && weeklyOff ? null : !isPunchedIn ? (
                         <div className={styles.punchInForm}>
                             <select value={punchInType} onChange={(e) => setPunchInType(e.target.value)} className={styles.selectInput}>
                                 <option value="Office">🏢 Office</option>

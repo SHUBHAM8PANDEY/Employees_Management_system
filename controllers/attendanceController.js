@@ -11,6 +11,7 @@ const {
 } = require('../utils/attendanceRules');
 
 const getTodayStr = () => attendanceDate(new Date());
+const isSunday = date => new Date(date + 'T00:00:00Z').getUTCDay() === 0;
 const photos = ['punch_in_photo', 'punch_out_photo'];
 
 function punchEvidence(body) {
@@ -50,6 +51,7 @@ const punchIn = async (req, res) => {
     try {
         const employeeCode = req.user.employee_code;
         const today = getTodayStr();
+        if (isSunday(today)) return res.status(400).json({ error: 'Sunday is a weekly off.' });
         const { punch_in_type = 'Office', notes } = req.body;
         const evidence = punchEvidence(req.body);
         if (!evidence) return res.status(400).json({ error: 'Take a selfie and allow location before punching in.' });
@@ -204,6 +206,7 @@ const getTodayAttendance = async (req, res) => {
             data: attendance,
             isPunchedIn,
             isPunchedOut,
+            weeklyOff: isSunday(today),
             shouldAutoPunchOut: autoPunchOut,
             statusInfo
         });
@@ -367,13 +370,13 @@ async function getTeamAttendance(targetDate, period = 'day') {
     ]);
     const byEmployee = new Map(records.map(record => [record.employee_code, record]));
     const onLeave = new Set(leaves.map(leave => leave.employee_code));
-    const sunday = new Date(targetDate + 'T00:00:00Z').getUTCDay() === 0;
+    const sunday = isSunday(targetDate);
     return employees.filter(employee => byEmployee.has(employee.employee_code) ||
         !employee.joining_date || employee.joining_date <= targetDate).map(employee => {
         const record = byEmployee.get(employee.employee_code)?.get({ plain: true });
         return {
             ...record, employee, employee_code: employee.employee_code, date: targetDate,
-            status: record?.punch_in ? record.status : onLeave.has(employee.employee_code) ? 'On Leave' : record?.status ?? (sunday ? 'Holiday' : 'Absent'),
+            status: record?.punch_in ? record.status : sunday ? 'Holiday' : onLeave.has(employee.employee_code) ? 'On Leave' : record?.status ?? (sunday ? 'Holiday' : 'Absent'),
             late: record?.punch_in ? isAfterTime(record.punch_in, '09:30') : false
         };
     });

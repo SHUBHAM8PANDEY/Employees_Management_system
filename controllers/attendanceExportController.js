@@ -20,6 +20,10 @@ async function exportTeamAttendance(req, res) {
         Code: record.employee_code, Status: record.status,
         'Punch in (IST)': record.punch_in ? getTimeString(record.punch_in) : '',
         'Punch out (IST)': record.punch_out ? getTimeString(record.punch_out) : '',
+        'Punch-in location': record.latitude != null && record.longitude != null
+            ? `${record.latitude}, ${record.longitude}` : record.location || '',
+        'Punch-out location': record.punch_out_latitude != null && record.punch_out_longitude != null
+            ? `${record.punch_out_latitude}, ${record.punch_out_longitude}` : record.punch_out_location || '',
         Late: record.late ? 'Yes' : '', Hours: record.total_hours ?? ''
     }));
     if (format === 'pdf') {
@@ -31,6 +35,8 @@ async function exportTeamAttendance(req, res) {
         for (const row of rows) {
             doc.fontSize(11).text(`${row.Date} | ${row.Employee} (${row.Code}) | ${row.Status}${row.Late ? ' | Late' : ''}`);
             doc.fontSize(9).text(`In ${row['Punch in (IST)'] || '-'} | Out ${row['Punch out (IST)'] || '-'} | Hours ${row.Hours || '-'}`);
+            if (row['Punch-in location']) doc.text(`In location: ${row['Punch-in location']}`);
+            if (row['Punch-out location']) doc.text(`Out location: ${row['Punch-out location']}`);
             doc.moveDown(.6);
         }
         doc.end();
