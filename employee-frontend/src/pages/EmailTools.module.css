@@ -32,8 +32,8 @@
 }
 .panel button:disabled { opacity: .65; cursor: wait; }
 .error, .success { padding: .75rem; border-radius: 8px; }
-.error { background: #fff1ef; color: #8e281d; }
-.success { background: #e8f7ed; color: #166036; }
+.error { background: var(--ui-danger-bg); color: var(--ui-danger); }
+.success { background: var(--ui-success-bg); color: var(--ui-success); }
 
 .composeHeader { border-bottom: 1px solid #dbe3ef; margin-bottom: 1rem; }
 .panel label small { color: var(--ui-muted); font-weight: 400; }

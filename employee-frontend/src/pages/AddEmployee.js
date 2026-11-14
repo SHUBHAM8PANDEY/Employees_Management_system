@@ -94,12 +94,12 @@ const AddEmployee = () => {
 
     return (
         <div style={{ padding: 0, maxWidth: '700px', margin: '0 auto' }}>
-            <h2 style={{ color: '#1a1a2e', marginBottom: '20px' }}>➕ Add New Employee</h2>
+            <h2 style={{ color: 'var(--ui-text)', marginBottom: '20px' }}>➕ Add New Employee</h2>
 
             {error && (
                 <div style={{
-                    background: '#fee2e2',
-                    color: '#b91c1c',
+                    background: 'var(--ui-danger-bg)',
+                    color: 'var(--ui-danger)',
                     padding: '12px',
                     borderRadius: '8px',
                     marginBottom: '16px'
@@ -204,7 +204,7 @@ const AddEmployee = () => {
                             style={{ flex: 1, padding: '8px', border: '1px solid #e2e8f0', borderRadius: '6px' }}
                         />
                         {formData.addresses.length > 1 && (
-                            <button type="button" onClick={() => removeAddress(index)} style={{ background: '#fee2e2', color: '#b91c1c', border: 'none', padding: '6px 10px', borderRadius: '4px', cursor: 'pointer' }}>✕</button>
+                            <button type="button" onClick={() => removeAddress(index)} style={{ background: 'var(--ui-danger-bg)', color: 'var(--ui-danger)', border: 'none', padding: '6px 10px', borderRadius: '4px', cursor: 'pointer' }}>✕</button>
                         )}
                     </div>
                 ))}
@@ -233,7 +233,7 @@ const AddEmployee = () => {
                             style={{ flex: 1, padding: '8px', border: '1px solid #e2e8f0', borderRadius: '6px' }}
                         />
                         {formData.qualifications.length > 1 && (
-                            <button type="button" onClick={() => removeQualification(index)} style={{ background: '#fee2e2', color: '#b91c1c', border: 'none', padding: '6px 10px', borderRadius: '4px', cursor: 'pointer' }}>✕</button>
+                            <button type="button" onClick={() => removeQualification(index)} style={{ background: 'var(--ui-danger-bg)', color: 'var(--ui-danger)', border: 'none', padding: '6px 10px', borderRadius: '4px', cursor: 'pointer' }}>✕</button>
                         )}
                     </div>
                 ))}
@@ -256,7 +256,7 @@ const AddEmployee = () => {
                                 style={{ border: 'none', background: 'transparent', padding: '4px 4px', width: '80px', outline: 'none' }}
                             />
                             {formData.skills.length > 1 && (
-                                <button type="button" onClick={() => removeSkill(index)} style={{ background: 'none', border: 'none', color: '#b91c1c', cursor: 'pointer', fontSize: '14px' }}>✕</button>
+                                <button type="button" onClick={() => removeSkill(index)} style={{ background: 'none', border: 'none', color: 'var(--ui-danger)', cursor: 'pointer', fontSize: '14px' }}>✕</button>
                             )}
                         </div>
                     ))}

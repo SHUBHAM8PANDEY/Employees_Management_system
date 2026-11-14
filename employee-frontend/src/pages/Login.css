@@ -9,7 +9,7 @@
 .sign-in__form > div { width: min(100%,390px); }
 .sign-in__form h2 { font-size: 2rem; letter-spacing: -.045em; }
 .sign-in__form p { color: var(--ui-muted); margin: .5rem 0 1.4rem; }
-.sign-in__form .sign-in__error { color: #9d2520; border-radius: 8px; padding: 10px; background: #fff0f0; }
+.sign-in__form .sign-in__error { color: var(--ui-danger); border-radius: 8px; padding: 10px; background: var(--ui-danger-bg); }
 .sign-in__form form, .sign-in__form label { display: grid; gap: 8px; }
 .sign-in__form form { gap: 17px; }
 .sign-in__form label { font-size: .84rem; font-weight: 650; }

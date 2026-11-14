@@ -111,7 +111,7 @@ const Notifications = () => {
                 {loading ? (
                     <div style={{ textAlign: 'center', padding: '40px' }}>⏳ Loading...</div>
                 ) : notifications.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '60px', color: '#94a3b8' }}>
+                    <div style={{ textAlign: 'center', padding: '60px', color: 'var(--ui-muted)' }}>
                         No notifications yet
                     </div>
                 ) : (
@@ -154,20 +154,20 @@ const Notifications = () => {
                                     <div style={{
                                         fontWeight: notif.is_read ? '500' : '700',
                                         fontSize: '15px',
-                                        color: '#1a1a2e'
+                                        color: 'var(--ui-text)'
                                     }}>
                                         {notif.title}
                                     </div>
                                     <div style={{
                                         fontSize: '14px',
-                                        color: '#475569',
+                                        color: 'var(--ui-muted)',
                                         marginTop: '4px'
                                     }}>
                                         {notif.message}
                                     </div>
                                     <div style={{
                                         fontSize: '12px',
-                                        color: '#94a3b8',
+                                        color: 'var(--ui-muted)',
                                         marginTop: '6px'
                                     }}>
                                         {new Date(notif.created_at).toLocaleString('en-IN')}
@@ -191,7 +191,7 @@ const Notifications = () => {
                                         style={{
                                             background: 'none',
                                             border: 'none',
-                                            color: '#94a3b8',
+                                            color: 'var(--ui-muted)',
                                             cursor: 'pointer',
                                             fontSize: '16px',
                                             padding: '4px 8px'

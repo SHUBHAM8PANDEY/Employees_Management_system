@@ -78,13 +78,13 @@ const EditEmployee = () => {
 
     return (
         <div style={{ padding: '90px 40px 40px', maxWidth: '600px', margin: '0 auto' }}>
-            <h2 style={{ color: '#1e1b4b', marginBottom: '24px' }}>✏️ Edit Employee</h2>
+            <h2 style={{ color: 'var(--ui-text)', marginBottom: '24px' }}>✏️ Edit Employee</h2>
             <p style={{ color: 'var(--ui-muted)', marginBottom: '16px' }}>Employee Code: <b>{code}</b></p>
 
             {error && (
                 <div style={{
-                    background: '#fee2e2',
-                    color: '#b91c1c',
+                    background: 'var(--ui-danger-bg)',
+                    color: 'var(--ui-danger)',
                     padding: '12px',
                     borderRadius: '8px',
                     marginBottom: '16px'

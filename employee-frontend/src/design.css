@@ -36,3 +36,17 @@ button, input, select, textarea { font-family: inherit; }
 .ui-page-stack { display: grid; gap: 1rem; min-width: 0; }
 .ui-page-stack :is(h2,h3) { color: var(--ui-text); }
 .ui-page-stack > * { min-width: 0; }
+
+:root {
+    --ui-danger-bg: #fff0f0; --ui-danger: #a22424;
+    --ui-success-bg: #e9f8ef; --ui-success: #16603b;
+    --ui-warning-bg: #fff4d6; --ui-warning: #855004;
+    --ui-placeholder: #626779;
+}
+:root[data-theme="dark"] {
+    --ui-text: #f8f6ff; --ui-muted: #cbc7dd; --ui-placeholder: #aaa5c1;
+    --ui-danger-bg: #412632; --ui-danger: #ffc2c7;
+    --ui-success-bg: #203b38; --ui-success: #a3ebce;
+    --ui-warning-bg: #423324; --ui-warning: #ffe0a3;
+}
+:root[data-theme="dark"] #main-content :is(input, textarea)::placeholder { color: var(--ui-placeholder); opacity: 1; }

@@ -138,7 +138,7 @@
 .attendanceBtn {
     padding: 6px 14px;
     background: rgba(16, 185, 129, 0.1);
-    color: #059669;
+    color: var(--ui-success);
     border: 1px solid rgba(16, 185, 129, 0.2);
     border-radius: 8px;
     cursor: pointer;
@@ -157,7 +157,7 @@
     gap: 4px;
     margin-bottom: 28px;
     padding: 4px;
-    background: white;
+    background: var(--ui-surface);
     border-radius: var(--radius);
     box-shadow: var(--shadow-sm);
     border: 1px solid var(--gray-200);
@@ -191,8 +191,8 @@
 
 /* ===== ERROR & LOADING ===== */
 .error {
-    background: #fef2f2;
-    color: #991b1b;
+    background: var(--ui-danger-bg);
+    color: var(--ui-danger);
     padding: 14px 20px;
     border-radius: var(--radius);
     margin-bottom: 20px;
@@ -241,7 +241,7 @@
 
 /* ===== EMPLOYEE CARD ===== */
 .employeeCard {
-    background: white;
+    background: var(--ui-surface);
     border-radius: var(--radius-lg);
     padding: 22px 24px;
     box-shadow: var(--shadow-sm);
@@ -311,7 +311,7 @@
 .editBtn {
     padding: 5px 10px;
     background: rgba(245, 158, 11, 0.08);
-    color: #b45309;
+    color: var(--ui-warning);
     border: none;
     border-radius: 6px;
     cursor: pointer;
@@ -326,7 +326,7 @@
 .deleteBtn {
     padding: 5px 10px;
     background: rgba(239, 68, 68, 0.08);
-    color: #b91c1c;
+    color: var(--ui-danger);
     border: none;
     border-radius: 6px;
     cursor: pointer;
@@ -366,11 +366,11 @@
     font-weight: 600;
 }
 .badgeCasual {
-    color: #d97706;
+    color: var(--ui-warning);
     font-weight: 600;
 }
 .badgePaid {
-    color: #059669;
+    color: var(--ui-success);
     font-weight: 600;
 }
 
@@ -441,7 +441,7 @@
     border-radius: 10px;
     font-size: 14px;
     transition: var(--transition);
-    background: white;
+    background: var(--ui-surface);
     color: var(--gray-800);
 }
 .searchInput:focus {
@@ -475,7 +475,7 @@
     border: 1.5px solid var(--gray-200);
     border-radius: 10px;
     font-size: 14px;
-    background: white;
+    background: var(--ui-surface);
     color: var(--gray-800);
     cursor: pointer;
     transition: var(--transition);
@@ -513,7 +513,7 @@
     padding: 8px 14px;
     border: 1px solid var(--gray-200);
     border-radius: 8px;
-    background: white;
+    background: var(--ui-surface);
     color: var(--gray-700);
     cursor: pointer;
     font-size: 13px;
@@ -577,7 +577,7 @@
 }
 
 .modal {
-    background: white;
+    background: var(--ui-surface);
     padding: 32px;
     border-radius: var(--radius-xl);
     max-width: 700px;
@@ -661,7 +661,7 @@
     border-radius: 10px;
     font-size: 14px;
     transition: var(--transition);
-    background: white;
+    background: var(--ui-surface);
     color: var(--gray-800);
 }
 .modalField input:focus,
@@ -680,7 +680,7 @@
 }
 .modalField .editMode {
     border-color: var(--primary);
-    background: white;
+    background: var(--ui-surface);
 }
 .modalField small {
     color: var(--gray-400);
@@ -713,15 +713,15 @@
     box-shadow: var(--shadow-md);
 }
 .modalBalanceCard.blue {
-    background: #eff6ff;
+    background: var(--ui-tint);
     border-color: #bfdbfe;
 }
 .modalBalanceCard.yellow {
-    background: #fffbeb;
+    background: var(--ui-warning-bg);
     border-color: #fde68a;
 }
 .modalBalanceCard.green {
-    background: #ecfdf5;
+    background: var(--ui-success-bg);
     border-color: #a7f3d0;
 }
 
@@ -741,10 +741,10 @@
     color: #0284c7;
 }
 .modalBalanceNum.yellow {
-    color: #d97706;
+    color: var(--ui-warning);
 }
 .modalBalanceNum.green {
-    color: #059669;
+    color: var(--ui-success);
 }
 .modalBalanceUsed {
     font-size: 11px;
@@ -786,7 +786,7 @@
 .removeBtnSmall {
     padding: 2px 10px;
     background: rgba(239, 68, 68, 0.08);
-    color: #b91c1c;
+    color: var(--ui-danger);
     border: 1px solid rgba(239, 68, 68, 0.15);
     border-radius: 4px;
     cursor: pointer;
@@ -821,7 +821,7 @@
 }
 .modalAddressItem input:focus {
     outline: none;
-    background: white;
+    background: var(--ui-surface);
     border-color: var(--primary);
 }
 .modalAddressItem span {
@@ -853,7 +853,7 @@
 }
 .modalQualItem input:focus {
     outline: none;
-    background: white;
+    background: var(--ui-surface);
     border-color: #d97706;
 }
 .modalQualItem span {
@@ -889,7 +889,7 @@
 }
 .modalSkillItem input:focus {
     outline: none;
-    background: white;
+    background: var(--ui-surface);
     padding: 4px 8px;
     border-radius: 4px;
     width: 100px;
@@ -976,7 +976,7 @@
 }
 
 .profileCard {
-    background: white;
+    background: var(--ui-surface);
     padding: 28px;
     border-radius: var(--radius-lg);
     border: 1px solid var(--gray-200);
@@ -1082,7 +1082,7 @@
 
 /* ===== BALANCE CARD ===== */
 .balanceCard {
-    background: white;
+    background: var(--ui-surface);
     padding: 28px;
     border-radius: var(--radius-lg);
     border: 1px solid var(--gray-200);
@@ -1158,7 +1158,7 @@
 
 /* ===== QUICK ACTIONS ===== */
 .quickActions {
-    background: white;
+    background: var(--ui-surface);
     padding: 20px;
     border-radius: var(--radius-lg);
     margin-top: 16px;
@@ -1207,7 +1207,7 @@
 
 /* ===== LEAVE FORM ===== */
 .leaveForm {
-    background: white;
+    background: var(--ui-surface);
     padding: 28px;
     border-radius: var(--radius-lg);
     max-width: 500px;
@@ -1231,7 +1231,7 @@
     font-size: 14px;
     outline: none;
     transition: var(--transition);
-    background: white;
+    background: var(--ui-surface);
 }
 .leaveForm input:focus,
 .leaveForm select:focus,
@@ -1297,16 +1297,16 @@
     display: inline-block;
 }
 .statusApproved {
-    background: #dcfce7;
-    color: #15803d;
+    background: var(--ui-success-bg);
+    color: var(--ui-success);
 }
 .statusRejected {
-    background: #fee2e2;
-    color: #b91c1c;
+    background: var(--ui-danger-bg);
+    color: var(--ui-danger);
 }
 .statusPending {
-    background: #fef3c7;
-    color: #d97706;
+    background: var(--ui-warning-bg);
+    color: var(--ui-warning);
 }
 
 .approveBtn {
@@ -1345,7 +1345,7 @@
 .editLeaveBtn {
     padding: 4px 12px;
     background: rgba(245, 158, 11, 0.08);
-    color: #b45309;
+    color: var(--ui-warning);
     border: 1px solid rgba(245, 158, 11, 0.15);
     border-radius: 6px;
     cursor: pointer;

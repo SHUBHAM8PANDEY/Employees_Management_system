@@ -33,7 +33,7 @@
 }
 
 .exportContent {
-    background: white;
+    background: var(--ui-surface);
     padding: 32px;
     border-radius: 20px;
     max-width: 500px;
@@ -54,13 +54,13 @@
 .exportHeader h3 {
     font-size: 20px;
     font-weight: 700;
-    color: #0a0a23;
+    color: var(--ui-text);
     margin: 0;
 }
 
 .closeBtn {
     background: var(--ui-subtle);
-    color: #475569;
+    color: var(--ui-muted);
     border: none;
     padding: 6px 14px;
     border-radius: 8px;
@@ -74,8 +74,8 @@
 }
 
 .error {
-    background: #fee2e2;
-    color: #b91c1c;
+    background: var(--ui-danger-bg);
+    color: var(--ui-danger);
     padding: 12px;
     border-radius: 8px;
     margin-bottom: 16px;
@@ -103,10 +103,10 @@
 .employeeInfo p {
     margin: 4px 0;
     font-size: 14px;
-    color: #334155;
+    color: var(--ui-text);
 }
 .employeeInfo strong {
-    color: #0a0a23;
+    color: var(--ui-text);
 }
 
 .formGroup {
@@ -117,7 +117,7 @@
 .formGroup label {
     font-size: 13px;
     font-weight: 600;
-    color: #475569;
+    color: var(--ui-muted);
 }
 
 .selectInput {
@@ -125,7 +125,7 @@
     border: 1.5px solid #e2e8f0;
     border-radius: 10px;
     font-size: 14px;
-    background: white;
+    background: var(--ui-surface);
     outline: none;
     transition: all 0.2s;
 }
@@ -144,7 +144,7 @@
     padding: 10px;
     border: 2px solid #e2e8f0;
     border-radius: 10px;
-    background: white;
+    background: var(--ui-surface);
     cursor: pointer;
     font-weight: 600;
     font-size: 14px;
@@ -155,8 +155,8 @@
 }
 .formatBtn.active {
     border-color: #4f46e5;
-    background: #eef2ff;
-    color: #4f46e5;
+    background: var(--ui-tint);
+    color: var(--ui-accent);
 }
 
 .exportBtn {
@@ -196,7 +196,7 @@
 .exportBtn {
     padding: 8px 16px;
     background: rgba(16, 185, 129, 0.1);
-    color: #059669;
+    color: var(--ui-success);
     border: 1px solid rgba(16, 185, 129, 0.2);
     border-radius: 8px;
     cursor: pointer;

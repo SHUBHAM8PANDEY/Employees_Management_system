@@ -35,7 +35,7 @@
 .headerLogo {
     font-size: 22px;
     font-weight: 800;
-    color: #0a0a23;
+    color: var(--ui-text);
 }
 .headerLogo span {
     background: linear-gradient(135deg, #4f46e5, #7c3aed);
@@ -51,7 +51,7 @@
 
 .headerUser {
     font-size: 14px;
-    color: #475569;
+    color: var(--ui-muted);
     font-weight: 500;
     background: var(--ui-subtle);
     padding: 6px 16px;
@@ -86,8 +86,8 @@
 
 /* ===== ERROR ===== */
 .error {
-    background: #fee2e2;
-    color: #b91c1c;
+    background: var(--ui-danger-bg);
+    color: var(--ui-danger);
     padding: 12px 16px;
     border-radius: 10px;
     margin-bottom: 16px;
@@ -96,7 +96,7 @@
 
 /* ===== TODAY CARD ===== */
 .todayCard {
-    background: white;
+    background: var(--ui-surface);
     padding: 24px 28px;
     border-radius: 16px;
     border: 1px solid #e9edf4;
@@ -106,7 +106,7 @@
 .todayCard h2 {
     font-size: 18px;
     font-weight: 700;
-    color: #0a0a23;
+    color: var(--ui-text);
     margin-bottom: 12px;
 }
 
@@ -130,20 +130,20 @@
     font-size: 14px;
     font-weight: 600;
 }
-.statusPresent { color: #059669; }
-.statusAbsent { color: #dc2626; }
-.statusPunched { color: #d97706; }
+.statusPresent { color: var(--ui-success); }
+.statusAbsent { color: var(--ui-danger); }
+.statusPunched { color: var(--ui-warning); }
 
 .todayDetails {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 6px 20px;
     font-size: 14px;
-    color: #334155;
+    color: var(--ui-text);
     padding: 10px 0;
 }
 .todayDetails strong {
-    color: #0a0a23;
+    color: var(--ui-text);
 }
 
 /* ===== STATUS SUMMARY ===== */
@@ -165,7 +165,7 @@
 .statusText {
     font-size: 16px;
     font-weight: 700;
-    color: #0a0a23;
+    color: var(--ui-text);
 }
 .statusReason {
     font-size: 13px;
@@ -173,8 +173,8 @@
 }
 
 .autoPunchoutWarning {
-    background: #fef3c7;
-    color: #d97706;
+    background: var(--ui-warning-bg);
+    color: var(--ui-warning);
     padding: 10px 14px;
     border-radius: 8px;
     font-size: 13px;
@@ -204,7 +204,7 @@
     font-size: 14px;
     outline: none;
     transition: all 0.2s;
-    background: white;
+    background: var(--ui-surface);
     min-width: 140px;
 }
 .selectInput:focus, .textInput:focus {
@@ -248,7 +248,7 @@
 }
 
 .completedMsg {
-    color: #059669;
+    color: var(--ui-success);
     font-weight: 600;
     font-size: 16px;
     padding: 8px 0;
@@ -263,7 +263,7 @@
 }
 
 .statCard {
-    background: white;
+    background: var(--ui-surface);
     padding: 18px 20px;
     border-radius: 12px;
     border: 1px solid #e9edf4;
@@ -273,7 +273,7 @@
 .statNumber {
     font-size: 28px;
     font-weight: 800;
-    color: #0a0a23;
+    color: var(--ui-text);
 }
 .statLabel {
     font-size: 13px;
@@ -283,7 +283,7 @@
 
 /* ===== LAST 7 DAYS ===== */
 .last7Days {
-    background: white;
+    background: var(--ui-surface);
     padding: 20px 24px;
     border-radius: 16px;
     border: 1px solid #e9edf4;
@@ -292,7 +292,7 @@
 .last7Days h3 {
     font-size: 16px;
     font-weight: 700;
-    color: #0a0a23;
+    color: var(--ui-text);
     margin-bottom: 12px;
 }
 
@@ -324,12 +324,12 @@
 .dayStatus {
     font-size: 14px;
     font-weight: 700;
-    color: #0a0a23;
+    color: var(--ui-text);
     margin: 4px 0;
 }
 .dayTime {
     font-size: 11px;
-    color: #94a3b8;
+    color: var(--ui-muted);
 }
 
 /* ===== TABS ===== */
@@ -363,7 +363,7 @@
 
 /* ===== HISTORY ===== */
 .historyCard {
-    background: white;
+    background: var(--ui-surface);
     padding: 20px 24px;
     border-radius: 16px;
     border: 1px solid #e9edf4;
@@ -382,7 +382,7 @@
     border: 1.5px solid #e2e8f0;
     border-radius: 8px;
     font-size: 13px;
-    background: white;
+    background: var(--ui-surface);
     outline: none;
     transition: all 0.2s;
 }
@@ -408,7 +408,7 @@
 .clearBtn {
     padding: 8px 16px;
     background: var(--ui-subtle);
-    color: #334155;
+    color: var(--ui-text);
     border: 1px solid #e2e8f0;
     border-radius: 8px;
     cursor: pointer;
@@ -434,13 +434,13 @@
     text-align: left;
     background: var(--ui-bg);
     font-weight: 600;
-    color: #475569;
+    color: var(--ui-muted);
     border-bottom: 2px solid #e9edf4;
 }
 .attendanceTable td {
     padding: 10px 14px;
     border-bottom: 1px solid #f1f5f9;
-    color: #334155;
+    color: var(--ui-text);
 }
 
 .badge {
@@ -450,12 +450,12 @@
     font-weight: 600;
     display: inline-block;
 }
-.badgePresent { background: #dcfce7; color: #15803d; }
-.badgeShortLeave { background: #fef3c7; color: #d97706; }
-.badgeHalf { background: #fffbeb; color: #b45309; }
-.badgeAbsent { background: #fee2e2; color: #b91c1c; }
-.badgeLeave { background: #ede9fe; color: #7c3aed; }
-.badgeHoliday { background: #e0e7ff; color: #4f46e5; }
+.badgePresent { background: var(--ui-success-bg); color: var(--ui-success); }
+.badgeShortLeave { background: var(--ui-warning-bg); color: var(--ui-warning); }
+.badgeHalf { background: var(--ui-warning-bg); color: var(--ui-warning); }
+.badgeAbsent { background: var(--ui-danger-bg); color: var(--ui-danger); }
+.badgeLeave { background: var(--ui-tint); color: var(--ui-accent); }
+.badgeHoliday { background: var(--ui-tint); color: var(--ui-accent); }
 
 /* ===== YEARLY SUMMARY ===== */
 .yearlySummary {
@@ -468,7 +468,7 @@
 .yearlySummary h4 {
     font-size: 14px;
     font-weight: 700;
-    color: #0a0a23;
+    color: var(--ui-text);
     margin-bottom: 10px;
 }
 
@@ -479,11 +479,11 @@
 }
 .summaryItem {
     font-size: 13px;
-    color: #475569;
+    color: var(--ui-muted);
     padding: 4px 0;
 }
 .summaryItem b {
-    color: #0a0a23;
+    color: var(--ui-text);
 }
 
 .yearlyStatsTable {
@@ -494,7 +494,7 @@
 .yearlyStatsTable h4 {
     font-size: 14px;
     font-weight: 700;
-    color: #0a0a23;
+    color: var(--ui-text);
     margin-bottom: 10px;
 }
 
@@ -512,14 +512,14 @@
     padding: 6px 16px;
     border: 1px solid #e2e8f0;
     border-radius: 6px;
-    background: white;
+    background: var(--ui-surface);
     cursor: pointer;
     font-weight: 600;
     transition: all 0.2s;
 }
 .pagination button:hover:not(:disabled) {
     border-color: #4f46e5;
-    color: #4f46e5;
+    color: var(--ui-accent);
 }
 .pagination button:disabled {
     opacity: 0.4;
@@ -535,7 +535,7 @@
 .empty {
     text-align: center;
     padding: 40px;
-    color: #94a3b8;
+    color: var(--ui-muted);
 }
 
 /* ===== RESPONSIVE ===== */
@@ -629,7 +629,7 @@
 .exportBtn {
     padding: 8px 16px;
     background: rgba(16, 185, 129, 0.1);
-    color: #059669;
+    color: var(--ui-success);
     border: 1px solid rgba(16, 185, 129, 0.2);
     border-radius: 8px;
     cursor: pointer;
@@ -665,15 +665,15 @@
 .attendanceNotice {
     padding: .75rem 1rem;
     border-radius: .65rem;
-    background: #e6f7ef;
-    color: #18593a;
+    background: var(--ui-success-bg);
+    color: var(--ui-success);
 }
 
 .punchDetail { display: block; margin-top: .3rem; color: var(--ui-muted); white-space: nowrap; }
-.mapLink { color: #174aaf; text-underline-offset: .16em; }
+.mapLink { color: var(--ui-accent); text-underline-offset: .16em; }
 .mapLink:focus-visible { outline: 2px solid #174aaf; outline-offset: 3px; }
 
-.employeeButton { display: grid; text-align: left; gap: .25rem; font: inherit; font-weight: 700; color: #174aaf; border: 0; padding: .25rem 0; background: none; cursor: pointer; }
+.employeeButton { display: grid; text-align: left; gap: .25rem; font: inherit; font-weight: 700; color: var(--ui-accent); border: 0; padding: .25rem 0; background: none; cursor: pointer; }
 .employeeButton small { color: var(--ui-muted); font-weight: 500; }
 .employeeButton:hover { text-decoration: underline; }
 .calendarOverlay { position: fixed; inset: 0; z-index: 120; display: grid; place-items: center; background: #0f172a99; padding: .75rem; }

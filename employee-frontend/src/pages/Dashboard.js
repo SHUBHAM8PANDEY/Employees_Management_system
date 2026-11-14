@@ -693,7 +693,7 @@ const Dashboard = () => {
                                                             <td>{emp ? emp.first_name : req.employee_code}</td>
                                                             <td>{req.leave_type}</td>
                                                             <td><b>{req.days || 1}</b></td>
-                                                            <td style={{ maxWidth: '200px', fontSize: '13px', wordWrap: 'break-word', color: '#1a1a2e', fontWeight: '500' }}>
+                                                            <td style={{ maxWidth: '200px', fontSize: '13px', wordWrap: 'break-word', color: 'var(--ui-text)', fontWeight: '500' }}>
                                                                 {req.reason || '—'}
                                                             </td>
                                                             <td>
@@ -781,7 +781,7 @@ const Dashboard = () => {
                                                             <td>{emp ? emp.first_name : req.employee_code}</td>
                                                             <td>{req.leave_type}</td>
                                                             <td><b>{req.days || 1}</b></td>
-                                                            <td style={{ maxWidth: '150px', fontSize: '12px', wordWrap: 'break-word', color: '#475569' }}>
+                                                            <td style={{ maxWidth: '150px', fontSize: '12px', wordWrap: 'break-word', color: 'var(--ui-muted)' }}>
                                                                 {req.reason || '—'}
                                                             </td>
                                                             <td>
@@ -929,7 +929,7 @@ const Dashboard = () => {
                                     </>
                                 )}
                             </div>
-                            {isEditing && <div style={{ marginTop: '10px', fontSize: '12px', color: '#64748b', textAlign: 'center' }}>💡 You can edit: Name, Email, Password, Address, Education, Skills</div>}
+                            {isEditing && <div style={{ marginTop: '10px', fontSize: '12px', color: 'var(--ui-muted)', textAlign: 'center' }}>💡 You can edit: Name, Email, Password, Address, Education, Skills</div>}
                         </div>
                     </div>
                 )}

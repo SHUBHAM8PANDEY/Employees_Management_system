@@ -72,8 +72,8 @@ const EmployeeLeave = () => {
 
             {error && (
                 <div style={{
-                    background: '#fee2e2',
-                    color: '#b91c1c',
+                    background: 'var(--ui-danger-bg)',
+                    color: 'var(--ui-danger)',
                     padding: '12px 16px',
                     borderRadius: '10px',
                     marginBottom: '16px'
@@ -269,8 +269,8 @@ const EmployeeLeave = () => {
                                                     borderRadius: '6px',
                                                     fontSize: '11px',
                                                     fontWeight: '600',
-                                                    background: leave.status === 'Approved' ? '#dcfce7' : leave.status === 'Rejected' ? '#fee2e2' : '#fef3c7',
-                                                    color: leave.status === 'Approved' ? '#15803d' : leave.status === 'Rejected' ? '#b91c1c' : '#d97706'
+                                                    background: leave.status === 'Approved' ? 'var(--ui-success-bg)' : leave.status === 'Rejected' ? 'var(--ui-danger-bg)' : 'var(--ui-warning-bg)',
+                                                    color: leave.status === 'Approved' ? '#15803d' : leave.status === 'Rejected' ? 'var(--ui-danger)' : 'var(--ui-warning)'
                                                 }}>
                                                     {leave.status}
                                                 </span>

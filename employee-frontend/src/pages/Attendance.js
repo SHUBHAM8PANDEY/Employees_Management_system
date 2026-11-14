@@ -762,7 +762,7 @@ const Attendance = () => {
                                 }} 
                                 className={styles.filterDate} 
                             />
-                            <span style={{ color: '#94a3b8' }}>to</span>
+                            <span style={{ color: 'var(--ui-muted)' }}>to</span>
                             <input 
                                 type="date" 
                                 value={endDate} 

@@ -112,7 +112,7 @@ const AttendanceExport = ({ employeeCode, onClose }) => {
             padding: '20px'
         }}>
             <div style={{
-                background: 'white',
+                background: 'var(--ui-surface)',
                 padding: '30px',
                 borderRadius: '16px',
                 maxWidth: '420px',
@@ -133,7 +133,7 @@ const AttendanceExport = ({ employeeCode, onClose }) => {
                     <button
                         onClick={onClose}
                         style={{
-                            background: '#f1f5f9',
+                            background: 'var(--ui-subtle)',
                             border: 'none',
                             padding: '6px 14px',
                             borderRadius: '8px',
@@ -148,8 +148,8 @@ const AttendanceExport = ({ employeeCode, onClose }) => {
 
                 {error && (
                     <div style={{
-                        background: '#fee2e2',
-                        color: '#b91c1c',
+                        background: 'var(--ui-danger-bg)',
+                        color: 'var(--ui-danger)',
                         padding: '10px 14px',
                         borderRadius: '8px',
                         marginBottom: '16px',
@@ -160,14 +160,14 @@ const AttendanceExport = ({ employeeCode, onClose }) => {
                 )}
 
                 {loading ? (
-                    <div style={{ textAlign: 'center', padding: '30px', color: '#64748b' }}>
+                    <div style={{ textAlign: 'center', padding: '30px', color: 'var(--ui-muted)' }}>
                         ⏳ Loading...
                     </div>
                 ) : (
                     <>
                         {options.employee && (
                             <div style={{
-                                background: '#f8fafc',
+                                background: 'var(--ui-subtle)',
                                 padding: '10px 14px',
                                 borderRadius: '8px',
                                 marginBottom: '16px',
@@ -188,7 +188,7 @@ const AttendanceExport = ({ employeeCode, onClose }) => {
                                 fontWeight: '600',
                                 marginBottom: '4px',
                                 fontSize: '13px',
-                                color: '#475569'
+                                color: 'var(--ui-muted)'
                             }}>
                                 Select Month
                             </label>
@@ -201,7 +201,7 @@ const AttendanceExport = ({ employeeCode, onClose }) => {
                                     border: '1.5px solid #e2e8f0',
                                     borderRadius: '10px',
                                     fontSize: '14px',
-                                    background: 'white',
+                                    background: 'var(--ui-surface)',
                                     outline: 'none'
                                 }}
                             >
@@ -220,7 +220,7 @@ const AttendanceExport = ({ employeeCode, onClose }) => {
                                 fontWeight: '600',
                                 marginBottom: '4px',
                                 fontSize: '13px',
-                                color: '#475569'
+                                color: 'var(--ui-muted)'
                             }}>
                                 Select Year
                             </label>
@@ -233,7 +233,7 @@ const AttendanceExport = ({ employeeCode, onClose }) => {
                                     border: '1.5px solid #e2e8f0',
                                     borderRadius: '10px',
                                     fontSize: '14px',
-                                    background: 'white',
+                                    background: 'var(--ui-surface)',
                                     outline: 'none'
                                 }}
                             >
@@ -249,7 +249,7 @@ const AttendanceExport = ({ employeeCode, onClose }) => {
                                 fontWeight: '600',
                                 marginBottom: '4px',
                                 fontSize: '13px',
-                                color: '#475569'
+                                color: 'var(--ui-muted)'
                             }}>
                                 Export Format
                             </label>
@@ -261,8 +261,8 @@ const AttendanceExport = ({ employeeCode, onClose }) => {
                                         padding: '10px',
                                         border: `2px solid ${exportType === 'excel' ? '#4f46e5' : '#e2e8f0'}`,
                                         borderRadius: '10px',
-                                        background: exportType === 'excel' ? '#eef2ff' : 'white',
-                                        color: exportType === 'excel' ? '#4f46e5' : '#64748b',
+                                        background: exportType === 'excel' ? 'var(--ui-tint)' : 'var(--ui-surface)',
+                                        color: exportType === 'excel' ? 'var(--ui-accent)' : 'var(--ui-muted)',
                                         cursor: 'pointer',
                                         fontWeight: '600',
                                         transition: 'all 0.2s'
@@ -277,8 +277,8 @@ const AttendanceExport = ({ employeeCode, onClose }) => {
                                         padding: '10px',
                                         border: `2px solid ${exportType === 'pdf' ? '#4f46e5' : '#e2e8f0'}`,
                                         borderRadius: '10px',
-                                        background: exportType === 'pdf' ? '#eef2ff' : 'white',
-                                        color: exportType === 'pdf' ? '#4f46e5' : '#64748b',
+                                        background: exportType === 'pdf' ? 'var(--ui-tint)' : 'var(--ui-surface)',
+                                        color: exportType === 'pdf' ? 'var(--ui-accent)' : 'var(--ui-muted)',
                                         cursor: 'pointer',
                                         fontWeight: '600',
                                         transition: 'all 0.2s'

@@ -64,8 +64,8 @@
     display: inline-block;
     margin-top: 4px;
     padding: 2px 8px;
-    background: #ecfdf5;
-    color: #0f766e;
+    background: var(--ui-success-bg);
+    color: var(--ui-success);
     border-radius: 4px;
     font-size: 11px !important;
     font-weight: 600;
@@ -86,7 +86,7 @@
     font-size: 14px;
     border-radius: 8px;
     cursor: pointer;
-    color: #334155;
+    color: var(--ui-text);
     font-weight: 500;
 }
 
@@ -100,9 +100,9 @@
 }
 
 .menuItemDanger {
-    color: #dc2626;
+    color: var(--ui-danger);
 }
 
 .menuItemDanger:hover {
-    background: #fef2f2;
+    background: var(--ui-danger-bg);
 }
