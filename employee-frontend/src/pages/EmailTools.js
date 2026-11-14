@@ -1,9 +1,11 @@
+import EmailHistory from './EmailHistory';
 import React, { useState } from 'react';
 import axios from 'axios';
 import styles from './EmailTools.module.css';
 import { API_BASE } from '../config';
 
 export default function EmailTools() {
+    const [tab, setTab] = useState('compose');
     const [status, setStatus] = useState(null);
     const [sending, setSending] = useState(false);
 
@@ -28,7 +30,12 @@ export default function EmailTools() {
         }
     }
 
-    return <section className={styles.panel}>
+    return <div className="ui-page-stack">
+        <nav className={styles.historyActions} aria-label="Email views">
+            <button type="button" aria-pressed={tab === 'compose'} className="ui-button" onClick={() => setTab('compose')}>Compose</button>
+            <button type="button" aria-pressed={tab === 'history'} className="ui-button" onClick={() => setTab('history')}>History</button>
+        </nav>
+        {tab === 'history' ? <EmailHistory /> : <section className={styles.panel}>
         <header className={styles.composeHeader}><h2>Compose email</h2><p>Send an update to one or more employees.</p></header>
         <form onSubmit={send}>
             <p><label>Recipients <small>Enter employee IDs separated by commas.</small><input name="codes" placeholder="EMP-12, EMP-24" required maxLength={5000} /></label></p>
@@ -37,5 +44,6 @@ export default function EmailTools() {
             <button type="submit" aria-busy={sending} disabled={sending}>{sending ? 'Sending...' : 'Send Email'}</button>
         </form>
         {status && <p role={status.kind === 'error' ? 'alert' : 'status'} className={styles[status.kind]}>{status.text}</p>}
-    </section>;
+        </section>}
+    </div>;
 }

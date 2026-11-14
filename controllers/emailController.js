@@ -88,7 +88,32 @@ const sendBulkLeaveNotification = async (req, res) => {
     }
 };
 
+async function getEmailHistory(req, res) {
+    const page = Math.max(1, Math.min(10000000, Number.parseInt(req.query.page, 10) || 1));
+    const search = typeof req.query.search === 'string' ? req.query.search.trim().slice(0, 255) : '';
+    const size = 20;
+    const [rows] = await db.sequelize.query(`
+        SELECT id, to_email, subject, status, created_at, sent_at
+        FROM public.email_queue
+        WHERE $search = '' OR strpos(lower(to_email), lower($search)) > 0
+            OR strpos(lower(subject), lower($search)) > 0
+        ORDER BY created_at DESC, id DESC LIMIT $limit OFFSET $offset`,
+    { bind: { search, limit: size + 1, offset: (page - 1) * size } });
+    res.json({ data: rows.slice(0, size), page, hasMore: rows.length > size });
+}
+
+async function getEmailDetails(req, res) {
+    const { id } = req.params;
+    if (!/^\d{1,10}$/.test(id) || Number(id) > 2147483647) return res.sendStatus(400);
+    const [rows] = await db.sequelize.query(`
+        SELECT id, to_email, subject, status, created_at, sent_at, body_html, error_message
+        FROM public.email_queue WHERE id = $id`, { bind: { id } });
+    if (!rows.length) return res.sendStatus(404);
+    res.json(rows[0]);
+}
+
 module.exports = {
+    getEmailHistory, getEmailDetails,
     sendLeaveStatusEmail,
     sendBulkLeaveNotification
 };

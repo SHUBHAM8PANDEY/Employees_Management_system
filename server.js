@@ -222,6 +222,7 @@ db.sequelize.authenticate()
             PRIMARY KEY (employee_code, kind, greeting_date)
         )
     `))
+    .then(() => require('./utils/emailHistory').ensureEmailHistory())
     .then(() => server.listen(PORT, () => {
     require('./jobs/autoPunchOut').startAutoPunchOutJob();
     require('./jobs/employeeGreetings').startEmployeeGreetings();

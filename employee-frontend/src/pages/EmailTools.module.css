@@ -38,3 +38,11 @@
 .composeHeader { border-bottom: 1px solid #dbe3ef; margin-bottom: 1rem; }
 .panel label small { color: var(--ui-muted); font-weight: 400; }
 .panel :is(input, textarea, button):focus-visible { outline: 2px solid #234ac5; outline-offset: 2px; }
+
+.historyActions { display: flex; flex-wrap: wrap; align-items: center; gap: .65rem; margin: .75rem 0; }
+.historyActions input { padding: .55rem; border: 1px solid var(--ui-border); border-radius: .45rem; }
+.historyActions button[aria-pressed="true"] { background: var(--ui-tint); color: var(--ui-accent); }
+.historyTable { overflow-x: auto; }
+.historyTable table { width: 100%; }
+.historyTable th, .historyTable td { padding: .65rem; text-align: left; border-bottom: 1px solid var(--ui-border); }
+.preview { width: 100%; min-height: 260px; border: 1px solid var(--ui-border); background: white; margin-top: .75rem; }

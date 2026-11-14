@@ -16,7 +16,7 @@ const transporter = nodemailer.createTransport({
 const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, char =>
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
 
-const sendEmail = async (to, subject, html, attachments = [], idempotencyKey) => {
+const deliverEmail = async (to, subject, html, attachments = [], idempotencyKey) => {
     if (!mailConfigured()) throw new Error('Email provider is not configured');
     if (process.env.RESEND_API_KEY && process.env.EMAIL_FROM) {
         const response = await fetch('https://api.resend.com/emails', {
@@ -54,6 +54,39 @@ const sendEmail = async (to, subject, html, attachments = [], idempotencyKey) =>
         throw error;
     }
 };
+
+async function sendEmail(to, subject, html, attachments = [], idempotencyKey) {
+    const database = require('../config/database');
+    const [rows] = await database.query(`
+        INSERT INTO public.email_queue (to_email, subject, body_html, status, created_at, updated_at)
+        VALUES ($recipient, $subject, $body, 'processing', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        RETURNING id`
+    , { bind: { recipient: to, subject, body: html } });
+    const id = rows[0].id;
+    let result;
+    try {
+        result = await deliverEmail(to, subject, html, attachments, idempotencyKey);
+    } catch (error) {
+        try {
+            await database.query(`
+                UPDATE public.email_queue SET status = 'failed', error_message = $reason,
+                    updated_at = CURRENT_TIMESTAMP WHERE id = $id`,
+            { bind: { id, reason: error.code ? 'Provider error: ' + error.code : error.message } });
+        } catch (historyError) {
+            console.error('Could not record email failure:', historyError.name);
+        }
+        throw error;
+    }
+    try {
+        await database.query(`
+            UPDATE public.email_queue SET status = 'sent', message_id = $messageId,
+                sent_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE id = $id`,
+        { bind: { id, messageId: result.messageId || result.id || null } });
+    } catch (error) {
+        console.error('Email accepted but history update failed:', error.name);
+    }
+    return result;
+}
 
 // Leave Status Email Template
 const getLeaveStatusEmailTemplate = (employeeName, leaveDetails, status, comments = '') => {
