@@ -50,53 +50,42 @@ const buildSummary = (records) => {
 const punchIn = async (req, res) => {
     try {
         const employeeCode = req.user.employee_code;
-        const today = getTodayStr();
+        const now = new Date();
+        const today = attendanceDate(now);
         if (isSunday(today)) return res.status(400).json({ error: 'Sunday is a weekly off.' });
         const { punch_in_type = 'Office', notes } = req.body;
         const evidence = punchEvidence(req.body);
         if (!evidence) return res.status(400).json({ error: 'Take a selfie and allow location before punching in.' });
         const { latitude, longitude, photo } = evidence;
-        const location = latitude.toFixed(5) + ', ' + longitude.toFixed(5);
-        if (new Date() >= autoPunchTime(today)) return res.status(400).json({ error: 'Punch-in closes at 9:30 PM IST.' });
+        const location = typeof req.body.place === 'string' ? req.body.place.trim() : '';
+        if (!location || location.length > 150 || !/\p{L}/u.test(location)) {
+            return res.status(400).json({ error: 'Enter a place name, such as your office or locality.' });
+        }
+        if (!['Office', 'Client', 'Remote'].includes(punch_in_type)) {
+            return res.status(400).json({ error: 'Choose a valid work mode.' });
+        }
+        if (now >= autoPunchTime(today)) return res.status(400).json({ error: 'Punch-in closes at 9:30 PM IST.' });
 
-        const existing = await Attendance.findOne({
-            where: { employee_code: employeeCode, date: today }
+        const statusInfo = calculateAttendanceStatus(now, null);
+        const isLate = statusInfo.isLate;
+        const [attendance, created] = await Attendance.findOrCreate({
+            where: { employee_code: employeeCode, date: today },
+            defaults: {
+                punch_in: now, punch_in_type, location, latitude, longitude, punch_in_photo: photo,
+                notes: notes || null, status: 'Present',
+                ip_address: req.ip, device_info: req.headers['user-agent']
+            }
         });
 
-        if (existing && existing.punch_in) {
-            return res.status(400).json({ error: 'Already punched in today!' });
-        }
-
-        const now = new Date();
-        const statusInfo = calculateAttendanceStatus(now, null);
-        const isLate = isAfterTime(now, '09:30');
-
-        let attendance;
-        if (existing) {
-            existing.punch_in = now;
-            existing.punch_in_type = punch_in_type;
-            existing.location = location;
-            existing.latitude = latitude;
-            existing.longitude = longitude;
-            existing.punch_in_photo = photo;
-            existing.notes = notes || null;
-            existing.status = 'Present';
-            existing.ip_address = req.ip || req.connection?.remoteAddress;
-            existing.device_info = req.headers['user-agent'];
-            await existing.save();
-            attendance = existing;
-        } else {
-            attendance = await Attendance.create({
-                employee_code: employeeCode,
-                date: today,
-                punch_in: now,
-                punch_in_type,
-                location, latitude, longitude, punch_in_photo: photo,
-                notes: notes || null,
-                status: 'Present',
-                ip_address: req.ip || req.connection?.remoteAddress,
-                device_info: req.headers['user-agent']
-            });
+        if (!created) {
+            const [updated] = await Attendance.update({
+                punch_in: now, punch_in_type, location, latitude, longitude, punch_in_photo: photo,
+                notes: notes || null, status: 'Present',
+                ip_address: req.ip, device_info: req.headers['user-agent']
+            }, { where: { id: attendance.id, punch_in: null, punch_out: null,
+                status: { [Op.notIn]: ['Holiday', 'On Leave'] } } });
+            if (!updated) return res.status(409).json({ error: 'Attendance is already recorded or this day is closed.' });
+            await attendance.reload();
         }
 
         await auditLogger.log({
@@ -149,6 +138,11 @@ const punchOut = async (req, res) => {
         attendance.punch_out = now;
         attendance.punch_out_type = auto ? 'Auto' : 'Manual';
         if (!auto) {
+            const place = typeof req.body.place === 'string' ? req.body.place.trim() : '';
+            if (!place || place.length > 150 || !/\p{L}/u.test(place)) {
+                return res.status(400).json({ error: 'Enter the place name for punch-out.' });
+            }
+            attendance.punch_out_location = place;
             attendance.punch_out_photo = evidence.photo;
             attendance.punch_out_latitude = evidence.latitude;
             attendance.punch_out_longitude = evidence.longitude;
@@ -460,6 +454,9 @@ const editAttendance = async (req, res) => {
 
         const oldData = attendance.toJSON();
 
+        if (isSunday(attendance.date) && (punch_in || punch_out || (status && status !== 'Holiday'))) {
+            return res.status(400).json({ error: 'Sunday is a weekly off.' });
+        }
         if (punch_in !== undefined) attendance.punch_in = punch_in ? new Date(punch_in) : null;
         if (punch_out !== undefined) attendance.punch_out = punch_out ? new Date(punch_out) : null;
         if (punch_in_type) attendance.punch_in_type = punch_in_type;
@@ -496,6 +493,9 @@ const editAttendance = async (req, res) => {
 const markAttendance = async (req, res) => {
     try {
         const { employee_code, date, status, punch_in, punch_out, punch_in_type, notes } = req.body;
+        if (isSunday(date) && (punch_in || punch_out || !['Holiday', undefined].includes(status))) {
+            return res.status(400).json({ error: 'Sunday is a weekly off.' });
+        }
 
         if (!employee_code || !date || !status) {
             return res.status(400).json({ error: 'employee_code, date and status are required!' });

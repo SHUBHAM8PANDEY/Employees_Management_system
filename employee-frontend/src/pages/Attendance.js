@@ -17,8 +17,9 @@ function PunchLocation({ latitude, longitude, fallback }) {
     const lng = Number(longitude);
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) return fallback || '—';
     const coordinates = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+    const label = fallback && /[\p{L}]/u.test(fallback) ? fallback : 'View location on map';
     return <a className={styles.mapLink} href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(coordinates)}`}
-        target="_blank" rel="noreferrer" aria-label={`Open map at ${coordinates}`}>{coordinates} ↗</a>;
+        target="_blank" rel="noreferrer" aria-label={`Open map at ${coordinates}`}>{label} ↗</a>;
 }
 
 const Attendance = () => {
@@ -47,6 +48,7 @@ const Attendance = () => {
     const [monthlyStats, setMonthlyStats] = useState([]);
     const [summary, setSummary] = useState({ present: 0, absent: 0, halfDay: 0, shortLeave: 0, onLeave: 0, holiday: 0, total: 0 });
     const [punchInType, setPunchInType] = useState('Office');
+    const [place, setPlace] = useState('');
     const [photo, setPhoto] = useState('');
     const [captureOpen, setCaptureOpen] = useState(false);
     const [teamPeriod, setTeamPeriod] = useState('day');
@@ -119,11 +121,12 @@ const Attendance = () => {
     };
 
     const getEvidence = async () => {
+        if (!place.trim()) throw new Error('Enter your office, client site or locality name.');
         if (!photo) throw new Error('Take a selfie before submitting attendance.');
         return new Promise((resolve, reject) => {
             if (!navigator.geolocation) return reject(new Error('Location is unavailable on this device.'));
             navigator.geolocation.getCurrentPosition(({ coords }) => resolve({
-                latitude: coords.latitude, longitude: coords.longitude, photo
+                latitude: coords.latitude, longitude: coords.longitude, photo, place: place.trim()
             }), () => reject(new Error('Allow location access and try again.')),
             { enableHighAccuracy: true, timeout: 15000 });
         });
@@ -235,6 +238,7 @@ const Attendance = () => {
             
             setNotice(response.data.message);
             setPhoto('');
+            setPlace('');
             setCaptureOpen(false);
             setTodayAttendance(response.data.attendance);
             setIsPunchedIn(true);
@@ -258,6 +262,7 @@ const Attendance = () => {
             
             setNotice(`Punch out recorded · ${response.data.status} · ${response.data.totalHours} hours`);
             setPhoto('');
+            setPlace('');
             setCaptureOpen(false);
             setTodayAttendance(response.data.attendance);
             setIsPunchedOut(true);
@@ -568,7 +573,7 @@ const Attendance = () => {
                                 <div><strong>Total Hours:</strong> {todayAttendance.total_hours || 0} hrs</div>
                             </>
                         )}
-                        {todayAttendance.location && <div><strong>Location:</strong> {todayAttendance.location}</div>}
+                        {todayAttendance.location && <div><strong>Location:</strong> <PunchLocation latitude={todayAttendance.latitude} longitude={todayAttendance.longitude} fallback={todayAttendance.location} /></div>}
                         {todayAttendance.notes && <div><strong>Notes:</strong> {todayAttendance.notes}</div>}
                     </div>
                 )}
@@ -594,13 +599,17 @@ const Attendance = () => {
                 {notice && <p role="status" className={styles.attendanceNotice}>{notice}</p>}
                 {captureOpen && !isPunchedOut && <div className={styles.evidencePanel}>
                     <strong>Selfie and location</strong>
+                    <label className={styles.placeField}>Place name
+                        <input className={styles.textInput} placeholder="Office, client site or locality" value={place}
+                            maxLength={150} onChange={event => setPlace(event.target.value)} />
+                    </label>
                     <p>Take a selfie. Location will be captured when you submit your punch.</p>
                     {cameraOpen && <video ref={video} autoPlay playsInline muted />}
                     {photo && <img src={photo} alt="Attendance selfie preview" />}
                     <button type="button" className={styles.exportBtn} onClick={cameraOpen ? takePhoto : startCamera}>
                         {cameraOpen ? 'Capture selfie' : photo ? 'Retake selfie' : 'Retry camera'}
                     </button>
-                    {photo && <button type="button" className={styles.punchInBtn} disabled={processing || cameraOpen}
+                    {photo && <button type="button" className={styles.punchInBtn} disabled={processing || cameraOpen || !place.trim()}
                         onClick={isPunchedIn ? handlePunchOut : handlePunchIn}>
                         {processing ? 'Saving…' : isPunchedIn ? 'Confirm punch out' : 'Confirm attendance'}
                     </button>}

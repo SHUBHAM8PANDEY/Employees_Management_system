@@ -20,10 +20,8 @@ async function exportTeamAttendance(req, res) {
         Code: record.employee_code, Status: record.status,
         'Punch in (IST)': record.punch_in ? getTimeString(record.punch_in) : '',
         'Punch out (IST)': record.punch_out ? getTimeString(record.punch_out) : '',
-        'Punch-in location': record.latitude != null && record.longitude != null
-            ? `${record.latitude}, ${record.longitude}` : record.location || '',
-        'Punch-out location': record.punch_out_latitude != null && record.punch_out_longitude != null
-            ? `${record.punch_out_latitude}, ${record.punch_out_longitude}` : record.punch_out_location || '',
+        'Punch-in location': /\p{L}/u.test(record.location || '') ? record.location : '',
+        'Punch-out location': /\p{L}/u.test(record.punch_out_location || '') ? record.punch_out_location : '',
         Late: record.late ? 'Yes' : '', Hours: record.total_hours ?? ''
     }));
     if (format === 'pdf') {

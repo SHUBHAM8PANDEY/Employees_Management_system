@@ -684,3 +684,4 @@
 .calendarSummary div { display: grid; gap: .2rem; padding: .65rem; border-radius: 8px; background: #eef4fc; }
 .calendarSummary strong { font-size: 1.2rem; }
 .calendarSummary span { font-size: .8rem; }
+.placeField { display: grid; gap: .35rem; width: min(100%, 360px); }

@@ -48,6 +48,7 @@ module.exports = (sequelize, DataTypes) => {
         longitude: DataTypes.DECIMAL(11, 8),
         punch_in_photo: DataTypes.TEXT,
         punch_out_photo: DataTypes.TEXT,
+        punch_out_location: DataTypes.STRING(500),
         punch_out_latitude: DataTypes.DECIMAL(10, 8),
         punch_out_longitude: DataTypes.DECIMAL(11, 8),
         total_hours: {

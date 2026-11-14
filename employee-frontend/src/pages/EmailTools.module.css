@@ -34,3 +34,7 @@
 .error, .success { padding: .75rem; border-radius: 8px; }
 .error { background: #fff1ef; color: #8e281d; }
 .success { background: #e8f7ed; color: #166036; }
+
+.composeHeader { border-bottom: 1px solid #dbe3ef; margin-bottom: 1rem; }
+.panel label small { color: #52647a; font-weight: 400; }
+.panel :is(input, textarea, button):focus-visible { outline: 2px solid #234ac5; outline-offset: 2px; }

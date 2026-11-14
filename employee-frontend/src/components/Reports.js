@@ -1,3 +1,4 @@
+import styles from './Reports.module.css';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { API_BASE } from '../config';
@@ -35,11 +36,14 @@ export default function Reports() {
         }
     }
 
-    return <section>
-        <h2>Leave Reports</h2>
+    return <section className={styles.report}>
+        <header className={styles.header}><h2>Leave Reports</h2><button type="button" onClick={download}>Download Excel</button></header>
         {error && <p role="alert">{error}</p>}
-        <button type="button" onClick={download}>Download Excel</button>
-        {stats && <p>Total {stats.totalLeaves} | Pending {stats.pendingLeaves} | Approved {stats.approvedLeaves} | Rejected {stats.rejectedLeaves}</p>}
+        {stats && <dl className={styles.metrics}>{[
+            ['Total requests', stats.totalLeaves], ['Pending', stats.pendingLeaves],
+            ['Approved', stats.approvedLeaves], ['Rejected', stats.rejectedLeaves]
+        ].map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>}
+        <div className={styles.tableWrap}>
         <table>
             <caption>Remaining leave days</caption>
             <thead><tr><th>Employee</th><th>Sick</th><th>Casual</th><th>Paid</th></tr></thead>
@@ -50,5 +54,6 @@ export default function Reports() {
                 <td>{employee.leaveBalance.paid.left}</td>
             </tr>)}</tbody>
         </table>
+        </div>
     </section>;
 }

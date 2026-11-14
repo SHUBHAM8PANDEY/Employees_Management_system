@@ -29,12 +29,12 @@ export default function EmailTools() {
     }
 
     return <section className={styles.panel}>
-        <header><h2>Compose email</h2><p>Send an update to one or more employees.</p></header>
+        <header className={styles.composeHeader}><h2>Compose email</h2><p>Send an update to one or more employees.</p></header>
         <form onSubmit={send}>
-            <p><label>Recipients <input name="codes" placeholder="EMP-12, EMP-24" required maxLength={5000} /></label></p>
+            <p><label>Recipients <small>Enter employee IDs separated by commas.</small><input name="codes" placeholder="EMP-12, EMP-24" required maxLength={5000} /></label></p>
             <p><label>Subject <input name="subject" required maxLength={200} /></label></p>
             <p><label>Message <textarea name="message" required maxLength={10000} /></label></p>
-            <button type="submit" disabled={sending}>{sending ? 'Sending...' : 'Send Email'}</button>
+            <button type="submit" aria-busy={sending} disabled={sending}>{sending ? 'Sending...' : 'Send Email'}</button>
         </form>
         {status && <p role={status.kind === 'error' ? 'alert' : 'status'} className={styles[status.kind]}>{status.text}</p>}
     </section>;
