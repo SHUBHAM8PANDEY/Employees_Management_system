@@ -7,6 +7,8 @@ import styles from './Chat.module.css';
 
 
 
+const EMOJIS = ['😀', '😂', '😊', '😍', '😎', '🤔', '😢', '😅', '👍', '👏', '🙌', '🙏', '❤️', '🔥', '🎉', '✅', '👋', '💯', '🤝', '🎂', '✨', '🚀', '💬', '📎'];
+
 const formatLastSeen = (isOnline, lastSeen) => {
     if (isOnline) return 'Online';
     if (!lastSeen) return 'Offline';
@@ -44,6 +46,10 @@ const Chat = () => {
     const [conversations, setConversations] = useState([]);
     const [selectedContact, setSelectedContact] = useState(null);
     const [typing, setTyping] = useState(false);
+    const [picker, setPicker] = useState(null);
+    const inputRef = useRef(null);
+    const imageRef = useRef(null);
+    const pdfRef = useRef(null);
     const [attachment, setAttachment] = useState(null);
     const [sending, setSending] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
@@ -177,6 +183,7 @@ const Chat = () => {
     const selectContact = async (contact) => {
         if (sending) return;
         setAttachment(null);
+        setPicker(null);
         setSelectedContact(contact);
         setMessages([]);
         await loadHistory(contact.employee_code);
@@ -198,10 +205,29 @@ const Chat = () => {
                 });
                 file = { name: attachment.name, type: attachment.type, data: encoded };
             }
-            const { data: response } = await axios.post(`${API_BASE}/api/chat/messages`, {
-                message: newMessage.trim(), receiverCode, attachment: file
-            }, { headers: { Authorization: `Bearer ${token}` } });
+            const message = newMessage.trim();
+            let response;
+            try {
+                ({ data: response } = await axios.post(`${API_BASE}/api/chat/messages`, {
+                    message, receiverCode, attachment: file
+                }, { headers: { Authorization: `Bearer ${token}` } }));
+            } catch (error) {
+                if (error.response?.status !== 404 || error.response.data?.error) throw error;
+                const socket = socketRef.current;
+                if (!socket?.connected) {
+                    throw new Error('Chat API is unavailable and live chat is disconnected. Check the backend deployment.');
+                }
+                // The previous backend accepts messages over Socket.IO.
+                response = await socket.timeout(20000).emitWithAck('send_message', {
+                    message, receiverCode, attachment: attachment && {
+                        name: attachment.name, type: attachment.type, data: await attachment.arrayBuffer()
+                    }
+                });
+            }
             if (response?.error) throw new Error(response.error);
+            if (!response?.message?.id || (attachment && !response.message.attachment_name)) {
+                throw new Error('The backend did not confirm the message or attachment.');
+            }
             setNewMessage('');
             setAttachment(null);
             if (selectedContactRef.current?.employee_code === receiverCode) {
@@ -210,7 +236,7 @@ const Chat = () => {
             }
             fetchConversations();
         } catch (error) {
-            setError(error.response?.data?.error || 'Could not send message. Please try again.');
+            setError(error.response?.data?.error || (error.response ? 'Could not send message. Please try again.' : error.message));
         } finally {
             setSending(false);
         }
@@ -232,8 +258,30 @@ const Chat = () => {
         }
     };
 
+    const selectFile = (event) => {
+        const file = event.currentTarget.files[0];
+        event.currentTarget.value = '';
+        if (!file) return;
+        if (file.size > 4 * 1024 * 1024) return setError('File must be 4 MB or smaller.');
+        setError('');
+        setAttachment(file);
+        setPicker(null);
+    };
+
+    const insertEmoji = (emoji) => {
+        const input = inputRef.current;
+        const start = input.selectionStart;
+        const end = input.selectionEnd;
+        handleTyping(newMessage.slice(0, start) + emoji + newMessage.slice(end));
+        setPicker(null);
+        requestAnimationFrame(() => {
+            input.focus();
+            input.setSelectionRange(start + emoji.length, start + emoji.length);
+        });
+    };
+
     const handleKeyDown = (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
+        if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
             e.preventDefault();
             handleSend();
         }
@@ -411,25 +459,34 @@ const Chat = () => {
                             <div ref={messagesEndRef} />
                         </div>
 
-                        <div className={styles.attachBar}>
-                            <label className={styles.attachButton}>
-                                Attach PDF or image
-                                <input type="file" accept="application/pdf,image/jpeg,image/png,image/webp"
-                                    disabled={sending} onChange={event => {
-                                        const file = event.currentTarget.files[0];
-                                        event.currentTarget.value = '';
-                                        if (!file) return;
-                                        if (file.size > 4 * 1024 * 1024) return setError('File must be 4 MB or smaller.');
-                                        setError('');
-                                        setAttachment(file);
-                                    }} />
-                            </label>
-                            {attachment && <button type="button" disabled={sending} onClick={() => setAttachment(null)}>
-                                Remove {attachment.name}
-                            </button>}
-                        </div>
-                        <div className={styles.inputBar}>
+                        <div className={styles.composer} onKeyDown={event => {
+                            if (event.key === 'Escape') setPicker(null);
+                        }}>
+                            {attachment && <div className={styles.attachmentPreview}>
+                                <span>📎 {attachment.name}</span>
+                                <button type="button" disabled={sending} onClick={() => setAttachment(null)}
+                                    aria-label="Remove attachment">×</button>
+                            </div>}
+                            {picker === 'attachments' && <div className={styles.picker} aria-label="Attachment options">
+                                <button type="button" onClick={() => imageRef.current.click()}>🖼️ Photos</button>
+                                <button type="button" onClick={() => pdfRef.current.click()}>📄 PDF document</button>
+                            </div>}
+                            {picker === 'emoji' && <div className={`${styles.picker} ${styles.emojiGrid}`} aria-label="Choose an emoji">
+                                {EMOJIS.map(emoji => <button type="button" key={emoji}
+                                    onClick={() => insertEmoji(emoji)}>{emoji}</button>)}
+                            </div>}
+                            <input type="file" hidden ref={imageRef} accept="image/jpeg,image/png,image/webp" onChange={selectFile} />
+                            <input type="file" hidden ref={pdfRef} accept="application/pdf" onChange={selectFile} />
+                            <div className={styles.inputBar}>
+                            <button type="button" className={styles.composerButton} disabled={sending}
+                                title="Emoji" aria-label="Choose emoji" aria-expanded={picker === 'emoji'}
+                                onClick={() => setPicker(picker === 'emoji' ? null : 'emoji')}>😊</button>
+                            <button type="button" className={styles.composerButton} disabled={sending}
+                                title="Attach file" aria-label="Attach photo or PDF" aria-expanded={picker === 'attachments'}
+                                onClick={() => setPicker(picker === 'attachments' ? null : 'attachments')}>📎</button>
                             <textarea
+                                ref={inputRef}
+                                disabled={sending}
                                 value={newMessage}
                                 onChange={(e) => handleTyping(e.target.value)}
                                 onKeyDown={handleKeyDown}
@@ -443,8 +500,9 @@ const Chat = () => {
                                 aria-label="Send message"
                                 disabled={(!newMessage.trim() && !attachment) || sending}
                             >
-                                Send
+                                {sending ? 'Sending…' : 'Send'}
                             </button>
+                            </div>
                         </div>
                     </>
                 )}

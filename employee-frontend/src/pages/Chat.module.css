@@ -314,17 +314,37 @@
     }
 }
 
-.attachBar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: .65rem;
-    padding: .55rem 1rem;
+.composer { position: relative; }
+
+.composerButton, .attachmentPreview button, .picker button {
+    border: 0;
+    border-radius: .65rem;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
 }
-.attachButton, .fileButton {
-    display: inline-flex;
-    align-items: center;
-    position: relative;
+.composerButton { font-size: 1.25rem; padding: .35rem; }
+.composerButton:hover, .composerButton[aria-expanded='true'], .picker button:hover { background: #dbe9ff; }
+.composerButton:focus-visible, .picker button:focus-visible { outline: 2px solid #416adb; }
+.picker {
+    position: absolute;
+    bottom: 100%;
+    left: .75rem;
+    z-index: 2;
+    max-width: calc(100% - 1.5rem);
+    padding: .5rem;
+    border: 1px solid #cad6e7;
+    border-radius: .85rem;
+    background: white;
+    color: #172f68;
+    box-shadow: 0 10px 30px #15223830;
+}
+.picker button { padding: .5rem; }
+.emojiGrid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.emojiGrid button { padding: clamp(.15rem, 1vw, .45rem); font-size: 1.1rem; }
+.attachmentPreview { display: flex; align-items: center; gap: .5rem; padding: .4rem 1rem; overflow-wrap: anywhere; }
+.fileButton {
     padding: .5rem .75rem;
     border: 1px solid #7383aa;
     border-radius: .6rem;
@@ -333,15 +353,4 @@
     font: inherit;
     cursor: pointer;
     overflow-wrap: anywhere;
-}
-.attachButton input {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    opacity: 0;
-    cursor: pointer;
-}
-.attachButton:focus-within, .fileButton:focus-visible {
-    outline: 2px solid #416adb;
-    outline-offset: 2px;
 }
