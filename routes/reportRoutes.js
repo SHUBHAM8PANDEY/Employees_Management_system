@@ -6,6 +6,7 @@ const reportController = require('../controllers/reportController');
 const { protect: verifyToken, authorizeAdmin } = require('../middlewares/authMiddleware');
 
 // Routes
+router.get('/workspace-overview', verifyToken, authorizeAdmin, require('../controllers/workspaceOverviewController'));
 router.get('/leave-report-excel', verifyToken, authorizeAdmin, reportController.exportLeaveReportExcel);
 router.get('/statistics', verifyToken, authorizeAdmin, reportController.getLeaveStatistics);
 router.get('/employee-summary', verifyToken, authorizeAdmin, reportController.getEmployeeLeaveSummary);
