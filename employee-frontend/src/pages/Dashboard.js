@@ -11,7 +11,7 @@ const Dashboard = () => {
     const navigate = useNavigate();
     const userRole = useOutletContext();
     
-    // ✅ Check if user is logged in - redirect if not
+    // Check if user is logged in - redirect if not
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (!token) {
@@ -20,7 +20,7 @@ const Dashboard = () => {
         }
     }, [navigate]);
 
-    // ✅ Role-based redirect
+    // Role-based redirect
     useEffect(() => {
         const role = userRole;
         const currentPath = window.location.pathname;
@@ -193,7 +193,7 @@ const Dashboard = () => {
         } catch (error) {
             console.error('Logout error:', error);
         }
-        // ✅ Clear ALL storage
+        // Clear ALL storage
         localStorage.clear();
         sessionStorage.clear();
         navigate('/');
@@ -201,7 +201,7 @@ const Dashboard = () => {
     };
 
     const handleDeleteEmployee = async (employeeCode, employeeName) => {
-        if (!window.confirm(`⚠️ Are you sure you want to delete ${employeeName}? This action cannot be undone!`)) {
+        if (!window.confirm(`Are you sure you want to delete ${employeeName}? This action cannot be undone!`)) {
             return;
         }
 
@@ -212,14 +212,14 @@ const Dashboard = () => {
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             if (response.data.success) {
-                alert(`✅ ${employeeName} deleted successfully!`);
+                alert(`${employeeName} deleted successfully!`);
                 fetchData();
             } else {
-                alert('❌ Delete failed!');
+                alert('Delete failed!');
             }
         } catch (err) {
             const msg = err.response?.data?.error || 'Delete failed!';
-            alert(`❌ ${msg}`);
+            alert(`${msg}`);
         }
     };
 
@@ -235,8 +235,8 @@ const Dashboard = () => {
         try {
             const token = localStorage.getItem('token');
             const finalComment = commentText.trim() || (selectedAction === 'Approved' 
-                ? '✅ Approved - Enjoy your leave!' 
-                : '❌ Rejected - Please contact HR for more details.');
+                ? 'Approved - Enjoy your leave!'
+                : 'Rejected - Please contact HR for more details.');
             
             const response = await axios.put(
                 `${API_BASE}/api/leaves/admin/status/${selectedLeaveId}`,
@@ -272,11 +272,11 @@ const Dashboard = () => {
             await axios.post(`${API_BASE}/api/leaves/apply`, leaveFormData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            alert('✅ Leave applied!');
+            alert('Leave applied!');
             setLeaveFormData({ leave_type: 'Sick Leave', start_date: '', end_date: '', reason: '', days: 1 });
             fetchData();
         } catch (err) {
-            alert('❌ Failed to apply leave!');
+            alert('Failed to apply leave!');
         }
     };
 
@@ -314,9 +314,9 @@ const Dashboard = () => {
             );
             setEditingLeaveLimits(null);
             fetchData();
-            alert('✅ Leave limits updated successfully!');
+            alert('Leave limits updated successfully!');
         } catch (err) {
-            alert('❌ Failed to update leave limits!');
+            alert('Failed to update leave limits!');
         }
     };
 
@@ -340,7 +340,7 @@ const Dashboard = () => {
                 editLeaveData,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            alert('✅ Leave updated successfully!');
+            alert('Leave updated successfully!');
             setShowEditLeaveModal(false);
             fetchData();
         } catch (err) {
@@ -419,11 +419,11 @@ const Dashboard = () => {
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
-            alert('✅ Employee profile updated successfully!');
+            alert('Employee profile updated successfully!');
             setIsEditing(false);
             fetchData();
         } catch (err) {
-            alert('❌ Failed to update profile!');
+            alert('Failed to update profile!');
         }
         setSaving(false);
     };
@@ -491,19 +491,19 @@ const Dashboard = () => {
 
         return (
             <div className={styles.dashboard}>
-                {error && <div className={styles.error}>❌ {error}</div>}
+                {error && <div className={styles.error}>{error}</div>}
 
                 {!searchParams.get('tab') && <WorkspaceOverview token={localStorage.getItem('token')} />}
                 {deliveryNotice && <p role="status">{deliveryNotice}</p>}
                 <div className={styles.tabs}>
                     <button onClick={() => setActiveTab('employees')} className={`${styles.tabBtn} ${activeTab === 'employees' ? styles.tabBtnActive : ''}`}>
-                        👥 Employees ({empTotal})
+                        Employees ({empTotal})
                     </button>
                     <button onClick={() => setActiveTab('leaves')} className={`${styles.tabBtn} ${activeTab === 'leaves' ? styles.tabBtnActive : ''}`}>
-                        📥 Requests ({pendingLeaves.length})
+                        Requests ({pendingLeaves.length})
                     </button>
                     <button onClick={() => setActiveTab('history')} className={`${styles.tabBtn} ${activeTab === 'history' ? styles.tabBtnActive : ''}`}>
-                        📜 History ({leaveTotal})
+                        History ({leaveTotal})
                     </button>
                 </div>
 
@@ -514,12 +514,12 @@ const Dashboard = () => {
                         {/* EMPLOYEES TAB */}
                         {activeTab === 'employees' && (
                             <div>
-                                <button className={styles.addBtn} onClick={() => navigate('/add-employee')}>➕ Add Employee</button>
+                                <button className={styles.addBtn} onClick={() => navigate('/add-employee')}>Add Employee</button>
                                 
                                 <div className={styles.searchWrapper}>
                                     <input
                                         type="text"
-                                        placeholder="🔍 Search by name, email, code..."
+                                        placeholder="Search by name, email, code..."
                                         value={empSearch}
                                         onChange={(e) => {
                                             setEmpSearch(e.target.value);
@@ -527,7 +527,7 @@ const Dashboard = () => {
                                         }}
                                         className={styles.searchInput}
                                     />
-                                    <button onClick={() => fetchData()} className={styles.searchBtn}>🔍 Search</button>
+                                    <button onClick={() => fetchData()} className={styles.searchBtn}>Search</button>
                                     <select
                                         value={empLimit}
                                         onChange={(e) => {
@@ -574,21 +574,21 @@ const Dashboard = () => {
                                             <div className={styles.cardHeader}>
                                                 <span className={styles.empCode}>{emp.employee_code}</span>
                                                 <div className={styles.cardActions}>
-                                                    <button className={styles.viewBtn} onClick={() => openViewEmployee(emp)}>👁️ View</button>
-                                                    <button className={styles.editBtn} onClick={() => navigate(`/edit-employee/${emp.employee_code}`)}>✏️ Edit</button>
-                                                    <button className={styles.deleteBtn} onClick={() => handleDeleteEmployee(emp.employee_code, `${emp.first_name} ${emp.last_name}`)}>🗑️</button>
+                                                    <button className={styles.viewBtn} onClick={() => openViewEmployee(emp)}>View</button>
+                                                    <button className={styles.editBtn} onClick={() => navigate(`/edit-employee/${emp.employee_code}`)}>Edit</button>
+                                                    <button className={styles.deleteBtn} onClick={() => handleDeleteEmployee(emp.employee_code, `${emp.first_name} ${emp.last_name}`)}>Delete</button>
                                                 </div>
                                             </div>
                                             <h3 className={styles.empName}>{emp.first_name} {emp.last_name}</h3>
                                             <p className={styles.empEmail}>{emp.email}</p>
                                             <div className={styles.leaveBadges}>
-                                                <span className={styles.badgeSick}>🤒 {emp.leaveBalance?.sick?.taken || 0}/{emp.leaveBalance?.sick?.total || 12}</span>
-                                                <span className={styles.badgeCasual}>🏖️ {emp.leaveBalance?.casual?.taken || 0}/{emp.leaveBalance?.casual?.total || 15}</span>
-                                                <span className={styles.badgePaid}>💵 {emp.leaveBalance?.paid?.taken || 0}/{emp.leaveBalance?.paid?.total || 10}</span>
+                                                <span className={styles.badgeSick}>Sick {emp.leaveBalance?.sick?.taken || 0}/{emp.leaveBalance?.sick?.total || 12}</span>
+                                                <span className={styles.badgeCasual}>Casual {emp.leaveBalance?.casual?.taken || 0}/{emp.leaveBalance?.casual?.total || 15}</span>
+                                                <span className={styles.badgePaid}>Paid {emp.leaveBalance?.paid?.taken || 0}/{emp.leaveBalance?.paid?.total || 10}</span>
                                             </div>
 
                                             <div className={styles.empDetails}>
-                                                <div><strong>📍 Address:</strong> 
+                                                <div><strong>Address:</strong>
                                                     {emp.EmployeeAddresses && emp.EmployeeAddresses.length > 0 ? (
                                                         emp.EmployeeAddresses.map((addr, i) => (
                                                             <span key={i}> {addr.address_line}, {addr.city}</span>
@@ -597,7 +597,7 @@ const Dashboard = () => {
                                                         <span className={styles.empty}> No address</span>
                                                     )}
                                                 </div>
-                                                <div><strong>🎓 Education:</strong>
+                                                <div><strong>Education:</strong>
                                                     {emp.EmployeeQualifications && emp.EmployeeQualifications.length > 0 ? (
                                                         emp.EmployeeQualifications.map((qual, i) => (
                                                             <span key={i}> {qual.degree} - {qual.institution}</span>
@@ -606,7 +606,7 @@ const Dashboard = () => {
                                                         <span className={styles.empty}> No education</span>
                                                     )}
                                                 </div>
-                                                <div><strong>⚡ Skills:</strong>
+                                                <div><strong>Skills:</strong>
                                                     {emp.EmployeeSkills && emp.EmployeeSkills.length > 0 ? (
                                                         emp.EmployeeSkills.map((skill, i) => (
                                                             <span key={i} className={styles.skillTag}>{skill.skill_name}</span>
@@ -617,7 +617,7 @@ const Dashboard = () => {
                                                 </div>
                                             </div>
 
-                                            <button className={styles.setLimitBtn} onClick={() => openLeaveLimitEditor(emp)}>⚙️ Set Leave Limits</button>
+                                            <button className={styles.setLimitBtn} onClick={() => openLeaveLimitEditor(emp)}>Set Leave Limits</button>
                                         </div>
                                     ))}
                                 </div>}
@@ -634,12 +634,12 @@ const Dashboard = () => {
                         {/* LEAVES TAB */}
                         {activeTab === 'leaves' && (
                             <div className={styles.profileCard}>
-                                <h3 className={styles.profileSectionTitle}>📥 Pending Requests</h3>
+                                <h3 className={styles.profileSectionTitle}>Pending Requests</h3>
                                 
                                 <div className={styles.searchWrapper}>
                                     <input
                                         type="text"
-                                        placeholder="🔍 Search by employee, type, reason..."
+                                        placeholder="Search by employee, type, reason..."
                                         value={leaveSearch}
                                         onChange={(e) => {
                                             setLeaveSearch(e.target.value);
@@ -647,7 +647,7 @@ const Dashboard = () => {
                                         }}
                                         className={styles.searchInput}
                                     />
-                                    <button onClick={() => fetchData()} className={styles.searchBtn}>🔍 Search</button>
+                                    <button onClick={() => fetchData()} className={styles.searchBtn}>Search</button>
                                     <select
                                         value={leaveStatus}
                                         onChange={(e) => {
@@ -677,13 +677,13 @@ const Dashboard = () => {
                                 </div>
 
                                 {pendingLeaves.length === 0 ? (
-                                    <p className={styles.profileSectionEmpty}>🎉 No pending requests!</p>
+                                    <p className={styles.profileSectionEmpty}>No pending requests!</p>
                                 ) : (
                                     <div className={styles.tableWrapper}>
                                         <table className={styles.historyTable}>
                                             <thead><tr>
                                                 <th>Employee</th><th>Type</th><th>Days</th>
-                                                <th>📝 Reason</th>
+                                                <th>Reason</th>
                                                 <th>Action</th>
                                             </tr></thead>
                                             <tbody>
@@ -698,8 +698,8 @@ const Dashboard = () => {
                                                                 {req.reason || '—'}
                                                             </td>
                                                             <td>
-                                                                <button className={styles.approveBtn} onClick={() => handleLeaveActionWithComment(req.id, 'Approved')}>✅ Approve</button>
-                                                                <button className={styles.rejectBtn} onClick={() => handleLeaveActionWithComment(req.id, 'Rejected')}>❌ Reject</button>
+                                                                <button className={styles.approveBtn} onClick={() => handleLeaveActionWithComment(req.id, 'Approved')}>Approve</button>
+                                                                <button className={styles.rejectBtn} onClick={() => handleLeaveActionWithComment(req.id, 'Rejected')}>Reject</button>
                                                             </td>
                                                         </tr>
                                                     );
@@ -720,12 +720,12 @@ const Dashboard = () => {
                         {/* HISTORY TAB */}
                         {activeTab === 'history' && (
                             <div className={styles.profileCard}>
-                                <h3 className={styles.profileSectionTitle}>📜 Leave History</h3>
+                                <h3 className={styles.profileSectionTitle}>Leave History</h3>
                                 
                                 <div className={styles.searchWrapper}>
                                     <input
                                         type="text"
-                                        placeholder="🔍 Search..."
+                                        placeholder="Search..."
                                         value={leaveSearch}
                                         onChange={(e) => {
                                             setLeaveSearch(e.target.value);
@@ -733,7 +733,7 @@ const Dashboard = () => {
                                         }}
                                         className={styles.searchInput}
                                     />
-                                    <button onClick={() => fetchData()} className={styles.searchBtn}>🔍 Search</button>
+                                    <button onClick={() => fetchData()} className={styles.searchBtn}>Search</button>
                                     <select
                                         value={leaveStatus}
                                         onChange={(e) => {
@@ -769,7 +769,7 @@ const Dashboard = () => {
                                         <table className={styles.historyTable}>
                                             <thead><tr>
                                                 <th>Employee</th><th>Type</th><th>Days</th>
-                                                <th>📝 Reason</th>
+                                                <th>Reason</th>
                                                 <th>Status</th>
                                                 <th>Comments</th>
                                                 <th>Action</th>
@@ -794,7 +794,7 @@ const Dashboard = () => {
                                                                 {req.comments || '—'}
                                                             </td>
                                                             <td>
-                                                                <button className={styles.editLeaveBtn} onClick={() => openEditLeave(req)}>✏️ Edit</button>
+                                                                <button className={styles.editLeaveBtn} onClick={() => openEditLeave(req)}>Edit</button>
                                                             </td>
                                                         </tr>
                                                     );
@@ -819,8 +819,8 @@ const Dashboard = () => {
                     <div className={styles.modalOverlay} onClick={() => { setSelectedViewEmp(null); setIsEditing(false); }}>
                         <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
                             <div className={styles.modalHeader}>
-                                <h2 className={styles.modalTitle}>{isEditing ? '✏️ Edit Employee (Full Profile)' : '👤 Employee Profile'}</h2>
-                                <button className={styles.modalClose} onClick={() => { setSelectedViewEmp(null); setIsEditing(false); }}>✕</button>
+                                <h2 className={styles.modalTitle}>{isEditing ? 'Edit Employee (Full Profile)' : 'Employee Profile'}</h2>
+                                <button className={styles.modalClose} onClick={() => { setSelectedViewEmp(null); setIsEditing(false); }}>×</button>
                             </div>
 
                             <div className={styles.modalCode}>{selectedViewEmp.employee_code}</div>
@@ -841,14 +841,14 @@ const Dashboard = () => {
                                 <div className={styles.modalField} style={{ gridColumn: '1 / -1' }}>
                                     <label>Password (Leave empty to keep current)</label>
                                     <input type="password" value={editFormData.password} onChange={(e) => setEditFormData({ ...editFormData, password: e.target.value })} disabled={!isEditing} placeholder="Enter new password or leave empty" className={isEditing ? styles.editMode : ''} />
-                                    {isEditing && <small>💡 Only fill if you want to change password</small>}
+                                    {isEditing && <small>Only fill if you want to change password</small>}
                                 </div>
                             </div>
 
                             <hr className={styles.modalDivider} />
 
                             <div className={styles.sectionEdit}>
-                                <h4>📍 Addresses</h4>
+                                <h4>Addresses</h4>
                                 {isEditing && <button className={styles.addBtnSmall} onClick={addAddress}>+ Add</button>}
                             </div>
                             {editFormData.addresses.map((addr, index) => (
@@ -857,7 +857,7 @@ const Dashboard = () => {
                                         <>
                                             <input type="text" value={addr.address_line} placeholder="Address Line" onChange={(e) => updateAddress(index, 'address_line', e.target.value)} />
                                             <input type="text" value={addr.city} placeholder="City" onChange={(e) => updateAddress(index, 'city', e.target.value)} style={{ marginTop: '4px' }} />
-                                            {editFormData.addresses.length > 1 && <button className={styles.removeBtnSmall} onClick={() => removeAddress(index)}>✕ Remove</button>}
+                                            {editFormData.addresses.length > 1 && <button className={styles.removeBtnSmall} onClick={() => removeAddress(index)}>Remove</button>}
                                         </>
                                     ) : <span>{addr.address_line}, {addr.city}</span>}
                                 </div>
@@ -865,7 +865,7 @@ const Dashboard = () => {
                             {!isEditing && editFormData.addresses.length === 0 && <p className={styles.profileSectionEmpty}>No address added</p>}
 
                             <div className={styles.sectionEdit} style={{ marginTop: '16px' }}>
-                                <h4>🎓 Education</h4>
+                                <h4>Education</h4>
                                 {isEditing && <button className={styles.addBtnSmall} onClick={addQualification}>+ Add</button>}
                             </div>
                             {editFormData.qualifications.map((qual, index) => (
@@ -874,7 +874,7 @@ const Dashboard = () => {
                                         <>
                                             <input type="text" value={qual.degree} placeholder="Degree (e.g. B.Tech)" onChange={(e) => updateQualification(index, 'degree', e.target.value)} />
                                             <input type="text" value={qual.institution} placeholder="Institution" onChange={(e) => updateQualification(index, 'institution', e.target.value)} style={{ marginTop: '4px' }} />
-                                            {editFormData.qualifications.length > 1 && <button className={styles.removeBtnSmall} onClick={() => removeQualification(index)}>✕ Remove</button>}
+                                            {editFormData.qualifications.length > 1 && <button className={styles.removeBtnSmall} onClick={() => removeQualification(index)}>Remove</button>}
                                         </>
                                     ) : <span><b>{qual.degree}</b> - {qual.institution}</span>}
                                 </div>
@@ -882,7 +882,7 @@ const Dashboard = () => {
                             {!isEditing && editFormData.qualifications.length === 0 && <p className={styles.profileSectionEmpty}>No education details</p>}
 
                             <div className={styles.sectionEdit} style={{ marginTop: '16px' }}>
-                                <h4>⚡ Skills</h4>
+                                <h4>Skills</h4>
                                 {isEditing && <button className={styles.addBtnSmall} onClick={addSkill}>+ Add</button>}
                             </div>
                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '4px' }}>
@@ -891,7 +891,7 @@ const Dashboard = () => {
                                         {isEditing ? (
                                             <>
                                                 <input type="text" value={skill.skill_name} placeholder="Skill" onChange={(e) => updateSkill(index, e.target.value)} />
-                                                {editFormData.skills.length > 1 && <button className={styles.removeBtnSmall} onClick={() => removeSkill(index)}>✕</button>}
+                                                {editFormData.skills.length > 1 && <button className={styles.removeBtnSmall} onClick={() => removeSkill(index)}>×</button>}
                                             </>
                                         ) : <span>{skill.skill_name}</span>}
                                     </div>
@@ -901,7 +901,7 @@ const Dashboard = () => {
 
                             <hr className={styles.modalDivider} />
 
-                            <h4 className={styles.profileSectionTitle}>📊 Leave Balance</h4>
+                            <h4 className={styles.profileSectionTitle}>Leave Balance</h4>
                             <div className={styles.modalBalanceGrid}>
                                 <div className={`${styles.modalBalanceCard} ${styles.blue}`}>
                                     <div className={styles.modalBalanceLabel}>Sick</div>
@@ -922,15 +922,15 @@ const Dashboard = () => {
 
                             <div className={styles.modalActions}>
                                 {!isEditing ? (
-                                    <button className={styles.modalEditBtn} onClick={() => setIsEditing(true)}>✏️ Edit Full Profile</button>
+                                    <button className={styles.modalEditBtn} onClick={() => setIsEditing(true)}>Edit Full Profile</button>
                                 ) : (
                                     <>
-                                        <button className={styles.modalSaveBtn} onClick={saveProfile} disabled={saving}>{saving ? '⏳ Saving...' : '💾 Save All Changes'}</button>
+                                        <button className={styles.modalSaveBtn} onClick={saveProfile} disabled={saving}>{saving ? 'Saving...' : 'Save All Changes'}</button>
                                         <button className={styles.modalCancelBtn} onClick={() => setIsEditing(false)}>Cancel</button>
                                     </>
                                 )}
                             </div>
-                            {isEditing && <div style={{ marginTop: '10px', fontSize: '12px', color: 'var(--ui-muted)', textAlign: 'center' }}>💡 You can edit: Name, Email, Password, Address, Education, Skills</div>}
+                            {isEditing && <div style={{ marginTop: '10px', fontSize: '12px', color: 'var(--ui-muted)', textAlign: 'center' }}>You can edit: Name, Email, Password, Address, Education, Skills</div>}
                         </div>
                     </div>
                 )}
@@ -940,24 +940,24 @@ const Dashboard = () => {
                     <div className={styles.modalOverlay} onClick={() => setEditingLeaveLimits(null)}>
                         <div className={styles.modal} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '450px' }}>
                             <div className={styles.modalHeader}>
-                                <h2 className={styles.modalTitle}>⚙️ Set Leave Limits</h2>
-                                <button className={styles.modalClose} onClick={() => setEditingLeaveLimits(null)}>✕</button>
+                                <h2 className={styles.modalTitle}>Set Leave Limits</h2>
+                                <button className={styles.modalClose} onClick={() => setEditingLeaveLimits(null)}>×</button>
                             </div>
                             <form onSubmit={handleLeaveLimitSubmit}>
                                 <div className={styles.modalField}>
-                                    <label>🤒 Sick Leave Limit</label>
+                                    <label>Sick Leave Limit</label>
                                     <input type="number" min="0" value={leaveLimitForm.sick_limit} onChange={(e) => setLeaveLimitForm({...leaveLimitForm, sick_limit: parseInt(e.target.value)})} required />
                                 </div>
                                 <div className={styles.modalField}>
-                                    <label>🏖️ Casual Leave Limit</label>
+                                    <label>Casual Leave Limit</label>
                                     <input type="number" min="0" value={leaveLimitForm.casual_limit} onChange={(e) => setLeaveLimitForm({...leaveLimitForm, casual_limit: parseInt(e.target.value)})} required />
                                 </div>
                                 <div className={styles.modalField}>
-                                    <label>💵 Paid Leave Limit</label>
+                                    <label>Paid Leave Limit</label>
                                     <input type="number" min="0" value={leaveLimitForm.paid_limit} onChange={(e) => setLeaveLimitForm({...leaveLimitForm, paid_limit: parseInt(e.target.value)})} required />
                                 </div>
                                 <div className={styles.modalActions}>
-                                    <button type="submit" className={styles.modalSaveBtn}>💾 Save Limits</button>
+                                    <button type="submit" className={styles.modalSaveBtn}>Save Limits</button>
                                     <button type="button" className={styles.modalCancelBtn} onClick={() => setEditingLeaveLimits(null)}>Cancel</button>
                                 </div>
                             </form>
@@ -970,8 +970,8 @@ const Dashboard = () => {
                     <div className={styles.modalOverlay} onClick={() => setShowCommentModal(false)}>
                         <div className={styles.modal} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '450px' }}>
                             <div className={styles.modalHeader}>
-                                <h2 className={styles.modalTitle}>{selectedAction === 'Approved' ? '✅ Approve Leave' : '❌ Reject Leave'}</h2>
-                                <button className={styles.modalClose} onClick={() => setShowCommentModal(false)}>✕</button>
+                                <h2 className={styles.modalTitle}>{selectedAction === 'Approved' ? 'Approve Leave' : 'Reject Leave'}</h2>
+                                <button className={styles.modalClose} onClick={() => setShowCommentModal(false)}>×</button>
                             </div>
                             
                             <div className={styles.modalField}>
@@ -985,13 +985,13 @@ const Dashboard = () => {
                                     rows="4"
                                 />
                                 <small>{selectedAction === 'Approved' 
-                                    ? '💡 Leave empty for default: "✅ Approved - Enjoy your leave!"' 
-                                    : '💡 Leave empty for default: "❌ Rejected - Please contact HR for more details."'}</small>
+                                    ? 'Leave empty for default: "Approved - Enjoy your leave!"'
+                                    : 'Leave empty for default: "Rejected - Please contact HR for more details."'}</small>
                             </div>
 
                             <div className={styles.modalActions}>
                                 <button className={styles.modalSaveBtn} onClick={submitLeaveAction} disabled={processingAction}>
-                                    {processingAction ? '⏳ Processing...' : (selectedAction === 'Approved' ? '✅ Approve' : '❌ Reject')}
+                                    {processingAction ? 'Processing...' : (selectedAction === 'Approved' ? 'Approve' : 'Reject')}
                                 </button>
                                 <button className={styles.modalCancelBtn} onClick={() => setShowCommentModal(false)}>Cancel</button>
                             </div>
@@ -1004,16 +1004,16 @@ const Dashboard = () => {
                     <div className={styles.modalOverlay} onClick={() => setShowEditLeaveModal(false)}>
                         <div className={styles.modal} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '500px' }}>
                             <div className={styles.modalHeader}>
-                                <h2 className={styles.modalTitle}>✏️ Edit Leave Request</h2>
-                                <button className={styles.modalClose} onClick={() => setShowEditLeaveModal(false)}>✕</button>
+                                <h2 className={styles.modalTitle}>Edit Leave Request</h2>
+                                <button className={styles.modalClose} onClick={() => setShowEditLeaveModal(false)}>×</button>
                             </div>
                             
                             <div className={styles.modalField}>
                                 <label>Leave Type</label>
                                 <select value={editLeaveData.leave_type} onChange={(e) => setEditLeaveData({...editLeaveData, leave_type: e.target.value})}>
-                                    <option value="Sick Leave">🤒 Sick Leave</option>
-                                    <option value="Casual Leave">🏖️ Casual Leave</option>
-                                    <option value="Paid Leave">💵 Paid Leave</option>
+                                    <option value="Sick Leave">Sick Leave</option>
+                                    <option value="Casual Leave">Casual Leave</option>
+                                    <option value="Paid Leave">Paid Leave</option>
                                 </select>
                             </div>
 
@@ -1038,7 +1038,7 @@ const Dashboard = () => {
                             </div>
 
                             <div className={styles.modalActions}>
-                                <button className={styles.modalSaveBtn} onClick={submitEditLeave}>💾 Save Changes</button>
+                                <button className={styles.modalSaveBtn} onClick={submitEditLeave}>Save Changes</button>
                                 <button className={styles.modalCancelBtn} onClick={() => setShowEditLeaveModal(false)}>Cancel</button>
                             </div>
                         </div>
@@ -1054,16 +1054,16 @@ const Dashboard = () => {
     return (
         <div className={styles.dashboard}>
                 <EmployeeOverview profile={myProfile} />
-            {error && <div className={styles.error}>❌ {error}</div>}
+            {error && <div className={styles.error}>{error}</div>}
 
             {loading ? (
                 <Skeleton label="Loading dashboard" />
             ) : myProfile ? (
                 <>
                     <div className={styles.tabs}>
-                        <button onClick={() => setActiveTab('my-profile')} className={`${styles.tabBtn} ${activeTab === 'my-profile' ? styles.tabBtnActive : ''}`}>👤 My Profile</button>
-                        <button onClick={() => setActiveTab('my-leaves')} className={`${styles.tabBtn} ${activeTab === 'my-leaves' ? styles.tabBtnActive : ''}`}>✈️ Apply Leave</button>
-                        <button onClick={() => setActiveTab('my-history')} className={`${styles.tabBtn} ${activeTab === 'my-history' ? styles.tabBtnActive : ''}`}>📜 History ({myLeaveTotal})</button>
+                        <button onClick={() => setActiveTab('my-profile')} className={`${styles.tabBtn} ${activeTab === 'my-profile' ? styles.tabBtnActive : ''}`}>My Profile</button>
+                        <button onClick={() => setActiveTab('my-leaves')} className={`${styles.tabBtn} ${activeTab === 'my-leaves' ? styles.tabBtnActive : ''}`}>Apply Leave</button>
+                        <button onClick={() => setActiveTab('my-history')} className={`${styles.tabBtn} ${activeTab === 'my-history' ? styles.tabBtnActive : ''}`}>History ({myLeaveTotal})</button>
                     </div>
 
                     {activeTab === 'my-profile' && (
@@ -1079,26 +1079,26 @@ const Dashboard = () => {
                                 </div>
 
                                 <div className={styles.profileSection}>
-                                    <p className={styles.profileSectionText}>📧 {myProfile.email}</p>
+                                    <p className={styles.profileSectionText}>{myProfile.email}</p>
                                     <p className={styles.profileSectionText}>🆔 {myProfile.employee_code}</p>
                                 </div>
 
                                 <div className={styles.profileSection}>
-                                    <h4 className={styles.profileSectionTitle}>📍 Address</h4>
+                                    <h4 className={styles.profileSectionTitle}>Address</h4>
                                     {myProfile.EmployeeAddresses && myProfile.EmployeeAddresses.length > 0 ? (
                                         myProfile.EmployeeAddresses.map((addr, i) => <p key={i} className={styles.profileSectionText}>{addr.address_line}, {addr.city}</p>)
                                     ) : <p className={styles.profileSectionEmpty}>No address added</p>}
                                 </div>
 
                                 <div className={styles.profileSection}>
-                                    <h4 className={styles.profileSectionTitle}>🎓 Education</h4>
+                                    <h4 className={styles.profileSectionTitle}>Education</h4>
                                     {myProfile.EmployeeQualifications && myProfile.EmployeeQualifications.length > 0 ? (
                                         myProfile.EmployeeQualifications.map((qual, i) => <p key={i} className={styles.profileSectionText}><b>{qual.degree}</b> - {qual.institution}</p>)
                                     ) : <p className={styles.profileSectionEmpty}>No education details</p>}
                                 </div>
 
                                 <div className={styles.profileSection}>
-                                    <h4 className={styles.profileSectionTitle}>⚡ Skills</h4>
+                                    <h4 className={styles.profileSectionTitle}>Skills</h4>
                                     {myProfile.EmployeeSkills && myProfile.EmployeeSkills.length > 0 ? (
                                         <div className={styles.skillTags}>
                                             {myProfile.EmployeeSkills.map((skill, i) => <span key={i} className={styles.skillTag}>{skill.skill_name}</span>)}
@@ -1109,33 +1109,33 @@ const Dashboard = () => {
 
                             <div>
                                 <div className={styles.balanceCard}>
-                                    <h3 className={styles.balanceTitle}>📊 Leave Balance</h3>
+                                    <h3 className={styles.balanceTitle}>Leave Balance</h3>
 
                                     <div className={styles.balanceItem}>
-                                        <div className={styles.balanceRow}><span>🤒 Sick Leave</span><span><b>{myProfile.leaveBalance?.sick?.left || 0}</b> days left</span></div>
+                                        <div className={styles.balanceRow}><span>Sick Leave</span><span><b>{myProfile.leaveBalance?.sick?.left || 0}</b> days left</span></div>
                                         <div className={styles.balanceBar}><div className={`${styles.balanceBarFill} ${styles.blue}`} style={{ width: `${((myProfile.leaveBalance?.sick?.taken || 0) / (myProfile.leaveBalance?.sick?.total || 12)) * 100}%` }}></div></div>
                                         <div className={styles.balanceStats}><span>Used: {myProfile.leaveBalance?.sick?.taken || 0}</span><span>Total: {myProfile.leaveBalance?.sick?.total || 12}</span></div>
                                     </div>
 
                                     <div className={styles.balanceItem}>
-                                        <div className={styles.balanceRow}><span>🏖️ Casual Leave</span><span><b>{myProfile.leaveBalance?.casual?.left || 0}</b> days left</span></div>
+                                        <div className={styles.balanceRow}><span>Casual Leave</span><span><b>{myProfile.leaveBalance?.casual?.left || 0}</b> days left</span></div>
                                         <div className={styles.balanceBar}><div className={`${styles.balanceBarFill} ${styles.yellow}`} style={{ width: `${((myProfile.leaveBalance?.casual?.taken || 0) / (myProfile.leaveBalance?.casual?.total || 15)) * 100}%` }}></div></div>
                                         <div className={styles.balanceStats}><span>Used: {myProfile.leaveBalance?.casual?.taken || 0}</span><span>Total: {myProfile.leaveBalance?.casual?.total || 15}</span></div>
                                     </div>
 
                                     <div className={styles.balanceItem}>
-                                        <div className={styles.balanceRow}><span>💵 Paid Leave</span><span><b>{myProfile.leaveBalance?.paid?.left || 0}</b> days left</span></div>
+                                        <div className={styles.balanceRow}><span>Paid Leave</span><span><b>{myProfile.leaveBalance?.paid?.left || 0}</b> days left</span></div>
                                         <div className={styles.balanceBar}><div className={`${styles.balanceBarFill} ${styles.green}`} style={{ width: `${((myProfile.leaveBalance?.paid?.taken || 0) / (myProfile.leaveBalance?.paid?.total || 10)) * 100}%` }}></div></div>
                                         <div className={styles.balanceStats}><span>Used: {myProfile.leaveBalance?.paid?.taken || 0}</span><span>Total: {myProfile.leaveBalance?.paid?.total || 10}</span></div>
                                     </div>
 
-                                    <div className={styles.balanceTotal}><span>📊 Total</span><span>{(myProfile.leaveBalance?.sick?.left || 0) + (myProfile.leaveBalance?.casual?.left || 0) + (myProfile.leaveBalance?.paid?.left || 0)} days left</span></div>
+                                    <div className={styles.balanceTotal}><span>Total</span><span>{(myProfile.leaveBalance?.sick?.left || 0) + (myProfile.leaveBalance?.casual?.left || 0) + (myProfile.leaveBalance?.paid?.left || 0)} days left</span></div>
                                 </div>
 
                                 <div className={styles.quickActions}>
-                                    <h4>⚡ Quick Actions</h4>
-                                    <button className={`${styles.quickActionBtn} ${styles.primary}`} onClick={() => setActiveTab('my-leaves')}>✈️ Apply Leave</button>
-                                    <button className={`${styles.quickActionBtn} ${styles.secondary}`} onClick={() => setActiveTab('my-history')}>📜 View History</button>
+                                    <h4>Quick Actions</h4>
+                                    <button className={`${styles.quickActionBtn} ${styles.primary}`} onClick={() => setActiveTab('my-leaves')}>Apply Leave</button>
+                                    <button className={`${styles.quickActionBtn} ${styles.secondary}`} onClick={() => setActiveTab('my-history')}>View History</button>
                                 </div>
                             </div>
                         </div>
@@ -1143,28 +1143,28 @@ const Dashboard = () => {
 
                     {activeTab === 'my-leaves' && (
                         <div className={styles.leaveForm}>
-                            <h3 className={styles.profileSectionTitle}>✈️ Apply Leave</h3>
+                            <h3 className={styles.profileSectionTitle}>Apply Leave</h3>
                             <form onSubmit={handleApplyLeave}>
                                 <div className={styles.modalField}>
                                     <label>Leave Type</label>
                                     <select value={leaveFormData.leave_type} onChange={(e) => setLeaveFormData({...leaveFormData, leave_type: e.target.value})}>
-                                        <option value="Sick Leave">🤒 Sick Leave</option>
-                                        <option value="Casual Leave">🏖️ Casual Leave</option>
-                                        <option value="Paid Leave">💵 Paid Leave</option>
+                                        <option value="Sick Leave">Sick Leave</option>
+                                        <option value="Casual Leave">Casual Leave</option>
+                                        <option value="Paid Leave">Paid Leave</option>
                                     </select>
                                 </div>
                                 <div className={styles.modalField}><label>Start Date</label><input type="date" value={leaveFormData.start_date} onChange={(e) => setLeaveFormData({...leaveFormData, start_date: e.target.value})} required /></div>
                                 <div className={styles.modalField}><label>End Date</label><input type="date" value={leaveFormData.end_date} onChange={(e) => setLeaveFormData({...leaveFormData, end_date: e.target.value})} required /></div>
                                 <div className={styles.modalField}><label>Total Days</label><input type="number" min="1" value={leaveFormData.days} onChange={(e) => setLeaveFormData({...leaveFormData, days: e.target.value})} required /></div>
                                 <div className={styles.modalField}><label>Reason</label><textarea rows="3" value={leaveFormData.reason} onChange={(e) => setLeaveFormData({...leaveFormData, reason: e.target.value})} required /></div>
-                                <button type="submit" className={styles.leaveSubmitBtn}>✅ Apply Leave</button>
+                                <button type="submit" className={styles.leaveSubmitBtn}>Apply Leave</button>
                             </form>
                         </div>
                     )}
 
                     {activeTab === 'my-history' && (
                         <div className={styles.profileCard}>
-                            <h3 className={styles.profileSectionTitle}>📜 My Leave History</h3>
+                            <h3 className={styles.profileSectionTitle}>My Leave History</h3>
                             
                             <div className={styles.searchWrapper}>
                                 <select

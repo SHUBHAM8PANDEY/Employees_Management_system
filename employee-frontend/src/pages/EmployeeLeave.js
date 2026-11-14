@@ -30,12 +30,12 @@ const EmployeeLeave = () => {
                 axios.get(`${API_BASE}/api/leaves/my-leaves`, { headers }),
                 axios.get(`${API_BASE}/api/employee/me`, { headers })
             ]);
-            // ✅ Fix: Ensure leaves is always an array
+            // Fix: Ensure leaves is always an array
             setLeaves(leaveRes.data?.data || leaveRes.data || []);
             setLeaveBalance(profileRes.data?.leaveBalance);
         } catch (err) {
             setError('Failed to fetch data!');
-            setLeaves([]); // ✅ Set empty array on error
+            setLeaves([]);
         }
     };
 
@@ -55,7 +55,7 @@ const EmployeeLeave = () => {
                 formData,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            alert('✅ Leave applied successfully!');
+            alert('Leave applied successfully!');
             setFormData({ leave_type: 'Sick Leave', start_date: '', end_date: '', reason: '', days: 1 });
             fetchData();
         } catch (err) {
@@ -78,7 +78,7 @@ const EmployeeLeave = () => {
                     borderRadius: '10px',
                     marginBottom: '16px'
                 }}>
-                    ❌ {error}
+                    {error}
                 </div>
             )}
 
@@ -126,7 +126,7 @@ const EmployeeLeave = () => {
                     borderRadius: '16px',
                     border: '1px solid #e2e8f0'
                 }}>
-                    <h3 style={{ marginBottom: '16px' }}>✈️ Apply Leave</h3>
+                    <h3 style={{ marginBottom: '16px' }}>Apply Leave</h3>
                     <form onSubmit={handleSubmit}>
                         <div style={{ marginBottom: '12px' }}>
                             <label style={{ display: 'block', fontWeight: '600', marginBottom: '4px' }}>Leave Type</label>
@@ -140,9 +140,9 @@ const EmployeeLeave = () => {
                                     borderRadius: '8px'
                                 }}
                             >
-                                <option value="Sick Leave">🤒 Sick Leave</option>
-                                <option value="Casual Leave">🏖️ Casual Leave</option>
-                                <option value="Paid Leave">💵 Paid Leave</option>
+                                <option value="Sick Leave">Sick Leave</option>
+                                <option value="Casual Leave">Casual Leave</option>
+                                <option value="Paid Leave">Paid Leave</option>
                             </select>
                         </div>
 
@@ -225,7 +225,7 @@ const EmployeeLeave = () => {
                                 cursor: 'pointer'
                             }}
                         >
-                            {loading ? '⏳ Applying...' : '✅ Apply Leave'}
+                            {loading ? 'Applying...' : 'Apply Leave'}
                         </button>
                     </form>
                 </div>
@@ -237,8 +237,8 @@ const EmployeeLeave = () => {
                     borderRadius: '16px',
                     border: '1px solid #e2e8f0'
                 }}>
-                    <h3 style={{ marginBottom: '16px' }}>📜 My Leave History</h3>
-                    {/* ✅ Fix: Check if leaves is array before using length */}
+                    <h3 style={{ marginBottom: '16px' }}>My Leave History</h3>
+
                     {!leaves || leaves.length === 0 ? (
                         <p style={{ textAlign: 'center', color: 'var(--ui-muted)', padding: '20px' }}>
                             No leaves applied yet!
@@ -255,7 +255,7 @@ const EmployeeLeave = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {/* ✅ Fix: Use (leaves || []) to ensure array */}
+
                                     {(leaves || []).map((leave) => (
                                         <tr key={leave.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
                                             <td style={{ padding: '8px' }}>{leave.leave_type}</td>

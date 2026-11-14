@@ -61,7 +61,7 @@ const applyLeave = async (req, res) => {
             applied_at: new Date()
         });
 
-        // ✅ Audit Log
+        // Audit Log
         await auditLogger.log({
             employee_code: activeEmpCode,
             action: 'CREATE',
@@ -96,7 +96,7 @@ const applyLeave = async (req, res) => {
                 });
             }
         } catch (notifError) {
-            console.error('❌ Notification error:', notifError);
+            console.error('Notification error:', notifError);
         }
 
         res.status(201).json({
@@ -333,7 +333,7 @@ const updateStatus = async (req, res) => {
             request.comments = finalComments;
             await request.save();
 
-            // ✅ Audit Log
+            // Audit Log
             await auditLogger.log({
                 employee_code: req.user?.employee_code || 'SYSTEM',
                 action: 'APPROVE',
@@ -345,7 +345,7 @@ const updateStatus = async (req, res) => {
                 user_agent: req.headers['user-agent']
             });
 
-            // ✅ Notification to employee
+            // Notification to employee
             await notificationHelper.create({
                 employee_code: request.employee_code,
                 type: 'LEAVE_APPROVED',
@@ -396,7 +396,7 @@ const updateStatus = async (req, res) => {
             request.comments = finalComments;
             await request.save();
 
-            // ✅ Audit Log
+            // Audit Log
             await auditLogger.log({
                 employee_code: req.user?.employee_code || 'SYSTEM',
                 action: 'REJECT',
@@ -408,7 +408,7 @@ const updateStatus = async (req, res) => {
                 user_agent: req.headers['user-agent']
             });
 
-            // ✅ Notification to employee
+            // Notification to employee
             await notificationHelper.create({
                 employee_code: request.employee_code,
                 type: 'LEAVE_REJECTED',
@@ -485,7 +485,7 @@ const editLeave = async (req, res) => {
 
         await leaveRequest.save();
 
-        // ✅ Audit Log
+        // Audit Log
         await auditLogger.log({
             employee_code: req.user?.employee_code || 'SYSTEM',
             action: 'UPDATE',

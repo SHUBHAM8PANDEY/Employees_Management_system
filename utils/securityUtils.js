@@ -82,9 +82,9 @@ const cleanupExpiredSessions = async () => {
             }
         });
 
-        console.log('✅ Expired sessions cleaned up');
+        console.log('Expired sessions cleaned up');
     } catch (error) {
-        console.error('❌ Session cleanup error:', error);
+        console.error('Session cleanup error:', error);
     }
 };
 

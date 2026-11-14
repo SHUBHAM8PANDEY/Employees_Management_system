@@ -18,7 +18,7 @@ const getAuditLogs = async (req, res) => {
             offset = 0
         } = req.query;
 
-        console.log('📊 Fetching audit logs with filters:', { employee_code, action, entity_type, start_date, end_date });
+        console.log('Fetching audit logs with filters:', { employee_code, action, entity_type, start_date, end_date });
 
         const where = {};
         if (employee_code) where.employee_code = employee_code;
@@ -43,7 +43,7 @@ const getAuditLogs = async (req, res) => {
             }]
         });
 
-        console.log(`✅ Found ${count} audit logs`);
+        console.log(`Found ${count} audit logs`);
 
         // Format response
         const formattedData = rows.map(log => {
@@ -91,7 +91,7 @@ const getAuditLogs = async (req, res) => {
             offset: parseInt(offset)
         });
     } catch (error) {
-        console.error('❌ Get audit logs error:', error);
+        console.error('Get audit logs error:', error);
         res.status(500).json({ 
             success: false,
             error: error.message 
@@ -171,7 +171,7 @@ const getAuditSummary = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('❌ Get audit summary error:', error);
+        console.error('Get audit summary error:', error);
         res.status(500).json({ 
             success: false,
             error: error.message 
@@ -244,7 +244,7 @@ const getUserActivity = async (req, res) => {
             data: formattedData
         });
     } catch (error) {
-        console.error('❌ Get user activity error:', error);
+        console.error('Get user activity error:', error);
         res.status(500).json({ 
             success: false,
             error: error.message 

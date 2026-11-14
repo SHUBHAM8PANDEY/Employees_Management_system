@@ -28,7 +28,7 @@ fs.readdirSync(__dirname)
                 db[modelDef.name] = modelDef;
             }
         } catch (err) {
-            console.error(`❌ Error loading model ${file}:`, err.message);
+            console.error(`Error loading model ${file}:`, err.message);
         }
     });
 
@@ -42,6 +42,6 @@ Object.keys(db).forEach(modelName => {
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
-console.log('✅ Models loaded:', Object.keys(db).filter(k => k !== 'sequelize' && k !== 'Sequelize'));
+console.log('Models loaded:', Object.keys(db).filter(k => k !== 'sequelize' && k !== 'Sequelize'));
 
 module.exports = db;

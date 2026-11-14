@@ -25,7 +25,7 @@ const getLeaveBalanceForEmployee = async (employeeCode) => {
         });
 
         if (!leaveLimit) {
-            // ✅ CREATE DEFAULT LEAVE LIMITS IF NOT EXISTS
+            // CREATE DEFAULT LEAVE LIMITS IF NOT EXISTS
             try {
                 await LeaveLimit.create({
                     employee_code: employeeCode,
@@ -36,9 +36,9 @@ const getLeaveBalanceForEmployee = async (employeeCode) => {
                     paid_limit: 10,
                     paid_taken: 0
                 });
-                console.log(`✅ Default leave limits created for ${employeeCode}`);
+                console.log(`Default leave limits created for ${employeeCode}`);
             } catch (createError) {
-                console.error('❌ Error creating default leave limits:', createError);
+                console.error('Error creating default leave limits:', createError);
             }
 
             return {
@@ -48,7 +48,7 @@ const getLeaveBalanceForEmployee = async (employeeCode) => {
             };
         }
 
-        // ✅ SAFE ACCESS WITH DEFAULT VALUES
+        // SAFE ACCESS WITH DEFAULT VALUES
         const sickTaken = leaveLimit.sick_taken || 0;
         const casualTaken = leaveLimit.casual_taken || 0;
         const paidTaken = leaveLimit.paid_taken || 0;
@@ -74,8 +74,8 @@ const getLeaveBalanceForEmployee = async (employeeCode) => {
             }
         };
     } catch (error) {
-        console.error('❌ Error getting leave balance:', error);
-        // ✅ RETURN DEFAULT ON ERROR
+        console.error('Error getting leave balance:', error);
+        // RETURN DEFAULT ON ERROR
         return {
             sick: { total: 12, taken: 0, left: 12 },
             casual: { total: 15, taken: 0, left: 15 },
@@ -91,7 +91,7 @@ const updateLeaveBalance = async (employeeCode, leaveType, days, isApproved) => 
         });
 
         if (!leaveLimit) {
-            // ✅ CREATE IF NOT EXISTS
+            // CREATE IF NOT EXISTS
             leaveLimit = await LeaveLimit.create({
                 employee_code: employeeCode,
                 sick_limit: 12,
@@ -117,7 +117,7 @@ const updateLeaveBalance = async (employeeCode, leaveType, days, isApproved) => 
         await leaveLimit.save();
         return true;
     } catch (error) {
-        console.error('❌ Error updating leave balance:', error);
+        console.error('Error updating leave balance:', error);
         throw error;
     }
 };

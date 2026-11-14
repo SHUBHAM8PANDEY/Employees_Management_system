@@ -38,7 +38,7 @@ const EmployeeSearch = ({ onSearchResults }) => {
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                 <input
                     type="text"
-                    placeholder="🔍 Search by name, code, email..."
+                    placeholder="Search by name, code, email..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     style={{
@@ -121,12 +121,12 @@ const EmployeeSearch = ({ onSearchResults }) => {
                         gap: '8px'
                     }}
                 >
-                    {loading ? '⏳ Searching...' : '🔍 Search'}
+                    {loading ? 'Searching...' : 'Search'}
                 </button>
             </div>
 
             <div style={{ marginTop: '12px', fontSize: '13px', color: '#64748b' }}>
-                💡 Tip: Use filters to narrow down results
+                Tip: Use filters to narrow down results
             </div>
         </div>
     );

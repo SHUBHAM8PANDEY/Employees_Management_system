@@ -53,7 +53,7 @@ const AuditLogs = () => {
     return (
         <div style={{ padding: 0, background: 'var(--ui-bg)', minHeight: '100vh' }}>
             <div style={{ background: 'var(--ui-surface)', padding: '24px', borderRadius: '16px' }}>
-                <h2 style={{ marginBottom: '20px' }}>📊 Audit Logs</h2>
+                <h2 style={{ marginBottom: '20px' }}>Audit Logs</h2>
 
                 {/* Filters */}
                 <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '20px' }}>
@@ -106,12 +106,12 @@ const AuditLogs = () => {
                             cursor: 'pointer'
                         }}
                     >
-                        🔍 Filter
+                        Filter
                     </button>
                 </div>
 
                 {loading ? (
-                    <div style={{ textAlign: 'center', padding: '40px' }}>⏳ Loading...</div>
+                    <div style={{ textAlign: 'center', padding: '40px' }}>Loading...</div>
                 ) : (
                     <>
                         <div style={{ marginBottom: '12px', color: 'var(--ui-muted)' }}>

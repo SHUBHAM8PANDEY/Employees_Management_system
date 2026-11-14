@@ -87,7 +87,7 @@ const AttendanceExport = ({ employeeCode, onClose }) => {
             link.remove();
             window.URL.revokeObjectURL(downloadUrl);
             
-            alert(`✅ Attendance exported as ${exportType.toUpperCase()} successfully!`);
+            alert(`Attendance exported as ${exportType.toUpperCase()} successfully!`);
             if (onClose) onClose();
         } catch (err) {
             setError('Failed to export! Please try again.');
@@ -128,7 +128,7 @@ const AttendanceExport = ({ employeeCode, onClose }) => {
                     borderBottom: '2px solid #e9edf4'
                 }}>
                     <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#0a0a23', margin: 0 }}>
-                        📊 Export Attendance
+                        Export Attendance
                     </h3>
                     <button
                         onClick={onClose}
@@ -142,7 +142,7 @@ const AttendanceExport = ({ employeeCode, onClose }) => {
                             fontSize: '16px'
                         }}
                     >
-                        ✕
+
                     </button>
                 </div>
 
@@ -155,13 +155,13 @@ const AttendanceExport = ({ employeeCode, onClose }) => {
                         marginBottom: '16px',
                         fontSize: '13px'
                     }}>
-                        ❌ {error}
+                        {error}
                     </div>
                 )}
 
                 {loading ? (
                     <div style={{ textAlign: 'center', padding: '30px', color: 'var(--ui-muted)' }}>
-                        ⏳ Loading...
+                        Loading...
                     </div>
                 ) : (
                     <>
@@ -268,7 +268,7 @@ const AttendanceExport = ({ employeeCode, onClose }) => {
                                         transition: 'all 0.2s'
                                     }}
                                 >
-                                    📊 Excel
+                                    Excel
                                 </button>
                                 <button
                                     onClick={() => setExportType('pdf')}
@@ -284,7 +284,7 @@ const AttendanceExport = ({ employeeCode, onClose }) => {
                                         transition: 'all 0.2s'
                                     }}
                                 >
-                                    📄 PDF
+                                    PDF
                                 </button>
                             </div>
                         </div>
@@ -305,7 +305,7 @@ const AttendanceExport = ({ employeeCode, onClose }) => {
                                 transition: 'all 0.2s'
                             }}
                         >
-                            {exportLoading ? '⏳ Exporting...' : `📥 Download ${exportType.toUpperCase()}`}
+                            {exportLoading ? 'Exporting...' : `Download ${exportType.toUpperCase()}`}
                         </button>
                     </>
                 )}

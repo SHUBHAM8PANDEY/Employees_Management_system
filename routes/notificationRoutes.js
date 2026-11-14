@@ -7,7 +7,7 @@ let notificationController;
 try {
     notificationController = require('../controllers/notificationController');
 } catch (error) {
-    console.error('❌ Failed to load notificationController:', error.message);
+    console.error('Failed to load notificationController:', error.message);
     notificationController = {
         getMyNotifications: (req, res) => res.json({ success: true, data: [], total: 0, unreadCount: 0 }),
         getUnreadCount: (req, res) => res.json({ success: true, unreadCount: 0 }),

@@ -1,3 +1,4 @@
+import { Bell } from 'lucide-react';
 import { API_BASE } from '../config';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
@@ -109,7 +110,7 @@ const Notifications = () => {
                 </div>
 
                 {loading ? (
-                    <div style={{ textAlign: 'center', padding: '40px' }}>⏳ Loading...</div>
+                    <div style={{ textAlign: 'center', padding: '40px' }}>Loading...</div>
                 ) : notifications.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: '60px', color: 'var(--ui-muted)' }}>
                         No notifications yet
@@ -148,7 +149,7 @@ const Notifications = () => {
                                     color: 'white',
                                     flexShrink: 0
                                 }}>
-                                    {notif.icon || '🔔'}
+                                    {<Bell size={18} aria-hidden="true" />}
                                 </div>
                                 <div style={{ flex: 1 }}>
                                     <div style={{
@@ -197,7 +198,7 @@ const Notifications = () => {
                                             padding: '4px 8px'
                                         }}
                                     >
-                                        ✕
+
                                     </button>
                                 </div>
                             </div>

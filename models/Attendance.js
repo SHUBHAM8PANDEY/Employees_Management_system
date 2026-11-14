@@ -85,7 +85,7 @@ module.exports = (sequelize, DataTypes) => {
     });
     
 
-    // ✅ FIX: Associate function
+    // FIX: Associate function
     Attendance.associate = (models) => {
         Attendance.belongsTo(models.Employee, {
             foreignKey: 'employee_code',

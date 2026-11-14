@@ -61,7 +61,7 @@ const EditEmployee = () => {
                 formData,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            alert('✅ Employee updated successfully!');
+            alert('Employee updated successfully!');
             navigate('/dashboard');
         } catch (err) {
             const msg = err.response?.data?.error || 'Failed to update employee!';
@@ -73,14 +73,14 @@ const EditEmployee = () => {
     if (fetching) {
         return (
             <div style={{ padding: '90px 40px 40px', textAlign: 'center' }}>
-                <h2>⏳ Loading...</h2>
+                <h2>Loading...</h2>
             </div>
         );
     }
 
     return (
         <div style={{ padding: '90px 40px 40px', maxWidth: '600px', margin: '0 auto' }}>
-            <h2 style={{ color: 'var(--ui-text)', marginBottom: '24px' }}>✏️ Edit Employee</h2>
+            <h2 style={{ color: 'var(--ui-text)', marginBottom: '24px' }}>Edit Employee</h2>
             <p style={{ color: 'var(--ui-muted)', marginBottom: '16px' }}>Employee Code: <b>{code}</b></p>
 
             {error && (
@@ -91,7 +91,7 @@ const EditEmployee = () => {
                     borderRadius: '8px',
                     marginBottom: '16px'
                 }}>
-                    ❌ {error}
+                    {error}
                 </div>
             )}
 
@@ -184,9 +184,9 @@ const EditEmployee = () => {
                             borderRadius: '8px'
                         }}
                     >
-                        <option value="Employee">👤 Employee</option>
-                        <option value="Admin">👑 Admin</option>
-                        <option value="HR">👔 HR</option>
+                        <option value="Employee">Employee</option>
+                        <option value="Admin">Admin</option>
+                        <option value="HR">HR</option>
                     </select>
                 </div>
 
@@ -205,7 +205,7 @@ const EditEmployee = () => {
                             cursor: 'pointer'
                         }}
                     >
-                        {loading ? '⏳ Updating...' : '✅ Update Employee'}
+                        {loading ? 'Updating...' : 'Update Employee'}
                     </button>
                     <button
                         type="button"

@@ -61,7 +61,7 @@ const AnalyticsDashboard = () => {
     if (loading) {
         return (
             <div style={{ textAlign: 'center', padding: '60px' }}>
-                <div style={{ fontSize: '24px' }}>📊 Loading Analytics...</div>
+                <div style={{ fontSize: '24px' }}>Loading Analytics...</div>
             </div>
         );
     }

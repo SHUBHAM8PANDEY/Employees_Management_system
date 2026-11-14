@@ -13,7 +13,7 @@ const notificationHelper = {
     }) => {
         try {
             if (!employee_code) {
-                console.log('⚠️ No employee_code provided for notification');
+                console.log('No employee_code provided for notification');
                 return null;
             }
 
@@ -28,10 +28,10 @@ const notificationHelper = {
                 is_read: false
             });
             
-            console.log(`✅ Notification created for ${employee_code}: ${title}`);
+            console.log(`Notification created for ${employee_code}: ${title}`);
             return notification;
         } catch (error) {
-            console.error('❌ Create notification error:', error);
+            console.error('Create notification error:', error);
             return null;
         }
     },
@@ -39,10 +39,10 @@ const notificationHelper = {
     createBulk: async (notifications) => {
         try {
             const results = await Notification.bulkCreate(notifications);
-            console.log(`🔔 ${results.length} notifications created`);
+            console.log(`${results.length} notifications created`);
             return results;
         } catch (error) {
-            console.error('❌ Bulk notification error:', error);
+            console.error('Bulk notification error:', error);
             return [];
         }
     },
@@ -57,7 +57,7 @@ const notificationHelper = {
             });
             return notifications;
         } catch (error) {
-            console.error('❌ Get user notifications error:', error);
+            console.error('Get user notifications error:', error);
             return { count: 0, rows: [] };
         }
     },
@@ -72,7 +72,7 @@ const notificationHelper = {
             });
             return count;
         } catch (error) {
-            console.error('❌ Get unread count error:', error);
+            console.error('Get unread count error:', error);
             return 0;
         }
     },
@@ -93,7 +93,7 @@ const notificationHelper = {
             }
             return false;
         } catch (error) {
-            console.error('❌ Mark as read error:', error);
+            console.error('Mark as read error:', error);
             return false;
         }
     },
@@ -114,7 +114,7 @@ const notificationHelper = {
             );
             return true;
         } catch (error) {
-            console.error('❌ Mark all as read error:', error);
+            console.error('Mark all as read error:', error);
             return false;
         }
     },
@@ -129,7 +129,7 @@ const notificationHelper = {
             });
             return true;
         } catch (error) {
-            console.error('❌ Delete notification error:', error);
+            console.error('Delete notification error:', error);
             return false;
         }
     },
@@ -155,7 +155,7 @@ const notificationHelper = {
             }
             return notifications;
         } catch (error) {
-            console.error('❌ Send to admins error:', error);
+            console.error('Send to admins error:', error);
             return [];
         }
     },
@@ -191,7 +191,7 @@ const notificationHelper = {
             }
             return notifications;
         } catch (error) {
-            console.error('❌ Send to employee and admins error:', error);
+            console.error('Send to employee and admins error:', error);
             return [];
         }
     },

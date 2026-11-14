@@ -1,3 +1,4 @@
+import { Paperclip, Smile } from 'lucide-react';
 import { API_BASE } from '../config';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
@@ -508,13 +509,13 @@ const Chat = () => {
                             if (event.key === 'Escape') setPicker(null);
                         }}>
                             {attachment && <div className={styles.attachmentPreview}>
-                                <span>📎 {attachment.name}</span>
+                                <span>{attachment.name}</span>
                                 <button type="button" disabled={sending} onClick={() => setAttachment(null)}
                                     aria-label="Remove attachment">×</button>
                             </div>}
                             {picker === 'attachments' && <div className={styles.picker} aria-label="Attachment options">
-                                <button type="button" onClick={() => imageRef.current.click()}>🖼️ Photos</button>
-                                <button type="button" onClick={() => pdfRef.current.click()}>📄 PDF document</button>
+                                <button type="button" onClick={() => imageRef.current.click()}>Photos</button>
+                                <button type="button" onClick={() => pdfRef.current.click()}>PDF document</button>
                             </div>}
                             {picker === 'emoji' && <div className={`${styles.picker} ${styles.emojiGrid}`} aria-label="Choose an emoji">
                                 {EMOJIS.map(emoji => <button type="button" key={emoji}
@@ -525,10 +526,10 @@ const Chat = () => {
                             <div className={styles.inputBar}>
                             <button type="button" className={styles.composerButton} disabled={sending}
                                 title="Emoji" aria-label="Choose emoji" aria-expanded={picker === 'emoji'}
-                                onClick={() => setPicker(picker === 'emoji' ? null : 'emoji')}>😊</button>
+                                onClick={() => setPicker(picker === 'emoji' ? null : 'emoji')}><Smile size={20} /></button>
                             <button type="button" className={styles.composerButton} disabled={sending}
                                 title="Attach file" aria-label="Attach photo or PDF" aria-expanded={picker === 'attachments'}
-                                onClick={() => setPicker(picker === 'attachments' ? null : 'attachments')}>📎</button>
+                                onClick={() => setPicker(picker === 'attachments' ? null : 'attachments')}><Paperclip size={20} /></button>
                             <textarea
                                 ref={inputRef}
                                 disabled={sending}

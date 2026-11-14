@@ -297,17 +297,7 @@ const Attendance = () => {
         return classes[status] || 'badgePresent';
     };
 
-    const getStatusEmoji = (status) => {
-        const emojis = {
-            'Present': '✅',
-            'Absent': '❌',
-            'Half Day': '🌓',
-            'Short Leave': '⏳',
-            'On Leave': '🏖️',
-            'Holiday': '🎉'
-        };
-        return emojis[status] || '📌';
-    };
+
 
     const handlePageChange = (newPage) => {
         if (newPage < 1 || newPage > pagination.totalPages) return;
@@ -360,36 +350,36 @@ const Attendance = () => {
                     <button className={styles.exportBtn} onClick={() => downloadTeam('excel')}>Team Excel</button>
                 </div>
 
-                {error && <div className={styles.error}>❌ {error}</div>}
+                {error && <div className={styles.error}>{error}</div>}
 
                 <div className={styles.statsGrid}>
                     <div className={styles.statCard}>
                         <div className={styles.statNumber}>{adminSummary.total || 0}</div>
-                        <div className={styles.statLabel}>👥 Total</div>
+                        <div className={styles.statLabel}>Total</div>
                     </div>
                     <div className={styles.statCard}>
                         <div className={styles.statNumber}>{adminSummary.present || 0}</div>
-                        <div className={styles.statLabel}>✅ Present</div>
+                        <div className={styles.statLabel}>Present</div>
                     </div>
                     <div className={styles.statCard}>
                         <div className={styles.statNumber}>{adminSummary.shortLeave || 0}</div>
-                        <div className={styles.statLabel}>⏳ Short Leave</div>
+                        <div className={styles.statLabel}>Short Leave</div>
                     </div>
                     <div className={styles.statCard}>
                         <div className={styles.statNumber}>{adminSummary.halfDay || 0}</div>
-                        <div className={styles.statLabel}>🌓 Half Day</div>
+                        <div className={styles.statLabel}>Half Day</div>
                     </div>
                     <div className={styles.statCard}>
                         <div className={styles.statNumber}>{adminSummary.absent || 0}</div>
-                        <div className={styles.statLabel}>❌ Absent</div>
+                        <div className={styles.statLabel}>Absent</div>
                     </div>
                     <div className={styles.statCard}>
                         <div className={styles.statNumber}>{adminSummary.onLeave || 0}</div>
-                        <div className={styles.statLabel}>🏖️ On Leave</div>
+                        <div className={styles.statLabel}>On Leave</div>
                     </div>
                     <div className={styles.statCard}>
                         <div className={styles.statNumber}>{adminSummary.holiday || 0}</div>
-                        <div className={styles.statLabel}>🎉 Holiday</div>
+                        <div className={styles.statLabel}>Holiday</div>
                     </div>
                 </div>
 
@@ -422,19 +412,19 @@ const Attendance = () => {
                         className={styles.filterSelect}
                     >
                         <option value="">All Status</option>
-                        <option value="Present">✅ Present</option>
-                        <option value="Short Leave">⏳ Short Leave</option>
-                        <option value="Half Day">🌓 Half Day</option>
-                        <option value="Absent">❌ Absent</option>
-                        <option value="On Leave">🏖️ On Leave</option>
-                        <option value="Holiday">🎉 Holiday</option>
+                        <option value="Present">Present</option>
+                        <option value="Short Leave">Short Leave</option>
+                        <option value="Half Day">Half Day</option>
+                        <option value="Absent">Absent</option>
+                        <option value="On Leave">On Leave</option>
+                        <option value="Holiday">Holiday</option>
                     </select>
-                    <button className={styles.filterBtn} onClick={fetchData}>🔍 Filter</button>
+                    <button className={styles.filterBtn} onClick={fetchData}>Filter</button>
                 </div>
 
                 <div className={styles.historyCard}>
                     {loading ? (
-                        <div className={styles.loading}>⏳ Loading...</div>
+                        <div className={styles.loading}>Loading...</div>
                     ) : allAttendance.length === 0 ? (
                         <div className={styles.empty}>No attendance records found</div>
                     ) : (
@@ -472,7 +462,7 @@ const Attendance = () => {
                                             <td>{item.punch_in ? item.punch_in_type || 'Office' : '—'}</td>
                                             <td>{item.total_hours || 0}</td>
                                             <td><span className={`${styles.badge} ${styles[getStatusBadge(item.status)]}`}>
-                                                {getStatusEmoji(item.status)} {item.status === 'Holiday' && new Date(item.date + 'T00:00:00Z').getUTCDay() === 0 ? 'Weekly Off' : item.status}
+                                                {item.status === 'Holiday' && new Date(item.date + 'T00:00:00Z').getUTCDay() === 0 ? 'Weekly Off' : item.status}
                                             </span></td>
                                         </tr>
                                     ))}
@@ -543,22 +533,22 @@ const Attendance = () => {
                 <button className={styles.exportBtn} onClick={() => setShowExportModal(true)}>Download PDF / Excel</button>
             </div>
 
-            {error && <div className={styles.error}>❌ {error}</div>}
+            {error && <div className={styles.error}>{error}</div>}
 
             {/* Today's Attendance */}
             <div className={styles.todayCard}>
-                <h2>📋 Today's Attendance</h2>
+                <h2>Today's Attendance</h2>
                 <div className={styles.todayInfo}>
                     <div className={styles.dateInfo}>
                         {new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                     </div>
                     <div className={styles.statusInfo}>
                         {!isPunchedIn && weeklyOff ? null : !isPunchedIn ? (
-                            <span className={styles.statusAbsent}>❌ Not Punched In</span>
+                            <span className={styles.statusAbsent}>Not Punched In</span>
                         ) : isPunchedOut ? (
-                            <span className={styles.statusPresent}>✅ Punched Out</span>
+                            <span className={styles.statusPresent}>Punched Out</span>
                         ) : (
-                            <span className={styles.statusPunched}>⏳ Punched In</span>
+                            <span className={styles.statusPunched}>Punched In</span>
                         )}
                     </div>
                 </div>
@@ -581,7 +571,7 @@ const Attendance = () => {
                 {statusInfo && (
                     <div className={styles.statusSummary}>
                         <div className={styles.statusBadgeLarge}>
-                            <span className={styles.statusEmoji}>{getStatusEmoji(statusInfo.status)}</span>
+                            <span className={styles.statusEmoji}></span>
                             <span className={styles.statusText}>{statusInfo.status}</span>
                             <span className={styles.statusReason}>{statusInfo.reason}</span>
                         </div>
@@ -625,21 +615,21 @@ const Attendance = () => {
                     {!isPunchedIn && weeklyOff ? null : !isPunchedIn ? (
                         <div className={styles.punchInForm}>
                             <select value={punchInType} onChange={(e) => setPunchInType(e.target.value)} className={styles.selectInput}>
-                                <option value="Office">🏢 Office</option>
-                                <option value="Client">🤝 Client</option>
-                                <option value="Remote">🏠 Remote</option>
+                                <option value="Office">Office</option>
+                                <option value="Client">Client</option>
+                                <option value="Remote">Remote</option>
                             </select>
                             <input type="text" placeholder="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} className={styles.textInput} />
                             <button className={styles.punchInBtn} onClick={startCamera} disabled={processing || captureOpen}>
-                                {processing ? '⏳ Processing...' : 'Mark Attendance'}
+                                {processing ? 'Processing...' : 'Mark Attendance'}
                             </button>
                         </div>
                     ) : !isPunchedOut ? (
                         <button className={styles.punchOutBtn} onClick={startCamera} disabled={processing || captureOpen}>
-                            {processing ? '⏳ Processing...' : '❌ Punch Out'}
+                            {processing ? 'Processing...' : 'Punch Out'}
                         </button>
                     ) : (
-                        <div className={styles.completedMsg}>✅ Completed!</div>
+                        <div className={styles.completedMsg}>Completed!</div>
                     )}
                 </div>
             </div>
@@ -648,34 +638,34 @@ const Attendance = () => {
             <div className={styles.statsGrid}>
                 <div className={styles.statCard}>
                     <div className={styles.statNumber}>{stats.present || 0}</div>
-                    <div className={styles.statLabel}>✅ Present</div>
+                    <div className={styles.statLabel}>Present</div>
                 </div>
                 <div className={styles.statCard}>
                     <div className={styles.statNumber}>{stats.shortLeave || 0}</div>
-                    <div className={styles.statLabel}>⏳ Short Leave</div>
+                    <div className={styles.statLabel}>Short Leave</div>
                 </div>
                 <div className={styles.statCard}>
                     <div className={styles.statNumber}>{stats.halfDay || 0}</div>
-                    <div className={styles.statLabel}>🌓 Half Day</div>
+                    <div className={styles.statLabel}>Half Day</div>
                 </div>
                 <div className={styles.statCard}>
                     <div className={styles.statNumber}>{stats.absent || 0}</div>
-                    <div className={styles.statLabel}>❌ Absent</div>
+                    <div className={styles.statLabel}>Absent</div>
                 </div>
                 <div className={styles.statCard}>
                     <div className={styles.statNumber}>{stats.onLeave || 0}</div>
-                    <div className={styles.statLabel}>🏖️ On Leave</div>
+                    <div className={styles.statLabel}>On Leave</div>
                 </div>
             </div>
 
             {/* Last 7 Days */}
             <div className={styles.last7Days}>
-                <h3>📊 Last 7 Days</h3>
+                <h3>Last 7 Days</h3>
                 <div className={styles.weekGrid}>
                     {last7Days.map((day, i) => (
                         <div key={i} className={`${styles.dayCard} ${styles[getStatusBadge(day.status)]}`}>
                             <div className={styles.dayDate}>{formatDateOnly(day.date)}</div>
-                            <div className={styles.dayStatus}>{getStatusEmoji(day.status)} {day.status}</div>
+                            <div className={styles.dayStatus}>{day.status}</div>
                             {day.punch_in && <div className={styles.dayTime}>IN: {indiaTime(day.punch_in)}</div>}
                             {day.punch_out && <div className={styles.dayTime}>OUT: {indiaTime(day.punch_out)}</div>}
                         </div>
@@ -686,10 +676,10 @@ const Attendance = () => {
             {/* Tabs */}
             <div className={styles.tabs}>
                 <button onClick={() => setActiveTab('today')} className={`${styles.tabBtn} ${activeTab === 'today' ? styles.tabBtnActive : ''}`}>
-                    📋 Today
+                    Today
                 </button>
                 <button onClick={() => { setActiveTab('history'); fetchData(); }} className={`${styles.tabBtn} ${activeTab === 'history' ? styles.tabBtnActive : ''}`}>
-                    📜 History
+                    History
                 </button>
             </div>
 
@@ -786,15 +776,15 @@ const Attendance = () => {
                             className={styles.filterSelect}
                         >
                             <option value="">All Status</option>
-                            <option value="Present">✅ Present</option>
-                            <option value="Short Leave">⏳ Short Leave</option>
-                            <option value="Half Day">🌓 Half Day</option>
-                            <option value="Absent">❌ Absent</option>
-                            <option value="On Leave">🏖️ On Leave</option>
-                            <option value="Holiday">🎉 Holiday</option>
+                            <option value="Present">Present</option>
+                            <option value="Short Leave">Short Leave</option>
+                            <option value="Half Day">Half Day</option>
+                            <option value="Absent">Absent</option>
+                            <option value="On Leave">On Leave</option>
+                            <option value="Holiday">Holiday</option>
                         </select>
 
-                        <button className={styles.filterBtn} onClick={fetchData}>🔍 Filter</button>
+                        <button className={styles.filterBtn} onClick={fetchData}>Filter</button>
                         <button 
                             className={styles.clearBtn} 
                             onClick={() => {
@@ -814,33 +804,33 @@ const Attendance = () => {
 
                     {/* Summary */}
                     <div className={styles.yearlySummary}>
-                        <h4>📊 Summary</h4>
+                        <h4>Summary</h4>
                         <div className={styles.summaryGrid}>
-                            <div className={styles.summaryItem}><span>✅ Present:</span> <b>{summary.present || 0}</b></div>
-                            <div className={styles.summaryItem}><span>⏳ Short Leave:</span> <b>{summary.shortLeave || 0}</b></div>
-                            <div className={styles.summaryItem}><span>🌓 Half Day:</span> <b>{summary.halfDay || 0}</b></div>
-                            <div className={styles.summaryItem}><span>❌ Absent:</span> <b>{summary.absent || 0}</b></div>
-                            <div className={styles.summaryItem}><span>🏖️ On Leave:</span> <b>{summary.onLeave || 0}</b></div>
-                            <div className={styles.summaryItem}><span>🎉 Holiday:</span> <b>{summary.holiday || 0}</b></div>
-                            <div className={styles.summaryItem}><span>📊 Total:</span> <b>{summary.total || 0}</b></div>
+                            <div className={styles.summaryItem}><span>Present:</span> <b>{summary.present || 0}</b></div>
+                            <div className={styles.summaryItem}><span>Short Leave:</span> <b>{summary.shortLeave || 0}</b></div>
+                            <div className={styles.summaryItem}><span>Half Day:</span> <b>{summary.halfDay || 0}</b></div>
+                            <div className={styles.summaryItem}><span>Absent:</span> <b>{summary.absent || 0}</b></div>
+                            <div className={styles.summaryItem}><span>On Leave:</span> <b>{summary.onLeave || 0}</b></div>
+                            <div className={styles.summaryItem}><span>Holiday:</span> <b>{summary.holiday || 0}</b></div>
+                            <div className={styles.summaryItem}><span>Total:</span> <b>{summary.total || 0}</b></div>
                         </div>
                     </div>
 
                     {/* Yearly Stats */}
                     {yearlyStats.length > 0 && (
                         <div className={styles.yearlyStatsTable}>
-                            <h4>📈 Yearly</h4>
+                            <h4>Yearly</h4>
                             <table className={styles.attendanceTable}>
                                 <thead>
                                     <tr>
                                         <th>Year</th>
-                                        <th>✅</th>
-                                        <th>⏳</th>
-                                        <th>🌓</th>
-                                        <th>❌</th>
-                                        <th>🏖️</th>
-                                        <th>🎉</th>
-                                        <th>📊</th>
+                                        <th>Present</th>
+                                        <th>Short leave</th>
+                                        <th>Short leave</th>
+                                        <th>Half day</th>
+                                        <th>Absent</th>
+                                        <th>On leave</th>
+                                        <th>Holiday</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -863,7 +853,7 @@ const Attendance = () => {
 
                     {/* History Table */}
                     {loading ? (
-                        <div className={styles.loading}>⏳ Loading...</div>
+                        <div className={styles.loading}>Loading...</div>
                     ) : history.length === 0 ? (
                         <div className={styles.empty}>No records</div>
                     ) : (
@@ -890,7 +880,7 @@ const Attendance = () => {
                                             <td>{item.punch_in_type || 'Office'}</td>
                                             <td>{item.total_hours || 0}</td>
                                             <td><span className={`${styles.badge} ${styles[getStatusBadge(item.status)]}`}>
-                                                {getStatusEmoji(item.status)} {item.status}
+                                                {item.status}
                                             </span></td>
                                         </tr>
                                     ))}

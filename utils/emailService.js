@@ -47,10 +47,10 @@ const sendEmail = async (to, subject, html, attachments = [], idempotencyKey) =>
         };
 
         const info = await transporter.sendMail(mailOptions);
-        console.log('✅ Email sent:', info.messageId);
+        console.log('Email sent:', info.messageId);
         return info;
     } catch (error) {
-        console.error('❌ Email error:', error);
+        console.error('Email error:', error);
         throw error;
     }
 };

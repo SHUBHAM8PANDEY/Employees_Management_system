@@ -14,7 +14,7 @@ router.get('/today', verifyToken, attendanceController.getTodayAttendance);
 router.get('/history', verifyToken, attendanceController.getAttendanceHistory);
 router.get('/stats', verifyToken, attendanceController.getAttendanceStats);
 
-// ✅ EXPORT ROUTES
+// EXPORT ROUTES
 router.get('/export/options', verifyToken, attendanceExportController.getExportOptions);
 router.get('/export/excel', verifyToken, attendanceExportController.exportAttendanceExcel);
 router.get('/export/pdf', verifyToken, attendanceExportController.exportAttendancePDF);
@@ -28,7 +28,7 @@ router.get('/admin/all', verifyToken, authorizeAdmin, attendanceController.getAl
 router.put('/admin/edit/:id', verifyToken, authorizeAdmin, attendanceController.editAttendance);
 router.post('/admin/mark', verifyToken, authorizeAdmin, attendanceController.markAttendance);
 
-// ✅ ADMIN EXPORT ROUTES
+// ADMIN EXPORT ROUTES
 router.get('/admin/export/excel', verifyToken, authorizeAdmin, attendanceExportController.exportAttendanceExcel);
 router.get('/admin/export/pdf', verifyToken, authorizeAdmin, attendanceExportController.exportAttendancePDF);
 

@@ -62,7 +62,7 @@ const setupSocketIO = (io) => {
             last_seen: null
         });
 
-        console.log(`💬 Online: ${myCode} (${user.role})`);
+        console.log(`Online: ${myCode} (${user.role})`);
 
         socket.on('send_message', async (payload, callback) => {
             try {
@@ -135,7 +135,7 @@ const setupSocketIO = (io) => {
                     last_seen: lastSeen
                 });
 
-                console.log(`💬 Offline: ${myCode}`);
+                console.log(`Offline: ${myCode}`);
             }
         });
     });

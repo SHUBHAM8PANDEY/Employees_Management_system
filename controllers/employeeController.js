@@ -63,7 +63,7 @@ const addEmployee = async (req, res) => {
             return res.status(400).json({ error: 'Enter a valid date of birth and joining date.' });
         }
 
-        console.log('📝 Adding employee:', { first_name, last_name, email });
+        console.log('Adding employee:', { first_name, last_name, email });
 
         if (!first_name || !last_name || !email) {
             return res.status(400).json({ 
@@ -108,7 +108,7 @@ const addEmployee = async (req, res) => {
                 password: hashedPassword,
                 role: role
             });
-            console.log(`✅ User created for ${empCode}`);
+            console.log(`User created for ${empCode}`);
         }
 
         // Create employee
@@ -120,7 +120,7 @@ const addEmployee = async (req, res) => {
             mobile_number,
             ...dates
         });
-        console.log(`✅ Employee created for ${empCode}`);
+        console.log(`Employee created for ${empCode}`);
 
         // Create addresses
         if (addresses && addresses.length > 0) {
@@ -171,7 +171,7 @@ const addEmployee = async (req, res) => {
             paid_taken: 0
         });
 
-        // ✅ Audit Log
+        // Audit Log
         await auditLogger.log({
             employee_code: req.user?.employee_code || 'SYSTEM',
             action: 'CREATE',
@@ -201,7 +201,7 @@ const addEmployee = async (req, res) => {
                 });
             }
         } catch (notifError) {
-            console.error('❌ Notification error:', notifError);
+            console.error('Notification error:', notifError);
         }
 
         const createdEmployee = await Employee.findOne({
@@ -219,7 +219,7 @@ const addEmployee = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('❌ Add employee error:', error);
+        console.error('Add employee error:', error);
         
         if (error.name === 'SequelizeUniqueConstraintError') {
             return res.status(400).json({
@@ -344,7 +344,7 @@ const getAllEmployees = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('❌ Get employees error:', error);
+        console.error('Get employees error:', error);
         res.status(500).json({ error: error.message });
     }
 };
@@ -404,7 +404,7 @@ const getEmployeeByCode = async (req, res) => {
             leaveBalance
         });
     } catch (error) {
-        console.error('❌ Get employee error:', error);
+        console.error('Get employee error:', error);
         res.status(500).json({ error: error.message });
     }
 };
@@ -478,7 +478,7 @@ const getMyProfile = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('❌ Get my profile error:', error);
+        console.error('Get my profile error:', error);
         res.status(500).json({ error: error.message });
     }
 };
@@ -584,7 +584,7 @@ const updateEmployee = async (req, res) => {
             }
         }
 
-        // ✅ Audit Log
+        // Audit Log
         await auditLogger.log({
             employee_code: req.user?.employee_code || 'SYSTEM',
             action: 'UPDATE',
@@ -621,7 +621,7 @@ const updateEmployee = async (req, res) => {
             employee: updatedEmployee
         });
     } catch (error) {
-        console.error('❌ Update employee error:', error);
+        console.error('Update employee error:', error);
         res.status(500).json({ error: error.message });
     }
 };
@@ -655,7 +655,7 @@ const deleteEmployee = async (req, res) => {
         await Employee.destroy({ where: { employee_code: code } });
         await User.destroy({ where: { employee_code: code } });
 
-        // ✅ Audit Log
+        // Audit Log
         await auditLogger.log({
             employee_code: req.user?.employee_code || 'SYSTEM',
             action: 'DELETE',
@@ -671,7 +671,7 @@ const deleteEmployee = async (req, res) => {
             message: '✅ Employee deleted successfully!' 
         });
     } catch (error) {
-        console.error('❌ Delete employee error:', error);
+        console.error('Delete employee error:', error);
         res.status(500).json({ 
             success: false,
             error: error.message 
@@ -708,7 +708,7 @@ const updateLeaveLimits = async (req, res) => {
             if (paid_limit !== undefined) leaveLimit.paid_limit = paid_limit;
             await leaveLimit.save();
 
-            // ✅ Audit Log
+            // Audit Log
             await auditLogger.log({
                 employee_code: req.user?.employee_code || 'SYSTEM',
                 action: 'UPDATE',
@@ -726,7 +726,7 @@ const updateLeaveLimits = async (req, res) => {
             leaveLimit
         });
     } catch (error) {
-        console.error('❌ Update leave limits error:', error);
+        console.error('Update leave limits error:', error);
         res.status(500).json({ error: error.message });
     }
 };

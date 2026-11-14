@@ -35,8 +35,8 @@ const resetLeaveLimits = async () => {
     const monthName = getMonthName(currentMonth);
     const isJanuary = currentMonth === 0;
 
-    console.log(`🔄 Starting monthly leave reset for ${monthName} ${currentYear}...`);
-    console.log(`📌 ${isJanuary ? 'ANNUAL' : 'MONTHLY'} reset`);
+    console.log(`Starting monthly leave reset for ${monthName} ${currentYear}...`);
+    console.log(`${isJanuary ? 'ANNUAL' : 'MONTHLY'} reset`);
 
     try {
         const employees = await Employee.findAll({
@@ -53,7 +53,7 @@ const resetLeaveLimits = async () => {
                     where: { employee_code: employee.employee_code }
                 });
 
-                // ✅ If no leave limits exist, create defaults
+                // If no leave limits exist, create defaults
                 if (!leaveLimit) {
                     leaveLimit = await LeaveLimit.create({
                         employee_code: employee.employee_code,
@@ -65,12 +65,12 @@ const resetLeaveLimits = async () => {
                         paid_taken: 0
                     });
                     updatedCount++;
-                    console.log(`✅ Created default limits for ${employee.employee_code}`);
+                    console.log(`Created default limits for ${employee.employee_code}`);
                     continue;
                 }
 
                 // ============================================
-                // ✅ JANUARY - ANNUAL RESET (All limits reset)
+                // JANUARY - ANNUAL RESET (All limits reset)
                 // ============================================
                 if (isJanuary) {
                     leaveLimit.sick_limit = LEAVE_CONFIG.SICK_LIMIT;
@@ -82,20 +82,20 @@ const resetLeaveLimits = async () => {
                     leaveLimit.paid_limit = LEAVE_CONFIG.PAID_LIMIT;
                     leaveLimit.paid_taken = 0;
                     
-                    console.log(`✅ ANNUAL RESET for ${employee.employee_code}: Sick=12, Casual=1, Paid=10`);
+                    console.log(`ANNUAL RESET for ${employee.employee_code}: Sick=12, Casual=1, Paid=10`);
                 } 
                 // ============================================
-                // ✅ OTHER MONTHS - Monthly Reset (Only Casual)
+                // OTHER MONTHS - Monthly Reset (Only Casual)
                 // ============================================
                 else {
-                    // ✅ Casual Leave: Reset to 1 every month
+                    // Casual Leave: Reset to 1 every month
                     leaveLimit.casual_limit = LEAVE_CONFIG.CASUAL_LIMIT;
                     leaveLimit.casual_taken = 0;
                     
-                    // ✅ Sick & Paid: No change (Annual reset only)
+                    // Sick & Paid: No change (Annual reset only)
                     // Keep existing values
                     
-                    console.log(`✅ MONTHLY RESET for ${employee.employee_code}: Casual=1 (new month)`);
+                    console.log(`MONTHLY RESET for ${employee.employee_code}: Casual=1 (new month)`);
                 }
 
                 await leaveLimit.save();
@@ -107,16 +107,16 @@ const resetLeaveLimits = async () => {
                     employee_code: employee.employee_code,
                     error: err.message
                 });
-                console.error(`❌ Error updating ${employee.employee_code}:`, err.message);
+                console.error(`Error updating ${employee.employee_code}:`, err.message);
             }
         }
 
-        // ✅ Send notification
+        // Send notification
         await sendResetNotification(employees.length, updatedCount, errorCount, errors, isJanuary, monthName, currentYear);
 
-        console.log(`✅ Monthly reset completed!`);
-        console.log(`📊 Updated: ${updatedCount} employees`);
-        console.log(`❌ Errors: ${errorCount} employees`);
+        console.log(`Monthly reset completed!`);
+        console.log(`Updated: ${updatedCount} employees`);
+        console.log(`Errors: ${errorCount} employees`);
 
         return {
             success: true,
@@ -129,7 +129,7 @@ const resetLeaveLimits = async () => {
         };
 
     } catch (error) {
-        console.error('❌ Monthly reset failed:', error);
+        console.error('Monthly reset failed:', error);
         await sendResetFailureNotification(error);
         return {
             success: false,
@@ -149,7 +149,7 @@ const sendResetNotification = async (totalEmployees, updatedCount, errorCount, e
         });
 
         if (admins.length === 0) {
-            console.log('⚠️ No HR/Admin found to send notification');
+            console.log('No HR/Admin found to send notification');
             return;
         }
 
@@ -234,14 +234,14 @@ const sendResetNotification = async (totalEmployees, updatedCount, errorCount, e
         for (const admin of admins) {
             try {
                 await sendEmail(admin.email, subject, html);
-                console.log(`✅ Notification sent to ${admin.email}`);
+                console.log(`Notification sent to ${admin.email}`);
             } catch (err) {
-                console.error(`❌ Failed to send email to ${admin.email}:`, err.message);
+                console.error(`Failed to send email to ${admin.email}:`, err.message);
             }
         }
 
     } catch (error) {
-        console.error('❌ Failed to send reset notification:', error);
+        console.error('Failed to send reset notification:', error);
     }
 };
 
@@ -278,19 +278,19 @@ const sendResetFailureNotification = async (error) => {
 // START CRON JOB
 // ============================================
 const startMonthlyResetJob = () => {
-    // ✅ Run at 00:00 on the 1st of every month
+    // Run at 00:00 on the 1st of every month
     cron.schedule('0 0 1 * *', async () => {
         console.log('⏰ Cron job triggered: Monthly leave limit reset');
-        console.log(`📅 Date: ${new Date().toISOString()}`);
+        console.log(`Date: ${new Date().toISOString()}`);
         await resetLeaveLimits();
     }, {
         scheduled: true,
         timezone: "Asia/Kolkata"
     });
 
-    console.log('✅ Monthly leave reset cron job scheduled successfully!');
-    console.log('📅 Will run at 00:00 on the 1st of every month');
-    console.log('📋 Reset Rules:');
+    console.log('Monthly leave reset cron job scheduled successfully!');
+    console.log('Will run at 00:00 on the 1st of every month');
+    console.log('Reset Rules:');
     console.log('   - Sick Leave: 12 days (Annual reset in January)');
     console.log('   - Casual Leave: 1 day (Monthly reset every month)');
     console.log('   - Paid Leave: 10 days (Annual reset in January)');
@@ -300,7 +300,7 @@ const startMonthlyResetJob = () => {
 // MANUAL RESET (For Testing)
 // ============================================
 const manualReset = async () => {
-    console.log('🔧 Manual reset triggered...');
+    console.log('Manual reset triggered...');
     return await resetLeaveLimits();
 };
 

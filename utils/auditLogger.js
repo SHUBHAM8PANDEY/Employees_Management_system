@@ -18,9 +18,9 @@ const auditLogger = {
         error_message = null
     }) => {
         try {
-            // ✅ Validate required fields
+            // Validate required fields
             if (!action || !entity_type) {
-                console.log('⚠️ Audit log missing required fields:', { action, entity_type });
+                console.log('Audit log missing required fields:', { action, entity_type });
                 return null;
             }
 
@@ -37,12 +37,12 @@ const auditLogger = {
                 error_message: error_message || null
             };
 
-            // ✅ Create log entry
+            // Create log entry
             const log = await AuditLog.create(logData);
-            console.log(`📝 Audit Log: ${action} on ${entity_type} by ${employee_code || 'SYSTEM'} (ID: ${log.id})`);
+            console.log(`Audit Log: ${action} on ${entity_type} by ${employee_code || 'SYSTEM'} (ID: ${log.id})`);
             return log;
         } catch (error) {
-            console.error('❌ Audit log error:', error);
+            console.error('Audit log error:', error);
             return null;
         }
     },
@@ -82,7 +82,7 @@ const auditLogger = {
                 }]
             });
 
-            // ✅ Format response
+            // Format response
             const formattedData = logs.rows.map(log => {
                 const logData = log.toJSON();
                 
@@ -118,7 +118,7 @@ const auditLogger = {
                 count: logs.count
             };
         } catch (error) {
-            console.error('❌ Get audit logs error:', error);
+            console.error('Get audit logs error:', error);
             return { rows: [], count: 0 };
         }
     },
@@ -158,7 +158,7 @@ const auditLogger = {
                 summary
             };
         } catch (error) {
-            console.error('❌ Get audit summary error:', error);
+            console.error('Get audit summary error:', error);
             return { total: 0, summary: [] };
         }
     },
@@ -203,7 +203,7 @@ const auditLogger = {
                 };
             });
         } catch (error) {
-            console.error('❌ Get user activity error:', error);
+            console.error('Get user activity error:', error);
             return [];
         }
     }

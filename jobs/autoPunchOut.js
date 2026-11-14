@@ -37,7 +37,7 @@ const autoPunchOut = async () => {
             }]
         });
 
-        console.log(`📊 Found ${attendances.length} employees with open attendance`);
+        console.log(`Found ${attendances.length} employees with open attendance`);
 
         let updatedCount = 0;
         let errorCount = 0;
@@ -54,7 +54,7 @@ const autoPunchOut = async () => {
                 const punchOutTime = autoPunchTime(attendance.date);
                 if (punchInTime > punchOutTime || new Date() < punchOutTime) continue;
                 
-                // ✅ Calculate status using rules
+                // Calculate status using rules
                 const result = calculateAttendanceStatus(punchInTime, punchOutTime);
 
                 const [updated] = await Attendance.update({
@@ -63,12 +63,12 @@ const autoPunchOut = async () => {
                 }, { where: { id: attendance.id, punch_out: null } });
                 if (!updated) continue;
 
-                // ✅ Update summary
+                // Update summary
                 if (statusSummary[result.status] !== undefined) {
                     statusSummary[result.status]++;
                 }
 
-                // ✅ Audit Log
+                // Audit Log
                 await auditLogger.log({
                     employee_code: attendance.employee_code,
                     action: 'AUTO_PUNCH_OUT',
@@ -78,7 +78,7 @@ const autoPunchOut = async () => {
                     status: 'Success'
                 });
 
-                // ✅ Notification
+                // Notification
                 const employeeName = attendance.employee 
                     ? `${attendance.employee.first_name} ${attendance.employee.last_name}` 
                     : attendance.employee_code;
@@ -103,15 +103,15 @@ const autoPunchOut = async () => {
                 );
 
                 updatedCount++;
-                console.log(`✅ Auto punched out: ${attendance.employee_code} - ${result.status} (${result.totalHours} hours)`);
+                console.log(`Auto punched out: ${attendance.employee_code} - ${result.status} (${result.totalHours} hours)`);
 
             } catch (err) {
                 errorCount++;
-                console.error(`❌ Error auto punching out ${attendance.employee_code}:`, err.message);
+                console.error(`Error auto punching out ${attendance.employee_code}:`, err.message);
             }
         }
 
-        // ✅ Notification to HR/Admin
+        // Notification to HR/Admin
         try {
             const admins = await User.findAll({
                 where: { role: ['Admin', 'HR'] },
@@ -135,8 +135,8 @@ const autoPunchOut = async () => {
             console.error('Admin notification error:', adminNotifError);
         }
 
-        console.log(`✅ Auto Punch Out completed! Updated: ${updatedCount}, Errors: ${errorCount}`);
-        console.log(`📊 Summary:`, statusSummary);
+        console.log(`Auto Punch Out completed! Updated: ${updatedCount}, Errors: ${errorCount}`);
+        console.log(`Summary:`, statusSummary);
 
         return {
             success: true,
@@ -147,7 +147,7 @@ const autoPunchOut = async () => {
         };
 
     } catch (error) {
-        console.error('❌ Auto Punch Out failed:', error);
+        console.error('Auto Punch Out failed:', error);
         return {
             success: false,
             error: error.message
@@ -159,7 +159,7 @@ const autoPunchOut = async () => {
 // START CRON JOB - 9:30 PM (21:30) Daily
 // ============================================
 const startAutoPunchOutJob = () => {
-    // ✅ Run at 9:30 PM every day
+    // Run at 9:30 PM every day
     cron.schedule('*/5 * * * *', async () => {
         await autoPunchOut();
     }, {
@@ -168,15 +168,15 @@ const startAutoPunchOutJob = () => {
     });
 
     void autoPunchOut();
-    console.log('✅ Auto Punch Out cron job scheduled successfully!');
-    console.log('📅 Will run at 9:30 PM every day');
+    console.log('Auto Punch Out cron job scheduled successfully!');
+    console.log('Will run at 9:30 PM every day');
 };
 
 // ============================================
 // MANUAL TRIGGER
 // ============================================
 const manualPunchOut = async () => {
-    console.log('🔧 Manual Auto Punch Out triggered...');
+    console.log('Manual Auto Punch Out triggered...');
     return await autoPunchOut();
 };
 

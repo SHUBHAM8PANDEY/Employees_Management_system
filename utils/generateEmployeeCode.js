@@ -3,7 +3,7 @@ const Employee = db.Employee;
 
 const generateEmployeeCode = async () => {
     try {
-        // ✅ Get all existing employee codes
+        // Get all existing employee codes
         const employees = await Employee.findAll({
             attributes: ['employee_code'],
             order: [['employee_code', 'ASC']]
@@ -11,7 +11,7 @@ const generateEmployeeCode = async () => {
 
         let maxNumber = 0;
 
-        // ✅ Find max number from existing codes
+        // Find max number from existing codes
         employees.forEach(emp => {
             const code = emp.employee_code;
             // Extract number from EMP-XXX
@@ -22,16 +22,16 @@ const generateEmployeeCode = async () => {
             }
         });
 
-        // ✅ Generate next number
+        // Generate next number
         let nextNumber = maxNumber + 1;
         let newCode = `EMP-${nextNumber}`;
 
-        // ✅ Double check - if code already exists (safety)
+        // Double check - if code already exists (safety)
         let exists = await Employee.findOne({
             where: { employee_code: newCode }
         });
 
-        // ✅ If exists, keep incrementing until unique
+        // If exists, keep incrementing until unique
         while (exists) {
             nextNumber++;
             newCode = `EMP-${nextNumber}`;
@@ -40,16 +40,16 @@ const generateEmployeeCode = async () => {
             });
         }
 
-        console.log(`📝 Generated unique employee code: ${newCode}`);
+        console.log(`Generated unique employee code: ${newCode}`);
         return newCode;
     } catch (error) {
-        console.error('❌ Error generating employee code:', error);
-        // ✅ Fallback: use timestamp + random
+        console.error('Error generating employee code:', error);
+        // Fallback: use timestamp + random
         return `EMP-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
     }
 };
 
-// ✅ Function to validate if code is unique
+// Function to validate if code is unique
 const isEmployeeCodeUnique = async (code) => {
     try {
         const employee = await Employee.findOne({
@@ -57,7 +57,7 @@ const isEmployeeCodeUnique = async (code) => {
         });
         return !employee; // true if not exists (unique)
     } catch (error) {
-        console.error('❌ Error checking employee code:', error);
+        console.error('Error checking employee code:', error);
         return false;
     }
 };

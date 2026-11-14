@@ -85,7 +85,7 @@ const AddEmployee = () => {
                 formData,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            alert('✅ Employee added successfully!');
+            alert('Employee added successfully!');
             navigate('/dashboard');
         } catch (err) {
             const msg = err.response?.data?.error || 'Failed to add employee!';
@@ -96,7 +96,7 @@ const AddEmployee = () => {
 
     return (
         <div className={styles.page}>
-            <h2 style={{ color: 'var(--ui-text)', marginBottom: '20px' }}>➕ Add New Employee</h2>
+            <h2 style={{ color: 'var(--ui-text)', marginBottom: '20px' }}>Add New Employee</h2>
 
             {error && (
                 <div style={{
@@ -106,7 +106,7 @@ const AddEmployee = () => {
                     borderRadius: '8px',
                     marginBottom: '16px'
                 }}>
-                    ❌ {error}
+                    {error}
                 </div>
             )}
 
@@ -150,7 +150,7 @@ const AddEmployee = () => {
 
                 {/* Addresses */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h4 style={{ margin: 0 }}>📍 Addresses</h4>
+                    <h4 style={{ margin: 0 }}>Addresses</h4>
                     <button type="button" onClick={addAddress} style={{ padding: '4px 12px', background: '#4f46e5', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>+ Add</button>
                 </div>
                 {formData.addresses.map((addr, index) => (
@@ -170,7 +170,7 @@ const AddEmployee = () => {
                             style={{ flex: 1, padding: '8px', border: '1px solid #e2e8f0', borderRadius: '6px' }}
                         />
                         {formData.addresses.length > 1 && (
-                            <button type="button" onClick={() => removeAddress(index)} style={{ background: 'var(--ui-danger-bg)', color: 'var(--ui-danger)', border: 'none', padding: '6px 10px', borderRadius: '4px', cursor: 'pointer' }}>✕</button>
+                            <button type="button" onClick={() => removeAddress(index)} style={{ background: 'var(--ui-danger-bg)', color: 'var(--ui-danger)', border: 'none', padding: '6px 10px', borderRadius: '4px', cursor: 'pointer' }}>×</button>
                         )}
                     </div>
                 ))}
@@ -179,7 +179,7 @@ const AddEmployee = () => {
 
                 {/* Qualifications */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h4 style={{ margin: 0 }}>🎓 Education</h4>
+                    <h4 style={{ margin: 0 }}>Education</h4>
                     <button type="button" onClick={addQualification} style={{ padding: '4px 12px', background: '#4f46e5', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>+ Add</button>
                 </div>
                 {formData.qualifications.map((qual, index) => (
@@ -199,7 +199,7 @@ const AddEmployee = () => {
                             style={{ flex: 1, padding: '8px', border: '1px solid #e2e8f0', borderRadius: '6px' }}
                         />
                         {formData.qualifications.length > 1 && (
-                            <button type="button" onClick={() => removeQualification(index)} style={{ background: 'var(--ui-danger-bg)', color: 'var(--ui-danger)', border: 'none', padding: '6px 10px', borderRadius: '4px', cursor: 'pointer' }}>✕</button>
+                            <button type="button" onClick={() => removeQualification(index)} style={{ background: 'var(--ui-danger-bg)', color: 'var(--ui-danger)', border: 'none', padding: '6px 10px', borderRadius: '4px', cursor: 'pointer' }}>×</button>
                         )}
                     </div>
                 ))}
@@ -208,7 +208,7 @@ const AddEmployee = () => {
 
                 {/* Skills */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h4 style={{ margin: 0 }}>⚡ Skills</h4>
+                    <h4 style={{ margin: 0 }}>Skills</h4>
                     <button type="button" onClick={addSkill} style={{ padding: '4px 12px', background: '#4f46e5', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>+ Add</button>
                 </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '8px' }}>
@@ -222,7 +222,7 @@ const AddEmployee = () => {
                                 style={{ border: 'none', background: 'transparent', padding: '4px 4px', width: '80px', outline: 'none' }}
                             />
                             {formData.skills.length > 1 && (
-                                <button type="button" onClick={() => removeSkill(index)} style={{ background: 'none', border: 'none', color: 'var(--ui-danger)', cursor: 'pointer', fontSize: '14px' }}>✕</button>
+                                <button type="button" onClick={() => removeSkill(index)} style={{ background: 'none', border: 'none', color: 'var(--ui-danger)', cursor: 'pointer', fontSize: '14px' }}>×</button>
                             )}
                         </div>
                     ))}
@@ -245,7 +245,7 @@ const AddEmployee = () => {
                             cursor: 'pointer'
                         }}
                     >
-                        {loading ? '⏳ Adding...' : '✅ Add Employee'}
+                        {loading ? 'Adding...' : 'Add Employee'}
                     </button>
                     <button
                         type="button"
