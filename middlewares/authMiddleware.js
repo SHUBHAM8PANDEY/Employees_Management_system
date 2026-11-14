@@ -1,4 +1,4 @@
-const { authenticateSession } = require('../utils/sessionAuth');
+const { authenticateSession, InvalidSessionError } = require('../utils/sessionAuth');
 
 async function protect(req, res, next) {
     if (req.user && req.session) return next();
@@ -9,7 +9,8 @@ async function protect(req, res, next) {
         req.session = session;
         req.sessionExpiresAt = expiresAt;
         next();
-    } catch {
+    } catch (error) {
+        if (!(error instanceof InvalidSessionError)) return next(error);
         res.status(401).json({ success: false, error: 'Invalid or expired session. Please sign in.' });
     }
 }

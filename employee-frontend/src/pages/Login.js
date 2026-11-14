@@ -2,7 +2,6 @@ import { API_BASE } from '../config';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { connectSocket } from '../utils/socket';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -44,7 +43,6 @@ const Login = () => {
                 localStorage.setItem('profile_picture', user.profile_picture);
             }
 
-            connectSocket(token);
 
             if (user.role === 'Admin' || user.role === 'HR') {
                 navigate('/dashboard', { replace: true });

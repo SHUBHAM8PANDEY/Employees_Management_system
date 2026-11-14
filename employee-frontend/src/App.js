@@ -16,27 +16,34 @@ import { connectSocket, disconnectSocket } from './utils/socket';
 
 
 
-const checkAuth = async () => {
-    const token = localStorage.getItem('token');
-    if (!token) return false;
+const checkAuth = async (token) => {
+    if (!token) return { status: 'invalid' };
 
     try {
-        const response = await axios.get(`${API_BASE}/api/auth/verify-token`, {
-            headers: { Authorization: `Bearer ${token}` }
+        const { data } = await axios.get(`${API_BASE}/api/auth/verify-token`, {
+            headers: { Authorization: `Bearer ${token}` },
+            timeout: 10000
         });
-        if (localStorage.getItem('token') !== token) return false;
-        localStorage.setItem('role', response.data.user.role);
-        localStorage.setItem('session_expires_at', response.data.expiresAt);
-        return response.data.valid;
+        if (!data.valid) return { status: 'invalid' };
+
+        let expiresAt = Number(data.expiresAt);
+        if (!Number.isFinite(expiresAt) || expiresAt <= 0) {
+            // Older deployments omit the timestamp. Cap their signed JWT lifetime at 24 hours.
+            const payload = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+            const { exp, iat } = JSON.parse(atob(payload));
+            expiresAt = Math.min(exp, iat + 86400) * 1000;
+        }
+        if (!Number.isFinite(expiresAt) || expiresAt <= Date.now()) return { status: 'invalid' };
+        return { status: 'valid', expiresAt, role: data.user.role };
     } catch (error) {
-        return false;
+        return { status: error.response?.status === 401 ? 'invalid' : 'unavailable' };
     }
 };
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
-    const [isAuthenticated, setIsAuthenticated] = useState(null);
+    const [session, setSession] = useState(null);
     const token = localStorage.getItem('token');
-    const role = localStorage.getItem('role');
+    const role = session?.role;
 
     useEffect(() => {
         let disposed = false;
@@ -46,44 +53,40 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
             disconnectSocket();
             localStorage.clear();
             sessionStorage.clear();
-            setIsAuthenticated(false);
+            setSession({ status: 'invalid' });
         };
         const verifyAuth = async () => {
-            const valid = await checkAuth();
-            if (disposed) return;
-            setIsAuthenticated(valid);
-            if (!valid) return endSession();
+            const result = await checkAuth(token);
+            if (disposed || localStorage.getItem('token') !== token) return;
+            if (result.status === 'invalid') return endSession();
+            if (result.status === 'unavailable') {
+                setSession(previous => previous?.status === 'valid' ? previous : result);
+                return;
+            }
+            localStorage.setItem('role', result.role);
+            setSession(result);
+            connectSocket(token);
             clearTimeout(timeout);
-            const expiresAt = Number(localStorage.getItem('session_expires_at'));
-            timeout = setTimeout(endSession, Math.max(0, expiresAt - Date.now()));
+            timeout = setTimeout(endSession, Math.max(0, result.expiresAt - Date.now()));
         };
-        const interceptor = axios.interceptors.response.use(undefined, error => {
-            if (error.response?.status === 401) endSession();
-            return Promise.reject(error);
-        });
         verifyAuth();
         const refresh = setInterval(verifyAuth, 30000);
         return () => {
             disposed = true;
             clearInterval(refresh);
             clearTimeout(timeout);
-            axios.interceptors.response.eject(interceptor);
         };
     }, [token]);
 
-    if (isAuthenticated === null) {
+    if (!token || session?.status === 'invalid') return <Navigate to="/" replace />;
+
+    if (!session || session.status === 'unavailable') {
         return (
             <div className="app-loading">
                 <div className="app-loading-spinner" />
-                <span>Verifying session...</span>
+                <span>{session ? 'Unable to verify session. Retrying…' : 'Verifying session...'}</span>
             </div>
         );
-    }
-
-    if (!isAuthenticated || !token) {
-        localStorage.clear();
-        sessionStorage.clear();
-        return <Navigate to="/" replace />;
     }
 
     if (allowedRoles && !allowedRoles.includes(role)) {
@@ -108,34 +111,7 @@ const withLayout = (Component, roles) => (
 );
 
 function App() {
-    const [loading, setLoading] = useState(true);
-
     useEffect(() => {
-        const verify = async () => {
-            const token = localStorage.getItem('token');
-            if (token) {
-                const valid = await checkAuth();
-                if (!valid) {
-                    localStorage.clear();
-                    sessionStorage.clear();
-                } else {
-                    connectSocket(token);
-                    try {
-                        const res = await axios.get(`${API_BASE}/api/auth/profile`, {
-                            headers: { Authorization: `Bearer ${token}` }
-                        });
-                        if (res.data.profile_picture) {
-                            localStorage.setItem('profile_picture', res.data.profile_picture);
-                        }
-                    } catch (e) {
-                        /* ignore */
-                    }
-                }
-            }
-            setLoading(false);
-        };
-        verify();
-
         const handleStorageChange = (e) => {
             if (e.key === 'token' && !e.newValue) {
                 disconnectSocket();
@@ -145,15 +121,6 @@ function App() {
         window.addEventListener('storage', handleStorageChange);
         return () => window.removeEventListener('storage', handleStorageChange);
     }, []);
-
-    if (loading) {
-        return (
-            <div className="app-loading">
-                <div className="app-loading-spinner" />
-                <span>Loading...</span>
-            </div>
-        );
-    }
 
     return (
         <Router>
