@@ -1,3 +1,4 @@
+import { Skeleton } from './components/Skeleton';
 import { API_BASE } from './config';
 import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useOutletContext } from 'react-router-dom';
@@ -19,6 +20,8 @@ const Notifications = lazy(() => import('./pages/Notifications'));
 const Attendance = lazy(() => import('./pages/Attendance'));
 const Chat = lazy(() => import('./pages/Chat'));
 
+
+const Settings = lazy(() => import('./pages/Settings'));
 
 const checkAuth = async (token) => {
     if (!token) return { status: 'invalid' };
@@ -95,7 +98,7 @@ const ProtectedRoute = () => {
 
     return (
         <AppLayout>
-            <Suspense fallback={<div className="app-loading" role="status">Loading page…</div>}>
+            <Suspense fallback={<Skeleton label="Loading page" />}>
                 <Outlet context={role} />
             </Suspense>
         </AppLayout>
@@ -136,6 +139,7 @@ function App() {
                     <Route path="/employee-leave" element={<RolePage component={EmployeeLeave} roles={['Employee', 'Admin', 'HR']} />} />
                     <Route path="/attendance" element={<RolePage component={Attendance} roles={['Admin', 'HR', 'Employee']} />} />
                     <Route path="/notifications" element={<RolePage component={Notifications} roles={['Admin', 'HR', 'Employee']} />} />
+                    <Route path="/settings" element={<RolePage component={Settings} roles={['Admin', 'HR', 'Employee']} />} />
                     <Route path="/chat" element={<RolePage component={Chat} roles={['Admin', 'HR', 'Employee']} />} />
                 </Route>
 

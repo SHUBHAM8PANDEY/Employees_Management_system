@@ -51,8 +51,8 @@ const AuditLogs = () => {
     };
 
     return (
-        <div style={{ padding: '80px 30px 30px', background: '#f0f4f8', minHeight: '100vh' }}>
-            <div style={{ background: 'white', padding: '24px', borderRadius: '16px' }}>
+        <div style={{ padding: 0, background: 'var(--ui-bg)', minHeight: '100vh' }}>
+            <div style={{ background: 'var(--ui-surface)', padding: '24px', borderRadius: '16px' }}>
                 <h2 style={{ marginBottom: '20px' }}>📊 Audit Logs</h2>
 
                 {/* Filters */}
@@ -114,13 +114,13 @@ const AuditLogs = () => {
                     <div style={{ textAlign: 'center', padding: '40px' }}>⏳ Loading...</div>
                 ) : (
                     <>
-                        <div style={{ marginBottom: '12px', color: '#64748b' }}>
+                        <div style={{ marginBottom: '12px', color: 'var(--ui-muted)' }}>
                             Total: {total} logs
                         </div>
                         <div style={{ overflowX: 'auto' }}>
                             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                                 <thead>
-                                    <tr style={{ background: '#f8fafc' }}>
+                                    <tr style={{ background: 'var(--ui-subtle)' }}>
                                         <th style={{ padding: '10px', textAlign: 'left' }}>Time</th>
                                         <th style={{ padding: '10px', textAlign: 'left' }}>User</th>
                                         <th style={{ padding: '10px', textAlign: 'left' }}>Action</th>

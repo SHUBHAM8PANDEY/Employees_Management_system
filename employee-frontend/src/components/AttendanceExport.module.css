@@ -59,7 +59,7 @@
 }
 
 .closeBtn {
-    background: #f1f5f9;
+    background: var(--ui-subtle);
     color: #475569;
     border: none;
     padding: 6px 14px;
@@ -70,7 +70,7 @@
     transition: all 0.2s;
 }
 .closeBtn:hover {
-    background: #e2e8f0;
+    background: var(--ui-border);
 }
 
 .error {
@@ -85,7 +85,7 @@
 .loading {
     text-align: center;
     padding: 30px;
-    color: #64748b;
+    color: var(--ui-muted);
 }
 
 .exportBody {
@@ -95,7 +95,7 @@
 }
 
 .employeeInfo {
-    background: #f8fafc;
+    background: var(--ui-bg);
     padding: 12px 16px;
     border-radius: 10px;
     border: 1px solid #e9edf4;

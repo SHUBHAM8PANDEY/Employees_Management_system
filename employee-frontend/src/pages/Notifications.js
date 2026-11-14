@@ -93,7 +93,7 @@ const Notifications = () => {
     };
 
     return (
-        <div style={{ padding: '80px 30px 30px', background: '#f0f4f8', minHeight: '100vh' }}>
+        <div style={{ padding: 0, background: 'var(--ui-bg)', minHeight: '100vh' }}>
             {/* Header */}
             <div style={{
                 position: 'fixed',
@@ -101,7 +101,7 @@ const Notifications = () => {
                 left: 0,
                 right: 0,
                 height: '68px',
-                background: 'white',
+                background: 'var(--ui-surface)',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
@@ -114,15 +114,15 @@ const Notifications = () => {
                     🌐 <span style={{ color: '#4f46e5' }}>HR</span>Dashboard
                 </h1>
                 <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-                    <span style={{ fontSize: '14px', color: '#64748b' }}>
+                    <span style={{ fontSize: '14px', color: 'var(--ui-muted)' }}>
                         👤 {localStorage.getItem('first_name') || 'Admin'}
                     </span>
                     <button
                         onClick={() => navigate('/dashboard')}
                         style={{
                             padding: '8px 16px',
-                            background: '#f1f5f9',
-                            color: '#334155',
+                            background: 'var(--ui-subtle)',
+                            color: 'var(--ui-text)',
                             border: 'none',
                             borderRadius: '8px',
                             cursor: 'pointer',
@@ -143,7 +143,7 @@ const Notifications = () => {
                 </div>
             </div>
 
-            <div style={{ background: 'white', padding: '24px', borderRadius: '16px' }}>
+            <div style={{ background: 'var(--ui-surface)', padding: '24px', borderRadius: '16px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                     <h2>🔔 All Notifications</h2>
                     <button
@@ -176,7 +176,7 @@ const Notifications = () => {
                                     padding: '16px',
                                     borderRadius: '10px',
                                     marginBottom: '10px',
-                                    background: notif.is_read ? 'white' : '#f8fafc',
+                                    background: notif.is_read ? 'var(--ui-surface)' : 'var(--ui-tint)',
                                     border: '1px solid #e2e8f0',
                                     display: 'flex',
                                     gap: '14px',
@@ -262,7 +262,7 @@ const Notifications = () => {
                                     onClick={() => setOffset(offset + limit)}
                                     style={{
                                         padding: '8px 24px',
-                                        background: '#f1f5f9',
+                                        background: 'var(--ui-subtle)',
                                         border: 'none',
                                         borderRadius: '8px',
                                         cursor: 'pointer',

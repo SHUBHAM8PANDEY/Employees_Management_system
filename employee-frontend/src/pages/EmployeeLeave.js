@@ -72,7 +72,7 @@ const EmployeeLeave = () => {
     };
 
     return (
-        <div style={{ padding: '90px 40px 40px', background: '#f8fafc', minHeight: '100vh' }}>
+        <div style={{ padding: '90px 40px 40px', background: 'var(--ui-subtle)', minHeight: '100vh' }}>
             {/* Header */}
             <div style={{
                 position: 'fixed',
@@ -176,7 +176,7 @@ const EmployeeLeave = () => {
                 gap: '24px'
             }}>
                 <div style={{
-                    background: 'white',
+                    background: 'var(--ui-surface)',
                     padding: '24px',
                     borderRadius: '16px',
                     border: '1px solid #e2e8f0'
@@ -287,7 +287,7 @@ const EmployeeLeave = () => {
 
                 {/* Leave History */}
                 <div style={{
-                    background: 'white',
+                    background: 'var(--ui-surface)',
                     padding: '24px',
                     borderRadius: '16px',
                     border: '1px solid #e2e8f0'
@@ -295,14 +295,14 @@ const EmployeeLeave = () => {
                     <h3 style={{ marginBottom: '16px' }}>📜 My Leave History</h3>
                     {/* ✅ Fix: Check if leaves is array before using length */}
                     {!leaves || leaves.length === 0 ? (
-                        <p style={{ textAlign: 'center', color: '#64748b', padding: '20px' }}>
+                        <p style={{ textAlign: 'center', color: 'var(--ui-muted)', padding: '20px' }}>
                             No leaves applied yet!
                         </p>
                     ) : (
                         <div style={{ overflowX: 'auto' }}>
                             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                                 <thead>
-                                    <tr style={{ background: '#f8fafc' }}>
+                                    <tr style={{ background: 'var(--ui-subtle)' }}>
                                         <th style={{ padding: '8px', textAlign: 'left' }}>Type</th>
                                         <th style={{ padding: '8px', textAlign: 'left' }}>Duration</th>
                                         <th style={{ padding: '8px', textAlign: 'left' }}>Days</th>

@@ -79,7 +79,7 @@ const EditEmployee = () => {
     return (
         <div style={{ padding: '90px 40px 40px', maxWidth: '600px', margin: '0 auto' }}>
             <h2 style={{ color: '#1e1b4b', marginBottom: '24px' }}>✏️ Edit Employee</h2>
-            <p style={{ color: '#64748b', marginBottom: '16px' }}>Employee Code: <b>{code}</b></p>
+            <p style={{ color: 'var(--ui-muted)', marginBottom: '16px' }}>Employee Code: <b>{code}</b></p>
 
             {error && (
                 <div style={{
@@ -94,7 +94,7 @@ const EditEmployee = () => {
             )}
 
             <form onSubmit={handleSubmit} style={{
-                background: 'white',
+                background: 'var(--ui-surface)',
                 padding: '24px',
                 borderRadius: '16px',
                 border: '1px solid #e2e8f0'
@@ -205,8 +205,8 @@ const EditEmployee = () => {
                         onClick={() => navigate('/dashboard')}
                         style={{
                             padding: '12px 24px',
-                            background: '#f1f5f9',
-                            color: '#334155',
+                            background: 'var(--ui-subtle)',
+                            color: 'var(--ui-text)',
                             border: 'none',
                             borderRadius: '8px',
                             fontWeight: '600',

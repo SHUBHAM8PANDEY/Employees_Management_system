@@ -20,7 +20,7 @@
     top: calc(100% + 10px);
     right: 0;
     width: 280px;
-    background: #fff;
+    background: var(--ui-surface);
     border: 1px solid #e2e8f0;
     border-radius: 12px;
     box-shadow: 0 12px 40px rgba(15, 23, 42, 0.12);
@@ -32,7 +32,7 @@
     display: flex;
     gap: 14px;
     padding: 20px;
-    background: #f8fafc;
+    background: var(--ui-bg);
     border-bottom: 1px solid #e2e8f0;
     align-items: center;
 }
@@ -46,7 +46,7 @@
 
 .profileInfo strong {
     font-size: 15px;
-    color: #0f172a;
+    color: var(--ui-text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -54,7 +54,7 @@
 
 .profileInfo span {
     font-size: 12px;
-    color: #64748b;
+    color: var(--ui-muted);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -91,7 +91,7 @@
 }
 
 .menuItem:hover {
-    background: #f1f5f9;
+    background: var(--ui-subtle);
 }
 
 .menuItem:disabled {

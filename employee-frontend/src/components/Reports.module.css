@@ -1,13 +1,13 @@
-.report { max-width: 1100px; margin: 0 auto; color: #152238; }
+.report { max-width: 1100px; margin: 0 auto; color: var(--ui-text); }
 .header { display: flex; justify-content: space-between; align-items: center; gap: .75rem; flex-wrap: wrap; margin-bottom: 1rem; }
 .header button { border: 0; background: #2446a8; color: white; padding: .75rem 1rem; border-radius: 9px; font: inherit; cursor: pointer; }
 .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: .75rem; margin: 0 0 1rem; }
-.metrics div, .tableWrap { background: #fff; border: 1px solid #dbe3ef; border-radius: 12px; }
+.metrics div, .tableWrap { background: var(--ui-surface); border: 1px solid #dbe3ef; border-radius: 12px; }
 .metrics div { padding: 1rem; }
-.metrics dt { color: #52647a; }
+.metrics dt { color: var(--ui-muted); }
 .metrics dd { margin: .35rem 0 0; font-size: 1.6rem; font-weight: 700; }
 .tableWrap { overflow-x: auto; }
 .tableWrap table { width: 100%; border-collapse: collapse; }
 .tableWrap caption { text-align: left; padding: 1rem; font-weight: 700; }
 .tableWrap th, .tableWrap td { padding: .7rem; text-align: left; border-top: 1px solid #e6edf5; }
-.tableWrap thead { background: #eef4fc; }
+.tableWrap thead { background: var(--ui-subtle); }

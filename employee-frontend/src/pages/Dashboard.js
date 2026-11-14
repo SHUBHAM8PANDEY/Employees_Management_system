@@ -1,3 +1,5 @@
+import WorkspaceOverview from '../components/WorkspaceOverview';
+import { Skeleton } from '../components/Skeleton';
 import { API_BASE } from '../config';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -69,6 +71,12 @@ const Dashboard = () => {
     const [empPage, setEmpPage] = useState(1);
     const [empLimit, setEmpLimit] = useState(10);
     const [empSearch, setEmpSearch] = useState('');
+    const [empSort, setEmpSort] = useState('employee_code:ASC');
+    const [directoryView, setDirectoryView] = useState('table');
+    useEffect(() => {
+        setEmpSearch(searchParams.get('search') || '');
+        setEmpPage(1);
+    }, [searchParams]);
     const [empTotal, setEmpTotal] = useState(0);
     const [empTotalPages, setEmpTotalPages] = useState(0);
 
@@ -124,7 +132,7 @@ const Dashboard = () => {
                 const empParams = new URLSearchParams({
                     page: empPage,
                     limit: empLimit,
-                    search: empSearch
+                    search: empSearch, sortBy: empSort.split(':')[0], sortOrder: empSort.split(':')[1]
                 });
                 
                 const leaveParams = new URLSearchParams({
@@ -168,7 +176,7 @@ const Dashboard = () => {
 
     useEffect(() => {
         fetchData();
-    }, [empPage, empLimit, empSearch, leavePage, leaveLimit, leaveSearch, leaveStatus, myLeavePage, myLeaveLimit, myLeaveStatus]);
+    }, [empPage, empLimit, empSearch, empSort, leavePage, leaveLimit, leaveSearch, leaveStatus, myLeavePage, myLeaveLimit, myLeaveStatus]);
 
     // ============ HANDLE LOGOUT ============
     const handleLogout = async () => {
@@ -484,6 +492,7 @@ const Dashboard = () => {
             <div className={styles.dashboard}>
                 {error && <div className={styles.error}>❌ {error}</div>}
 
+                {!searchParams.get('tab') && <WorkspaceOverview token={localStorage.getItem('token')} />}
                 {deliveryNotice && <p role="status">{deliveryNotice}</p>}
                 <div className={styles.tabs}>
                     <button onClick={() => setActiveTab('employees')} className={`${styles.tabBtn} ${activeTab === 'employees' ? styles.tabBtnActive : ''}`}>
@@ -498,7 +507,7 @@ const Dashboard = () => {
                 </div>
 
                 {loading ? (
-                    <div className={styles.loading}>⏳ Loading...</div>
+                    <Skeleton label="Loading dashboard" />
                 ) : (
                     <>
                         {/* EMPLOYEES TAB */}
@@ -533,6 +542,31 @@ const Dashboard = () => {
                                     </select>
                                 </div>
 
+                                <div className={styles.directoryOptions}>
+                                    <label>Sort by <select value={empSort} onChange={event => { setEmpSort(event.target.value); setEmpPage(1); }}>
+                                        <option value="employee_code:ASC">Employee ID</option>
+                                        <option value="first_name:ASC">Name A–Z</option>
+                                        <option value="first_name:DESC">Name Z–A</option>
+                                        <option value="email:ASC">Email</option>
+                                    </select></label>
+                                    <button className="ui-button" onClick={() => setDirectoryView(directoryView === 'table' ? 'cards' : 'table')}>
+                                        {directoryView === 'table' ? 'Card view' : 'Table view'}
+                                    </button>
+                                </div>
+                                {directoryView === 'table' ? <div className={styles.tableWrapper}>
+                                    <table className={styles.historyTable}>
+                                        <thead><tr><th>Employee</th><th>ID</th><th>Email</th><th>Actions</th></tr></thead>
+                                        <tbody>{employees.map(emp => <tr key={emp.employee_code}>
+                                            <td><button className="ui-button" onClick={() => openViewEmployee(emp)}>{emp.first_name} {emp.last_name}</button></td>
+                                            <td>{emp.employee_code}</td><td>{emp.email}</td>
+                                            <td><div className={styles.directoryOptions}>
+                                                <button className="ui-button" onClick={() => navigate(`/edit-employee/${emp.employee_code}`)}>Edit</button>
+                                                <button className="ui-button" onClick={() => handleDeleteEmployee(emp.employee_code, `${emp.first_name} ${emp.last_name}`)}>Delete</button>
+                                            </div></td>
+                                        </tr>)}</tbody>
+                                    </table>
+                                    {!employees.length && <p className="ui-muted">No employees match your search.</p>}
+                                </div> :
                                 <div className={styles.employeeGrid}>
                                     {(employees || []).map((emp) => (
                                         <div key={emp.employee_code} className={styles.employeeCard}>
@@ -585,7 +619,7 @@ const Dashboard = () => {
                                             <button className={styles.setLimitBtn} onClick={() => openLeaveLimitEditor(emp)}>⚙️ Set Leave Limits</button>
                                         </div>
                                     ))}
-                                </div>
+                                </div>}
 
                                 <Pagination 
                                     page={empPage}
@@ -1021,7 +1055,7 @@ const Dashboard = () => {
             {error && <div className={styles.error}>❌ {error}</div>}
 
             {loading ? (
-                <div className={styles.loading}>⏳ Loading...</div>
+                <Skeleton label="Loading dashboard" />
             ) : myProfile ? (
                 <>
                     <div className={styles.tabs}>

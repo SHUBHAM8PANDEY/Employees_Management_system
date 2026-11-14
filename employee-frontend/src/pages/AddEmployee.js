@@ -93,7 +93,7 @@ const AddEmployee = () => {
     };
 
     return (
-        <div style={{ padding: '80px 30px 30px', maxWidth: '700px', margin: '0 auto' }}>
+        <div style={{ padding: 0, maxWidth: '700px', margin: '0 auto' }}>
             <h2 style={{ color: '#1a1a2e', marginBottom: '20px' }}>➕ Add New Employee</h2>
 
             {error && (
@@ -109,7 +109,7 @@ const AddEmployee = () => {
             )}
 
             <form onSubmit={handleSubmit} style={{
-                background: 'white',
+                background: 'var(--ui-surface)',
                 padding: '24px',
                 borderRadius: '12px',
                 border: '1px solid #e2e8f0'
@@ -176,7 +176,7 @@ const AddEmployee = () => {
                             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                             style={{ width: '100%', padding: '10px', border: '1px solid #e2e8f0', borderRadius: '8px' }}
                         />
-                        <small style={{ color: '#64748b' }}>Default: 123456</small>
+                        <small style={{ color: 'var(--ui-muted)' }}>Default: 123456</small>
                     </div>
                 </div>
 
@@ -247,7 +247,7 @@ const AddEmployee = () => {
                 </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '8px' }}>
                     {formData.skills.map((skill, index) => (
-                        <div key={index} style={{ display: 'flex', alignItems: 'center', background: '#f1f5f9', padding: '4px 8px', borderRadius: '20px' }}>
+                        <div key={index} style={{ display: 'flex', alignItems: 'center', background: 'var(--ui-subtle)', padding: '4px 8px', borderRadius: '20px' }}>
                             <input
                                 type="text"
                                 placeholder="Skill"
@@ -286,8 +286,8 @@ const AddEmployee = () => {
                         onClick={() => navigate('/dashboard')}
                         style={{
                             padding: '12px 24px',
-                            background: '#f1f5f9',
-                            color: '#334155',
+                            background: 'var(--ui-subtle)',
+                            color: 'var(--ui-text)',
                             border: 'none',
                             borderRadius: '8px',
                             fontWeight: '600',
