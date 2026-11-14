@@ -18,9 +18,10 @@ export const connectSocket = (token) => {
         return socket;
     }
 
-    socket = io(API_BASE, {
+    socket = io(API_BASE || window.location.origin, {
         auth: { token },
-        transports: ['websocket', 'polling'],
+        // Start with HTTP polling so the CRA proxy can establish the session.
+        transports: ['polling', 'websocket'],
         autoConnect: true
     });
 

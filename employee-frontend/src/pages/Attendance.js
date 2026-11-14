@@ -36,6 +36,8 @@ const Attendance = () => {
     const [summary, setSummary] = useState({ present: 0, absent: 0, halfDay: 0, shortLeave: 0, onLeave: 0, holiday: 0, total: 0 });
     const [punchInType, setPunchInType] = useState('Office');
     const [photo, setPhoto] = useState('');
+    const [captureOpen, setCaptureOpen] = useState(false);
+    const [teamPeriod, setTeamPeriod] = useState('day');
     const [cameraOpen, setCameraOpen] = useState(false);
     const [teamView, setTeamView] = useState(false);
     const [notice, setNotice] = useState('');
@@ -54,6 +56,7 @@ const Attendance = () => {
     }, [cameraOpen]);
 
     const startCamera = async () => {
+        setCaptureOpen(true);
         const request = ++cameraRequest.current;
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
@@ -126,7 +129,7 @@ const Attendance = () => {
         try {
             if (canSeeTeam && teamView) {
                 const params = new URLSearchParams({
-                    date: selectedDate,
+                    date: selectedDate, period: teamPeriod,
                     page: pagination.page || 1,
                     limit: 10
                 });
@@ -183,7 +186,7 @@ const Attendance = () => {
 
     useEffect(() => {
         fetchData();
-    }, [teamView, pagination.page, filterStatus, selectedDate, selectedYear, selectedMonth, selectedDay, startDate, endDate]);
+    }, [teamView, teamPeriod, pagination.page, filterStatus, selectedDate, selectedYear, selectedMonth, selectedDay, startDate, endDate]);
 
     // ============ PUNCH IN ============
     const handlePunchIn = async () => {
@@ -197,6 +200,7 @@ const Attendance = () => {
             
             setNotice(response.data.message);
             setPhoto('');
+            setCaptureOpen(false);
             setTodayAttendance(response.data.attendance);
             setIsPunchedIn(true);
             fetchData();
@@ -219,6 +223,7 @@ const Attendance = () => {
             
             setNotice(`Punch out recorded · ${response.data.status} · ${response.data.totalHours} hours`);
             setPhoto('');
+            setCaptureOpen(false);
             setTodayAttendance(response.data.attendance);
             setIsPunchedOut(true);
             fetchData();
@@ -281,7 +286,7 @@ const Attendance = () => {
     const downloadTeam = async (format) => {
         try {
             const { data } = await axios.get(`${API_BASE}/api/attendance/admin/export/team`, {
-                params: { date: selectedDate, format }, responseType: 'blob',
+                params: { date: selectedDate, period: teamPeriod, format }, responseType: 'blob',
                 headers: { Authorization: `Bearer ${token}` }
             });
             const url = URL.createObjectURL(data);
@@ -299,6 +304,7 @@ const Attendance = () => {
         camera.current?.getTracks().forEach(track => track.stop());
         cameraRequest.current++;
         setCameraOpen(false);
+        setCaptureOpen(false);
         setPhoto('');
         setFilterStatus('');
         setPagination({ page: 1 });
@@ -348,6 +354,14 @@ const Attendance = () => {
                 </div>
 
                 <div className={styles.filterBar}>
+                    <select aria-label="Report period" value={teamPeriod} className={styles.selectInput} onChange={event => {
+                        setTeamPeriod(event.target.value);
+                        setPagination({ page: 1 });
+                    }}>
+                        <option value="day">Day</option>
+                        <option value="month">Month</option>
+                        <option value="year">Year</option>
+                    </select>
                     <input 
                         type="date" 
                         value={selectedDate} 
@@ -391,7 +405,7 @@ const Attendance = () => {
                                 </thead>
                                 <tbody>
                                     {allAttendance.map((item) => (
-                                        <tr key={item.id || item.employee_code}>
+                                        <tr key={item.id || `${item.employee_code}-${item.date}`}>
                                             <td>{item.employee?.first_name} {item.employee?.last_name}</td>
                                             <td>{formatDateOnly(item.date)}</td>
                                             <td>{indiaTime(item.punch_in)}{item.late && ' · Late'}</td>
@@ -489,14 +503,25 @@ const Attendance = () => {
 )}
 
                 {notice && <p role="status" className={styles.attendanceNotice}>{notice}</p>}
-                {!isPunchedOut && <div className={styles.evidencePanel}>
+                {captureOpen && !isPunchedOut && <div className={styles.evidencePanel}>
                     <strong>Selfie and location</strong>
                     <p>Take a selfie. Location will be captured when you submit your punch.</p>
                     {cameraOpen && <video ref={video} autoPlay playsInline muted />}
                     {photo && <img src={photo} alt="Attendance selfie preview" />}
                     <button type="button" className={styles.exportBtn} onClick={cameraOpen ? takePhoto : startCamera}>
-                        {cameraOpen ? 'Capture selfie' : photo ? 'Retake selfie' : 'Open camera'}
+                        {cameraOpen ? 'Capture selfie' : photo ? 'Retake selfie' : 'Retry camera'}
                     </button>
+                    {photo && <button type="button" className={styles.punchInBtn} disabled={processing || cameraOpen}
+                        onClick={isPunchedIn ? handlePunchOut : handlePunchIn}>
+                        {processing ? 'Saving…' : isPunchedIn ? 'Confirm punch out' : 'Confirm attendance'}
+                    </button>}
+                    <button type="button" disabled={processing} onClick={() => {
+                        cameraRequest.current++;
+                        camera.current?.getTracks().forEach(track => track.stop());
+                        setCaptureOpen(false);
+                        setCameraOpen(false);
+                        setPhoto('');
+                    }}>Cancel</button>
                 </div>}
                 <div className={styles.punchActions}>
                     {!isPunchedIn ? (
@@ -507,12 +532,12 @@ const Attendance = () => {
                                 <option value="Remote">🏠 Remote</option>
                             </select>
                             <input type="text" placeholder="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} className={styles.textInput} />
-                            <button className={styles.punchInBtn} onClick={handlePunchIn} disabled={processing || !photo}>
-                                {processing ? '⏳ Processing...' : '✅ Punch In'}
+                            <button className={styles.punchInBtn} onClick={startCamera} disabled={processing || captureOpen}>
+                                {processing ? '⏳ Processing...' : 'Mark Attendance'}
                             </button>
                         </div>
                     ) : !isPunchedOut ? (
-                        <button className={styles.punchOutBtn} onClick={handlePunchOut} disabled={processing || !photo}>
+                        <button className={styles.punchOutBtn} onClick={startCamera} disabled={processing || captureOpen}>
                             {processing ? '⏳ Processing...' : '❌ Punch Out'}
                         </button>
                     ) : (
@@ -759,7 +784,7 @@ const Attendance = () => {
                                 </thead>
                                 <tbody>
                                     {history.map((item) => (
-                                        <tr key={item.id || item.employee_code}>
+                                        <tr key={item.id || `${item.employee_code}-${item.date}`}>
                                             <td>{formatDateOnly(item.date)}</td>
                                             <td>{new Date(item.date).toLocaleDateString('en-IN', { weekday: 'long' })}</td>
                                             <td>{indiaTime(item.punch_in)}{item.late && ' · Late'}</td>

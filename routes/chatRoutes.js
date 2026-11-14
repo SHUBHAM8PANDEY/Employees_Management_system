@@ -8,6 +8,7 @@ const chatController = require('../controllers/chatController');
 const { protect } = require('../middlewares/authMiddleware');
 
 router.get('/attachments/:id', protect, chatController.getAttachment);
+router.patch('/messages/:id/read', protect, chatController.markMessageRead);
 router.post('/messages', protect, chatController.postMessage);
 router.post('/files', protect, (req, res, next) => {
     upload(req, res, error => {

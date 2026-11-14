@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import NotificationBell from '../NotificationBell';
 import UserMenu from '../UserMenu';
@@ -12,6 +12,7 @@ const AppLayout = ({ children }) => {
     const role = localStorage.getItem('role') || 'Employee';
     const isHr = role === 'Admin' || role === 'HR';
     const location = useLocation();
+    const [menuOpen, setMenuOpen] = useState(false);
 
     const dashboardPath = isHr ? '/dashboard' : '/employee-dashboard';
 
@@ -36,7 +37,8 @@ const AppLayout = ({ children }) => {
 
     return (
         <div className={styles.shell}>
-            <aside className={styles.sidebar}>
+            {menuOpen && <button type="button" className={styles.scrim} aria-label="Close navigation" onClick={() => setMenuOpen(false)} />}
+            <aside id="app-navigation" className={`${styles.sidebar} ${menuOpen ? styles.sidebarOpen : ''}`}>
                 <div className={styles.brand}>
                     <div className={styles.brandMark}>W</div>
                     <div>
@@ -45,7 +47,7 @@ const AppLayout = ({ children }) => {
                     </div>
                 </div>
 
-                <nav className={styles.nav}>
+                <nav className={styles.nav} onClick={event => { if (event.target.closest('a')) setMenuOpen(false); }}>
                     <p className={styles.navLabel}>Main</p>
                     <NavLink to={dashboardPath} className={({ isActive }) => `${styles.navLink} ${isActive ? styles.active : ''}`}>
                         <NavIcon>
@@ -114,7 +116,11 @@ const AppLayout = ({ children }) => {
 
             <div className={styles.main}>
                 <header className={styles.topbar}>
-                    <h1 className={styles.pageTitle}>{getPageTitle()}</h1>
+                    <div className={styles.topbarTitle}>
+                        <button type="button" className={styles.mobileMenu} aria-controls="app-navigation"
+                            aria-label="Toggle navigation" aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>☰</button>
+                        <h1 className={styles.pageTitle}>{getPageTitle()}</h1>
+                    </div>
                     <div className={styles.topbarActions}>
                         <NotificationBell />
                         <UserMenu />

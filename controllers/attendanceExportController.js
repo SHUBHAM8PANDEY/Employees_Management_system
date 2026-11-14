@@ -13,8 +13,9 @@ async function exportTeamAttendance(req, res) {
     if (!parsed || !Number.isFinite(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== date) {
         return res.status(400).json({ error: 'Choose a valid report date.' });
     }
-    const records = await getTeamAttendance(date);
+    const records = await getTeamAttendance(date, ['month', 'year'].includes(req.query.period) ? req.query.period : 'day');
     const rows = records.map(record => ({
+        Date: record.date,
         Employee: record.employee.first_name + ' ' + record.employee.last_name,
         Code: record.employee_code, Status: record.status,
         'Punch in (IST)': record.punch_in ? getTimeString(record.punch_in) : '',
@@ -28,7 +29,7 @@ async function exportTeamAttendance(req, res) {
         doc.fontSize(18).text(`Team attendance | ${date}`);
         doc.moveDown();
         for (const row of rows) {
-            doc.fontSize(11).text(`${row.Employee} (${row.Code}) | ${row.Status}${row.Late ? ' | Late' : ''}`);
+            doc.fontSize(11).text(`${row.Date} | ${row.Employee} (${row.Code}) | ${row.Status}${row.Late ? ' | Late' : ''}`);
             doc.fontSize(9).text(`In ${row['Punch in (IST)'] || '-'} | Out ${row['Punch out (IST)'] || '-'} | Hours ${row.Hours || '-'}`);
             doc.moveDown(.6);
         }

@@ -66,3 +66,16 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
 }
+
+@media (max-width: 768px) {
+    main input, main select, main textarea { max-width: 100%; }
+    main img, main video, main canvas { max-width: 100%; }
+    main button, main th, main td { overflow-wrap: anywhere; }
+    main form, main section { min-width: 0; max-width: 100%; }
+    main table { max-width: 100%; }
+}
+
+@media (max-width: 768px) {
+    .leave-columns { grid-template-columns: minmax(0, 1fr) !important; }
+    .leave-columns > * { min-width: 0; }
+}

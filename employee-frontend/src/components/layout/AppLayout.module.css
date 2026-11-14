@@ -180,3 +180,21 @@
         padding: 0;
     }
 }
+
+.main { min-width: 0; }
+.topbarTitle { display: flex; align-items: center; gap: .65rem; min-width: 0; }
+.mobileMenu, .scrim { display: none; }
+
+@media (max-width: 900px) {
+    .main { margin-left: 0; }
+    .sidebar { display: none; width: min(280px, 85vw); }
+    .sidebarOpen { display: flex; }
+    .sidebar .navText, .sidebar .navLabel, .brand div:last-child { display: block; }
+    .sidebar .brand, .sidebar .navLink { justify-content: flex-start; }
+    .scrim { display: block; position: fixed; inset: 0; border: 0; background: #0f172a80; z-index: 90; }
+    .mobileMenu { display: inline-grid; place-items: center; min-width: 44px; min-height: 44px; border: 0; border-radius: 8px; background: #eef2ff; color: #152238; font-size: 1.15rem; }
+    .topbar { padding-inline: .65rem; gap: .5rem; }
+    .pageTitle { font-size: 1rem; overflow-wrap: anywhere; }
+    .content { min-width: 0; padding: .75rem; }
+    .contentFlush { padding: 0; }
+}

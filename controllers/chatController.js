@@ -159,16 +159,11 @@ const getHistory = async (req, res) => {
             limit: 200
         });
 
-        await ChatMessage.update(
-            { is_read: true },
-            {
-                where: {
-                    sender_code: otherCode,
-                    receiver_code: myCode,
-                    is_read: false
-                }
-            }
-        );
+        const read = await acknowledgeRead(req, { sender_code: otherCode });
+        const readIds = new Set(read.map(message => message.id));
+        for (const message of messages) {
+            if (readIds.has(message.id)) message.is_read = true;
+        }
 
         const otherUser = await User.findByPk(otherCode, { attributes: ['last_seen'] });
 
@@ -310,7 +305,33 @@ async function getAttachment(req, res) {
     res.attachment(message.attachment_name).type(message.attachment_type).send(content);
 }
 
+async function acknowledgeRead(req, filter) {
+    const [, messages] = await ChatMessage.update({ is_read: true }, {
+        where: { ...filter, receiver_code: req.user.employee_code, is_read: false },
+        returning: ['id', 'sender_code', 'receiver_code']
+    });
+    const idsBySender = new Map();
+    for (const message of messages) {
+        const ids = idsBySender.get(message.sender_code) ?? [];
+        ids.push(message.id);
+        idsBySender.set(message.sender_code, ids);
+    }
+    const io = req.app.get('io');
+    for (const [sender, ids] of idsBySender) {
+        io?.to(`user:${sender}`).emit('messages_read', { ids });
+    }
+    return messages;
+}
+
+async function markMessageRead(req, res) {
+    const { id } = req.params;
+    if (!/^\d{1,10}$/.test(id) || Number(id) > 2147483647) return res.sendStatus(400);
+    await acknowledgeRead(req, { id });
+    res.sendStatus(204);
+}
+
 module.exports = {
+    markMessageRead,
     getAttachment,
     postMessage,
     getContacts,

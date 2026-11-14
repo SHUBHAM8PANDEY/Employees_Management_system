@@ -354,3 +354,18 @@
     cursor: pointer;
     overflow-wrap: anywhere;
 }
+
+.mobileBack { display: none; }
+@media (max-width: 768px) {
+    .chatRoot { height: calc(100dvh - 64px); min-height: 0; min-width: 0; }
+    .contactsPanel { max-height: none; flex: 1; min-height: 0; }
+    .chatRoot:not(.threadOpen) .chatPanel, .threadOpen .contactsPanel { display: none; }
+    .threadOpen .chatPanel { width: 100%; min-height: 0; }
+    .mobileBack { display: inline-grid; place-items: center; min-width: 44px; min-height: 44px; border: 0; border-radius: 8px; background: #edf2ff; color: #152238; font-size: 1.25rem; }
+    .inputBar { gap: .25rem; padding-inline: .4rem; }
+    .inputBar textarea { min-width: 0; font-size: 16px; }
+    .composer, .chatHeadInfo, .bubble { min-width: 0; overflow-wrap: anywhere; }
+}
+
+.sentTick, .readTicks { font-weight: 700; margin-inline-end: .25rem; }
+.readTicks { color: #075ce5; letter-spacing: -.15em; }

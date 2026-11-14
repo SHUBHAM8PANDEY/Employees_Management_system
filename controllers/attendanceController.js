@@ -344,7 +344,20 @@ const getAttendanceStats = async (req, res) => {
     }
 };
 
-async function getTeamAttendance(targetDate) {
+async function getTeamAttendance(targetDate, period = 'day') {
+    if (period !== 'day') {
+        const prefix = targetDate.slice(0, period === 'year' ? 4 : 7);
+        const records = await Attendance.findAll({
+            attributes: { exclude: photos },
+            where: sqlWhere(cast(col('Attendance.date'), 'text'), { [Op.like]: prefix + '-%' }),
+            include: [{ model: Employee, as: 'employee', attributes: ['employee_code', 'first_name', 'last_name'] }],
+            order: [['date', 'DESC'], ['employee_code', 'ASC']]
+        });
+        return records.map(row => {
+            const record = row.get({ plain: true });
+            return { ...record, late: Boolean(record.punch_in && isAfterTime(record.punch_in, '09:30')) };
+        });
+    }
     const [employees, records, leaves] = await Promise.all([
         Employee.findAll({ attributes: ['employee_code', 'first_name', 'last_name', 'email', 'joining_date'], order: [['first_name', 'ASC'], ['employee_code', 'ASC']] }),
         Attendance.findAll({ where: { date: targetDate }, attributes: { exclude: photos } }),
@@ -378,7 +391,7 @@ const getAllEmployeeAttendance = async (req, res) => {
             return res.status(400).json({ error: 'Choose a valid attendance date.' });
         }
 
-        const allForDate = await getTeamAttendance(targetDate);
+        const allForDate = await getTeamAttendance(targetDate, ['month', 'year'].includes(req.query.period) ? req.query.period : 'day');
         const filtered = status ? allForDate.filter(record => record.status === status) : allForDate;
         res.json({
             data: filtered.slice(offset, offset + limit), summary: buildSummary(allForDate),

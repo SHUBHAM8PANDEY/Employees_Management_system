@@ -170,7 +170,7 @@ const EmployeeLeave = () => {
             )}
 
             {/* Apply Leave Form */}
-            <div style={{
+            <div className="leave-columns" style={{
                 display: 'grid',
                 gridTemplateColumns: '1fr 1.5fr',
                 gap: '24px'
