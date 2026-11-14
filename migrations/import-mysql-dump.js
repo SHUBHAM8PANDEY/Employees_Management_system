@@ -153,7 +153,9 @@ async function main() {
     }
 }
 
-main().catch(error => {
+module.exports = { compile };
+
+if (require.main === module) main().catch(error => {
     // Driver details can contain source row values.
     console.error('Import failed:', error.code || error.message);
     if (error.table) console.error('Table:', error.table);

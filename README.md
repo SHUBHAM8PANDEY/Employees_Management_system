@@ -27,3 +27,9 @@ Fill in date of birth and joining date in Add Employee or Edit Employee. Existin
 Chat uploads use multipart `POST /api/chat/files`. Chat messages store attachment metadata, and Neon stores the file bytes in `chat_files` linked by message ID. Deploy the backend before the frontend so the upload route and database table are available.
 
 For local development, start the backend at port 5000 and the CRA frontend in separate terminals. Leave `REACT_APP_API_URL` unset to use the local development proxy. If your backend uses a different port, set `REACT_APP_API_URL` in `employee-frontend/.env.local` and restart the frontend. Restart the backend after pulling changes to pick up new API routes.
+
+## Database migrations
+
+Run `npm run db:migrate` to provision or upgrade PostgreSQL. Backend startup also applies pending migrations before opening the HTTP port. Keep applied SQL files unchanged and add a new numbered file for later schema changes. Migration history and checksums are stored in `schema_migrations`. A database lock serializes startup migrations.
+
+For a fresh database with legacy data, import the original MySQL dump first with `npm run db:import -- <local-dump.sql>` and then run `npm run db:migrate`. For a fresh database without legacy data, run migrations directly. The baseline creates the schema only, so set `BOOTSTRAP_ADMIN_EMAIL` and `BOOTSTRAP_ADMIN_PASSWORD` and run `npm run db:bootstrap-admin` once to create the first admin. Existing imported databases keep their records and adopt the baseline. SMTP credentials and the PostgreSQL URL belong in environment variables.
