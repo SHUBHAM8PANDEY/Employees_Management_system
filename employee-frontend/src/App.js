@@ -1,3 +1,5 @@
+import Reports from './components/Reports';
+import EmailTools from './pages/EmailTools';
 import { API_BASE } from './config';
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
@@ -131,8 +133,10 @@ function App() {
                 <Route path="/employee-dashboard" element={withLayout(Dashboard, ['Employee'])} />
                 <Route path="/add-employee" element={withLayout(AddEmployee, ['Admin', 'HR'])} />
                 <Route path="/edit-employee/:code" element={withLayout(EditEmployee, ['Admin', 'HR'])} />
+                <Route path="/reports" element={withLayout(Reports, ['Admin', 'HR'])} />
+                <Route path="/email" element={withLayout(EmailTools, ['Admin', 'HR'])} />
                 <Route path="/audit-logs" element={withLayout(AuditLogs, ['Admin', 'HR'])} />
-                <Route path="/employee-leave" element={withLayout(EmployeeLeave, ['Employee'])} />
+                <Route path="/employee-leave" element={withLayout(EmployeeLeave, ['Employee', 'Admin', 'HR'])} />
                 <Route path="/attendance" element={withLayout(Attendance, ['Admin', 'HR', 'Employee'])} />
                 <Route path="/notifications" element={withLayout(Notifications, ['Admin', 'HR', 'Employee'])} />
                 <Route path="/chat" element={withLayout(Chat, ['Admin', 'HR', 'Employee'])} />

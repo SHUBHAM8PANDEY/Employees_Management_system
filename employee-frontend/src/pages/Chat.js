@@ -44,6 +44,7 @@ const Chat = () => {
     const [conversations, setConversations] = useState([]);
     const [selectedContact, setSelectedContact] = useState(null);
     const [typing, setTyping] = useState(false);
+    const [attachment, setAttachment] = useState(null);
     const [sending, setSending] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [sidebarTab, setSidebarTab] = useState('all');
@@ -174,31 +175,56 @@ const Chat = () => {
     }, [token, fetchContacts, fetchConversations, updateContactPresence]);
 
     const selectContact = async (contact) => {
+        if (sending) return;
+        setAttachment(null);
         setSelectedContact(contact);
         setMessages([]);
         await loadHistory(contact.employee_code);
     };
 
-    const handleSend = () => {
-        if (!newMessage.trim() || sending || !selectedContact) return;
-
+    const handleSend = async () => {
+        if ((!newMessage.trim() && !attachment) || sending || !selectedContact) return;
+        const socket = socketRef.current;
+        if (!socket?.connected) return setError('Chat is reconnecting. Please try again.');
         setSending(true);
-        socketRef.current?.emit(
-            'send_message',
-            { message: newMessage.trim(), receiverCode: selectedContact.employee_code },
-            (response) => {
-                setSending(false);
-                if (response?.error) {
-                    setError(response.error);
-                } else if (response?.message) {
-                    setMessages((prev) =>
-                        prev.some((m) => m.id === response.message.id) ? prev : [...prev, response.message]
-                    );
-                    fetchConversations();
-                }
+        setError('');
+        const receiverCode = selectedContact.employee_code;
+        try {
+            const file = attachment && {
+                name: attachment.name, type: attachment.type, data: await attachment.arrayBuffer()
+            };
+            const response = await socket.timeout(20000).emitWithAck('send_message', {
+                message: newMessage.trim(), receiverCode, attachment: file
+            });
+            if (response?.error) throw new Error(response.error);
+            setNewMessage('');
+            setAttachment(null);
+            if (selectedContactRef.current?.employee_code === receiverCode) {
+                setMessages(previous => previous.some(m => m.id === response.message.id)
+                    ? previous : [...previous, response.message]);
             }
-        );
-        setNewMessage('');
+            fetchConversations();
+        } catch (error) {
+            setError(error.message || 'Could not send message.');
+        } finally {
+            setSending(false);
+        }
+    };
+
+    const downloadAttachment = async (message) => {
+        try {
+            const response = await axios.get(`${API_BASE}/api/chat/attachments/${message.id}`, {
+                headers: { Authorization: `Bearer ${token}` }, responseType: 'blob'
+            });
+            const url = URL.createObjectURL(response.data);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = message.attachment_name;
+            link.click();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        } catch {
+            setError('Could not download the attachment.');
+        }
     };
 
     const handleKeyDown = (e) => {
@@ -362,6 +388,11 @@ const Chat = () => {
                                         }`}
                                     >
                                         <div>{msg.message}</div>
+                                        {msg.attachment_name && (
+                                            <button type="button" onClick={() => downloadAttachment(msg)}>
+                                                Download {msg.attachment_name}
+                                            </button>
+                                        )}
                                         <div className={styles.bubbleMeta}>
                                             {new Date(msg.created_at).toLocaleTimeString('en-IN', {
                                                 hour: '2-digit',
@@ -375,6 +406,23 @@ const Chat = () => {
                             <div ref={messagesEndRef} />
                         </div>
 
+                        <div>
+                            <label>
+                                Attach PDF or image
+                                <input type="file" accept="application/pdf,image/jpeg,image/png,image/webp"
+                                    disabled={sending} onChange={event => {
+                                        const file = event.currentTarget.files[0];
+                                        event.currentTarget.value = '';
+                                        if (!file) return;
+                                        if (file.size > 4 * 1024 * 1024) return setError('File must be 4 MB or smaller.');
+                                        setError('');
+                                        setAttachment(file);
+                                    }} />
+                            </label>
+                            {attachment && <button type="button" disabled={sending} onClick={() => setAttachment(null)}>
+                                Remove {attachment.name}
+                            </button>}
+                        </div>
                         <div className={styles.inputBar}>
                             <textarea
                                 value={newMessage}
@@ -387,7 +435,7 @@ const Chat = () => {
                                 type="button"
                                 className={styles.sendBtn}
                                 onClick={handleSend}
-                                disabled={!newMessage.trim() || sending}
+                                disabled={(!newMessage.trim() && !attachment) || sending}
                             >
                                 Send
                             </button>

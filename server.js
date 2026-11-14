@@ -50,6 +50,7 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/email', require('./routes/emailRoutes'));
 
 // ============================================
 // CRON JOB TEST ROUTES
@@ -187,6 +188,7 @@ console.log('✅ Session cleanup job scheduled (Daily at 2:00 AM)');
 // SOCKET.IO SETUP
 // ============================================
 const io = new Server(server, {
+    maxHttpBufferSize: 6 * 1024 * 1024,
     allowRequest: (req, callback) => callback(null, !req.headers.origin || frontendOrigins.includes(req.headers.origin)),
     cors: {
         origin: frontendOrigins,
@@ -201,7 +203,14 @@ setupSocketIO(io);
 // START SERVER
 // ============================================
 const PORT = process.env.PORT || 5000;
-db.sequelize.authenticate().then(() => server.listen(PORT, () => {
+db.sequelize.authenticate()
+    .then(() => db.sequelize.query(`
+        ALTER TABLE public.chat_messages
+            ADD COLUMN IF NOT EXISTS attachment_name varchar(255),
+            ADD COLUMN IF NOT EXISTS attachment_type varchar(100),
+            ADD COLUMN IF NOT EXISTS attachment_data bytea
+    `))
+    .then(() => server.listen(PORT, () => {
     console.log(`\n🚀 Server running on port ${PORT}`);
     console.log(`\n🔐 Security Features:`);
     console.log(`   - Token Verification ✅`);

@@ -17,14 +17,25 @@ const notificationHelper = require('../utils/notificationHelper');
 // ============================================
 const applyLeave = async (req, res) => {
     try {
-        const { leave_type, start_date, end_date, reason, employee_code, days } = req.body;
+        const { leave_type, start_date, end_date, reason } = req.body;
 
-        const activeEmpCode = req.user?.employee_code || employee_code;
+        const activeEmpCode = req.user.employee_code;
         if (!activeEmpCode) {
             return res.status(400).json({ error: 'Employee code missing!' });
         }
 
-        const inputDays = parseInt(days, 10) || 0;
+        const validDate = value => {
+            if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+            const date = new Date(value);
+            return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value;
+        };
+        if (!validDate(start_date) || !validDate(end_date) || typeof reason !== 'string' || !reason.trim()) {
+            return res.status(400).json({ error: 'Enter valid leave dates and a reason.' });
+        }
+        if (!['Sick Leave', 'Casual Leave', 'Paid Leave'].includes(leave_type)) {
+            return res.status(400).json({ error: 'Choose a valid leave type.' });
+        }
+        const inputDays = (Date.parse(end_date) - Date.parse(start_date)) / 86400000 + 1;
         if (inputDays <= 0) {
             return res.status(400).json({ error: 'Minimum 1 day required' });
         }

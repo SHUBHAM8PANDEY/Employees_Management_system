@@ -20,6 +20,9 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             field: 'message'
         },
+        attachment_name: DataTypes.STRING(255),
+        attachment_type: DataTypes.STRING(100),
+        attachment_data: DataTypes.BLOB,
         is_read: {
             type: DataTypes.BOOLEAN,
             allowNull: false,

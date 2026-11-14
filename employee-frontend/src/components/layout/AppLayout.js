@@ -24,7 +24,9 @@ const AppLayout = ({ children }) => {
             '/notifications': 'Notifications',
             '/audit-logs': 'Audit Logs',
             '/add-employee': 'Add Employee',
-            '/employee-leave': 'Leave Management'
+            '/employee-leave': 'Apply Leave',
+            '/reports': 'Reports',
+            '/email': 'Email'
         };
         if (location.pathname.startsWith('/edit-employee')) return 'Edit Employee';
         return titles[location.pathname] || 'WorkHub';
@@ -73,6 +75,18 @@ const AppLayout = ({ children }) => {
                     {isHr && (
                         <>
                             <p className={styles.navLabel}>Management</p>
+                            <NavLink to="/dashboard?tab=leaves" className={styles.navLink}>
+                                <span className={styles.navText}>Leave Requests</span>
+                            </NavLink>
+                            <NavLink to="/dashboard?tab=history" className={styles.navLink}>
+                                <span className={styles.navText}>Leave History</span>
+                            </NavLink>
+                            <NavLink to="/reports" className={styles.navLink}>
+                                <span className={styles.navText}>Reports</span>
+                            </NavLink>
+                            <NavLink to="/email" className={styles.navLink}>
+                                <span className={styles.navText}>Email</span>
+                            </NavLink>
                             <NavLink to="/add-employee" className={({ isActive }) => `${styles.navLink} ${isActive ? styles.active : ''}`}>
                                 <NavIcon>
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
@@ -88,8 +102,6 @@ const AppLayout = ({ children }) => {
                         </>
                     )}
 
-                    {!isHr && (
-                        <>
                             <p className={styles.navLabel}>Self Service</p>
                             <NavLink to="/employee-leave" className={({ isActive }) => `${styles.navLink} ${isActive ? styles.active : ''}`}>
                                 <NavIcon>
@@ -97,8 +109,6 @@ const AppLayout = ({ children }) => {
                                 </NavIcon>
                                 <span className={styles.navText}>Apply Leave</span>
                             </NavLink>
-                        </>
-                    )}
                 </nav>
             </aside>
 

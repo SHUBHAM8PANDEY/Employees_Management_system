@@ -1,18 +1,42 @@
 const nodemailer = require('nodemailer');
 
-// Email configuration
+const mailConfigured = () => Boolean((process.env.RESEND_API_KEY && process.env.EMAIL_FROM) || (process.env.EMAIL_USER && process.env.EMAIL_PASS));
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL_USER || 'your-email@gmail.com',
-        pass: process.env.EMAIL_PASS || 'your-app-password'
-    }
+    host: process.env.SMTP_HOST || 'smtp.gmail.com',
+    port: Number(process.env.SMTP_PORT || 465),
+    secure: Number(process.env.SMTP_PORT || 465) === 465,
+    requireTLS: true,
+    connectionTimeout: 10000,
+    socketTimeout: 15000,
+    auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
 });
 
+const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, char =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
+
 const sendEmail = async (to, subject, html, attachments = []) => {
+    if (!mailConfigured()) throw new Error('Email provider is not configured');
+    if (process.env.RESEND_API_KEY && process.env.EMAIL_FROM) {
+        const response = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                from: process.env.EMAIL_FROM, to: [to], subject, html,
+                attachments: attachments.map(({ filename, content }) => ({
+                    filename, content: Buffer.isBuffer(content) ? content.toString('base64') : content
+                }))
+            }),
+            signal: AbortSignal.timeout(15000)
+        });
+        if (!response.ok) throw new Error(`Email provider rejected request (${response.status})`);
+        return response.json();
+    }
     try {
         const mailOptions = {
-            from: process.env.EMAIL_USER || 'your-email@gmail.com',
+            from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
             to,
             subject,
             html,
@@ -61,21 +85,21 @@ const getLeaveStatusEmailTemplate = (employeeName, leaveDetails, status, comment
                     <div class="status-badge">${statusEmoji} ${statusMessage}</div>
                 </div>
                 <div class="content">
-                    <p>Dear <strong>${employeeName}</strong>,</p>
+                    <p>Dear <strong>${escapeHtml(employeeName)}</strong>,</p>
                     <p>Your leave request has been <strong>${statusMessage}</strong>.</p>
                     
                     <div style="background: #f8fafc; padding: 16px; border-radius: 12px; margin: 16px 0;">
                         <div class="detail-row">
                             <span class="detail-label">📅 Leave Type</span>
-                            <span class="detail-value">${leaveDetails.leave_type}</span>
+                            <span class="detail-value">${escapeHtml(leaveDetails.leave_type)}</span>
                         </div>
                         <div class="detail-row">
                             <span class="detail-label">📆 Duration</span>
-                            <span class="detail-value">${leaveDetails.start_date} to ${leaveDetails.end_date}</span>
+                            <span class="detail-value">${escapeHtml(leaveDetails.start_date)} to ${escapeHtml(leaveDetails.end_date)}</span>
                         </div>
                         <div class="detail-row">
                             <span class="detail-label">📊 Total Days</span>
-                            <span class="detail-value"><b>${leaveDetails.days}</b> days</span>
+                            <span class="detail-value"><b>${escapeHtml(leaveDetails.days)}</b> days</span>
                         </div>
                         <div class="detail-row">
                             <span class="detail-label">📝 Reason</span>
@@ -84,7 +108,7 @@ const getLeaveStatusEmailTemplate = (employeeName, leaveDetails, status, comment
                         ${comments ? `
                         <div class="detail-row">
                             <span class="detail-label">💬 Comments</span>
-                            <span class="detail-value">${comments}</span>
+                            <span class="detail-value">${escapeHtml(comments)}</span>
                         </div>
                         ` : ''}
                     </div>
@@ -96,7 +120,7 @@ const getLeaveStatusEmailTemplate = (employeeName, leaveDetails, status, comment
                     `}
                     
                     <div style="text-align: center; margin-top: 20px;">
-                        <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}" class="btn">📊 View Dashboard</a>
+                        <a href="${escapeHtml(process.env.FRONTEND_ORIGINS?.split(',')[0]?.trim() || 'http://localhost:3000')}" class="btn">📊 View Dashboard</a>
                     </div>
                 </div>
                 <div class="footer">
@@ -110,6 +134,7 @@ const getLeaveStatusEmailTemplate = (employeeName, leaveDetails, status, comment
 };
 
 module.exports = {
+    mailConfigured, escapeHtml,
     sendEmail,
     getLeaveStatusEmailTemplate
 };

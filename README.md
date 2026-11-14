@@ -13,3 +13,9 @@ The Neon schema and data are already imported on the configured database. For a 
 Create a backend `.env` from `.env.example` and supply a Neon URL and a random JWT signing secret of at least 32 characters. Run `npm ci` and `npm start` in the repository root, then `npm ci` and `npm start` in `employee-frontend`.
 
 Sessions expire 24 hours after sign-in. Signing out or forcing logout revokes the database session. Changing the signing secret requires all users to sign in again.
+
+## Email and chat files
+
+For Render, set `RESEND_API_KEY` and `EMAIL_FROM` to a verified sender address. The HTTPS API works on Render Free, which blocks standard outbound SMTP ports. On an SMTP-capable host, set `EMAIL_USER`, `EMAIL_PASS`, and optionally `SMTP_HOST` and `SMTP_PORT`.
+
+Chat accepts PDF, JPEG, PNG and WebP files up to 4 MB. Files are stored in Neon and can be downloaded by the sender and recipient. Backend startup adds the attachment columns to an existing database.

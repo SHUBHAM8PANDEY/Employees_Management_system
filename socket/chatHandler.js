@@ -66,10 +66,7 @@ const setupSocketIO = (io) => {
 
         socket.on('send_message', async (payload, callback) => {
             try {
-                const { message, receiverCode } = payload || {};
-                if (!message || !message.trim()) {
-                    return callback?.({ error: 'Message cannot be empty' });
-                }
+                const { message, receiverCode, attachment } = payload || {};
                 if (!receiverCode) {
                     return callback?.({ error: 'Receiver is required' });
                 }
@@ -77,7 +74,7 @@ const setupSocketIO = (io) => {
                 const saved = await saveMessage({
                     senderCode: myCode,
                     receiverCode,
-                    message
+                    message, attachment
                 });
 
                 const messageData = {
@@ -85,6 +82,8 @@ const setupSocketIO = (io) => {
                     sender_code: myCode,
                     receiver_code: receiverCode,
                     message: saved.message,
+                    attachment_name: saved.attachment_name,
+                    attachment_type: saved.attachment_type,
                     is_read: false,
                     created_at: saved.created_at
                 };

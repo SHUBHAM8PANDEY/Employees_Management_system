@@ -1,7 +1,7 @@
 import { API_BASE } from '../config';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import styles from './Dashboard.module.css';
 
 const Dashboard = () => {
@@ -37,6 +37,13 @@ const Dashboard = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState(userRole === 'Admin' || userRole === 'HR' ? 'employees' : 'my-profile');
+    const [searchParams] = useSearchParams();
+    useEffect(() => {
+        const tab = searchParams.get('tab');
+        if (['Admin', 'HR'].includes(userRole)) {
+            setActiveTab(['leaves', 'history'].includes(tab) ? tab : 'employees');
+        }
+    }, [searchParams, userRole]);
     const [selectedViewEmp, setSelectedViewEmp] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
     const [saving, setSaving] = useState(false);

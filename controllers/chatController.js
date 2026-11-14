@@ -60,6 +60,7 @@ const getConversations = async (req, res) => {
         const myCode = req.user.employee_code;
 
         const messages = await ChatMessage.findAll({
+            attributes: { exclude: ['attachment_data'] },
             where: {
                 [Op.or]: [
                     { sender_code: myCode },
@@ -79,7 +80,7 @@ const getConversations = async (req, res) => {
                     first_name: '',
                     last_name: '',
                     role: '',
-                    lastMessage: msg.message,
+                    lastMessage: msg.message || msg.attachment_name,
                     lastMessageAt: msg.created_at,
                     unreadCount: 0,
                     isOnline: isOnline(otherCode),
@@ -152,8 +153,9 @@ const getHistory = async (req, res) => {
         }
 
         const messages = await ChatMessage.findAll({
+            attributes: { exclude: ['attachment_data'] },
             where: buildPeerWhere(myCode, otherCode),
-            order: [['created_at', 'ASC']],
+            order: [['created_at', 'DESC'], ['id', 'DESC']],
             limit: 200
         });
 
@@ -171,7 +173,7 @@ const getHistory = async (req, res) => {
         const otherUser = await User.findByPk(otherCode, { attributes: ['last_seen'] });
 
         res.json({
-            data: messages,
+            data: messages.reverse(),
             partner: {
                 employee_code: otherCode,
                 first_name: otherExists.first_name,
@@ -211,7 +213,10 @@ const getOnlineUsers = async (req, res) => {
     }
 };
 
-const saveMessage = async ({ senderCode, receiverCode, message }) => {
+const saveMessage = async ({ senderCode, receiverCode, message, attachment }) => {
+    const text = typeof message === 'string' ? message.trim() : '';
+    const file = attachment ? validateAttachment(attachment) : {};
+    if ((!text && !attachment) || text.length > 10000) throw new Error('Invalid message');
     if (senderCode === receiverCode) {
         throw new Error('Cannot send message to yourself!');
     }
@@ -231,12 +236,44 @@ const saveMessage = async ({ senderCode, receiverCode, message }) => {
     return ChatMessage.create({
         sender_code: senderCode,
         receiver_code: receiverCode,
-        message: message.trim(),
+        message: text,
+        ...file,
         is_read: false
     });
 };
 
+function validateAttachment({ name, type, data }) {
+    const signatures = {
+        'application/pdf': ['255044462d', 0],
+        'image/jpeg': ['ffd8ff', 0],
+        'image/png': ['89504e470d0a1a0a', 0],
+        'image/webp': ['57454250', 8]
+    };
+    if (!Object.hasOwn(signatures, type) || !Buffer.isBuffer(data) || data.length > 4 * 1024 * 1024) {
+        throw new Error('Choose a PDF, JPEG, PNG or WebP file up to 4 MB');
+    }
+    const [signature, offset] = signatures[type];
+    if (data.subarray(offset, offset + signature.length / 2).toString('hex') !== signature) {
+        throw new Error('File contents do not match its type');
+    }
+    const fileName = typeof name === 'string' ? name.split(/[\\/]/).pop().replace(/[\u0000-\u001f\u007f]/g, '').slice(0, 240) : '';
+    return { attachment_name: fileName || 'attachment', attachment_type: type, attachment_data: data };
+}
+
+async function getAttachment(req, res) {
+    if (!/^\d{1,10}$/.test(req.params.id) || Number(req.params.id) > 2147483647) return res.sendStatus(404);
+    const code = req.user.employee_code;
+    const message = await ChatMessage.findOne({
+        where: { id: req.params.id, [Op.or]: [{ sender_code: code }, { receiver_code: code }] }
+    });
+    if (!message?.attachment_data) return res.sendStatus(404);
+    res.set('Cache-Control', 'private, no-store');
+    res.set('X-Content-Type-Options', 'nosniff');
+    res.attachment(message.attachment_name).type(message.attachment_type).send(message.attachment_data);
+}
+
 module.exports = {
+    getAttachment,
     getContacts,
     getConversations,
     getHistory,
