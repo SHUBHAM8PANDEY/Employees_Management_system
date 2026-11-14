@@ -1,3 +1,4 @@
+import EmployeeOverview from '../components/EmployeeOverview';
 import WorkspaceOverview from '../components/WorkspaceOverview';
 import { Skeleton } from '../components/Skeleton';
 import { API_BASE } from '../config';
@@ -1052,6 +1053,7 @@ const Dashboard = () => {
     // ============================================
     return (
         <div className={styles.dashboard}>
+                <EmployeeOverview profile={myProfile} />
             {error && <div className={styles.error}>❌ {error}</div>}
 
             {loading ? (

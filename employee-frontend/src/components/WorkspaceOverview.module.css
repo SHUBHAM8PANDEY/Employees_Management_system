@@ -25,3 +25,7 @@
 .activity { list-style: none; }
 .activity li { display: grid; gap: 4px; padding: 9px 0; border-top: 1px solid var(--ui-border); }
 .activity span { color: var(--ui-muted); font-size: .8rem; }
+
+.activity > div { display: flex; justify-content: space-between; gap: 8px; padding: 8px 0; border-top: 1px solid var(--ui-border); }
+.activity dd { font-weight: 650; text-align: right; }
+.charts h3 svg { vertical-align: middle; margin-right: 5px; color: var(--ui-accent); }

@@ -11,7 +11,7 @@ const auditLogger = require('../utils/auditLogger');
 const { checkLoginAttempts, resetLoginAttempts } = require('../utils/securityUtils');
 
 const { randomUUID } = require('node:crypto');
-const { JWT_SECRET, SESSION_SECONDS } = require('../utils/sessionAuth');
+const { JWT_SECRET, SESSION_SECONDS, SESSION_ISSUER } = require('../utils/sessionAuth');
 
 // ============================================
 // LOGIN
@@ -107,7 +107,7 @@ const login = async (req, res) => {
                 role: user.role 
             },
             JWT_SECRET,
-            { expiresIn: SESSION_SECONDS, jwtid: randomUUID() }
+            { expiresIn: SESSION_SECONDS, issuer: SESSION_ISSUER, jwtid: randomUUID() }
         );
 
         await UserSession.create({

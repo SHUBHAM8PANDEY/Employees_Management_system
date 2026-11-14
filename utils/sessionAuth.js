@@ -1,8 +1,10 @@
+const { randomUUID } = require('node:crypto');
 const jwt = require('jsonwebtoken');
 const { Op } = require('sequelize');
 const { User, UserSession } = require('../models');
 
 const SESSION_SECONDS = 86400;
+const SESSION_ISSUER = randomUUID();
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET || JWT_SECRET.length < 32) {
     throw new Error('JWT_SECRET must be at least 32 characters');
@@ -16,6 +18,7 @@ async function authenticateSession(token) {
     try {
         claims = jwt.verify(token, JWT_SECRET, {
             algorithms: ['HS256'],
+            issuer: SESSION_ISSUER,
             maxAge: SESSION_SECONDS
         });
     } catch {
@@ -44,4 +47,4 @@ async function authenticateSession(token) {
     };
 }
 
-module.exports = { authenticateSession, InvalidSessionError, JWT_SECRET, SESSION_SECONDS };
+module.exports = { authenticateSession, InvalidSessionError, JWT_SECRET, SESSION_SECONDS, SESSION_ISSUER };

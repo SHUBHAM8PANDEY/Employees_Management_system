@@ -77,9 +77,12 @@ const ProtectedRoute = () => {
             timeout = setTimeout(endSession, Math.max(0, result.expiresAt - Date.now()));
         };
         verifyAuth();
+        const onVisible = () => { if (!document.hidden) void verifyAuth(); };
+        document.addEventListener('visibilitychange', onVisible);
         const refresh = setInterval(verifyAuth, 30000);
         return () => {
             disposed = true;
+            document.removeEventListener('visibilitychange', onVisible);
             clearInterval(refresh);
             clearTimeout(timeout);
         };
