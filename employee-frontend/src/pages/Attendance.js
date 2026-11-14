@@ -6,6 +6,7 @@ import styles from './Attendance.module.css';
 import AttendanceExport from '../components/AttendanceExport';
 
 const indiaDate = () => new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Kolkata' }).format();
+const calendarStatuses = { Present: 'present', Absent: 'absent', 'Half Day': 'halfDay', 'On Leave': 'onLeave', Holiday: 'holiday', 'Short Leave': 'shortLeave' };
 const indiaTime = value => value ? new Date(value).toLocaleTimeString('en-IN', {
     timeZone: 'Asia/Kolkata', hour: 'numeric', minute: '2-digit'
 }) : '—';
@@ -50,7 +51,13 @@ const Attendance = () => {
     const [captureOpen, setCaptureOpen] = useState(false);
     const [teamPeriod, setTeamPeriod] = useState('day');
     const [cameraOpen, setCameraOpen] = useState(false);
-    const [teamView, setTeamView] = useState(false);
+    const [teamView, setTeamView] = useState(['Admin', 'HR'].includes(userRole));
+    const [teamSearch, setTeamSearch] = useState('');
+    const [selectedEmployee, setSelectedEmployee] = useState(null);
+    const [calendarMonth, setCalendarMonth] = useState(indiaDate().slice(0, 7));
+    const [calendarMode, setCalendarMode] = useState('month');
+    const [calendar, setCalendar] = useState(null);
+    const [calendarError, setCalendarError] = useState('');
     const [notice, setNotice] = useState('');
     const camera = useRef(null);
     const video = useRef(null);
@@ -65,6 +72,22 @@ const Attendance = () => {
     useEffect(() => {
         if (cameraOpen && video.current) video.current.srcObject = camera.current;
     }, [cameraOpen]);
+
+    const calendarPeriod = calendarMode === 'year' ? calendarMonth.slice(0, 4) : calendarMonth;
+    useEffect(() => {
+        if (!selectedEmployee || !calendarPeriod) return;
+        const controller = new AbortController();
+        setCalendar(null);
+        setCalendarError('');
+        axios.get(`${API_BASE}/api/attendance/admin/employee/${encodeURIComponent(selectedEmployee.employee_code)}/calendar`, {
+            params: { period: calendarPeriod }, headers: { Authorization: `Bearer ${token}` }, signal: controller.signal
+        }).then(({ data }) => {
+            if (!controller.signal.aborted) setCalendar(data);
+        }).catch(error => {
+            if (!controller.signal.aborted) setCalendarError(error.response?.data?.error || 'Could not load employee attendance.');
+        });
+        return () => controller.abort();
+    }, [selectedEmployee, calendarPeriod, token]);
 
     const startCamera = async () => {
         setCaptureOpen(true);
@@ -140,7 +163,7 @@ const Attendance = () => {
         try {
             if (canSeeTeam && teamView) {
                 const params = new URLSearchParams({
-                    date: selectedDate, period: teamPeriod,
+                    date: selectedDate, period: teamPeriod, search: teamSearch,
                     page: pagination.page || 1,
                     limit: 10
                 });
@@ -198,7 +221,7 @@ const Attendance = () => {
 
     useEffect(() => {
         fetchData();
-    }, [teamView, teamPeriod, pagination.page, filterStatus, selectedDate, selectedYear, selectedMonth, selectedDay, startDate, endDate]);
+    }, [teamView, teamPeriod, teamSearch, pagination.page, filterStatus, selectedDate, selectedYear, selectedMonth, selectedDay, startDate, endDate]);
 
     // ============ PUNCH IN ============
     const handlePunchIn = async () => {
@@ -366,6 +389,14 @@ const Attendance = () => {
                 </div>
 
                 <div className={styles.filterBar}>
+                    <input type="search" aria-label="Search employee name or ID" placeholder="Search name or employee ID"
+                        className={styles.textInput} value={teamSearch} onChange={event => {
+                            setTeamSearch(event.target.value);
+                            setPagination({ page: 1 });
+                        }} />
+                    <button type="button" className={styles.exportBtn} onClick={() => {
+                        setSelectedDate(indiaDate()); setTeamPeriod('day'); setPagination({ page: 1 });
+                    }}>Today</button>
                     <select aria-label="Report period" value={teamPeriod} className={styles.selectInput} onChange={event => {
                         setTeamPeriod(event.target.value);
                         setPagination({ page: 1 });
@@ -418,7 +449,13 @@ const Attendance = () => {
                                 <tbody>
                                     {allAttendance.map((item) => (
                                         <tr key={item.id || `${item.employee_code}-${item.date}`}>
-                                            <td><strong>{item.employee?.first_name} {item.employee?.last_name}</strong><small className={styles.punchDetail}>{item.employee_code}</small></td>
+                                            <td><button type="button" className={styles.employeeButton} onClick={() => {
+                                                setCalendarMonth(item.date.slice(0, 7));
+                                                setCalendarMode('month');
+                                                setSelectedEmployee(item.employee);
+                                            }}>{item.employee?.first_name} {item.employee?.last_name}
+                                                <small>{item.employee_code} · View history</small>
+                                            </button></td>
                                             <td>{formatDateOnly(item.date)}</td>
                                             <td><strong>{indiaTime(item.punch_in)}{item.late && ' · Late'}</strong>
                                                 {item.punch_in && <small className={styles.punchDetail}><PunchLocation latitude={item.latitude} longitude={item.longitude} fallback={item.location} /></small>}
@@ -448,6 +485,40 @@ const Attendance = () => {
                     )}
                 </div>
 
+                {selectedEmployee && <div className={styles.calendarOverlay} onClick={event => {
+                    if (event.target === event.currentTarget) setSelectedEmployee(null);
+                }}>
+                    <section className={styles.employeeCalendar} role="dialog" aria-modal="true" aria-labelledby="employee-history"
+                        onKeyDown={event => { if (event.key === 'Escape') setSelectedEmployee(null); }}>
+                        <header className={styles.calendarHeader}>
+                            <div><h2 id="employee-history">{selectedEmployee.first_name} {selectedEmployee.last_name}</h2>
+                                <p>{selectedEmployee.employee_code} · Attendance history</p></div>
+                            <button type="button" autoFocus className={styles.exportBtn} onClick={() => setSelectedEmployee(null)}>Close</button>
+                        </header>
+                        <div className={styles.filterBar}>
+                            <select aria-label="History view" className={styles.selectInput} value={calendarMode} onChange={event => setCalendarMode(event.target.value)}>
+                                <option value="month">Monthly</option><option value="year">Yearly</option>
+                            </select>
+                            <input type="month" aria-label={calendarMode === 'year' ? 'Choose a month in the report year' : 'Report month'}
+                                className={styles.dateInput} value={calendarMonth} max={indiaDate().slice(0, 7)}
+                                onChange={event => { if (event.target.value) setCalendarMonth(event.target.value); }} />
+                        </div>
+                        {calendarError ? <p role="alert">{calendarError}</p> : !calendar ? <p role="status">Loading attendance…</p> : <>
+                            <div className={styles.calendarSummary}>{Object.entries(calendarStatuses).map(([label, field]) =>
+                                <div key={field}><strong>{calendar.summary[field]}</strong><span>{label === 'Holiday' ? 'Off / Holiday' : label}</span></div>
+                            )}</div>
+                            {calendar.data.length ? <div className={styles.tableWrapper}><table className={styles.attendanceTable}>
+                                <thead><tr><th>Date</th><th>Status</th><th>In · IST</th><th>Out · IST</th><th>Hours</th></tr></thead>
+                                <tbody>{calendar.data.map(day => <tr key={day.date}>
+                                    <td>{formatDateOnly(day.date)}</td>
+                                    <td><span className={`${styles.badge} ${styles[getStatusBadge(day.status)]}`}>{day.status}</span></td>
+                                    <td>{indiaTime(day.punch_in)}{day.late && ' · Late'}</td><td>{indiaTime(day.punch_out)}</td>
+                                    <td>{day.total_hours ?? '—'}</td>
+                                </tr>)}</tbody>
+                            </table></div> : <p>No attendance days available for this period.</p>}
+                        </>}
+                    </section>
+                </div>}
                 {showExportModal && (
                     <AttendanceExport 
                         onClose={() => setShowExportModal(false)} 

@@ -382,6 +382,46 @@ async function getTeamAttendance(targetDate, period = 'day') {
     });
 }
 
+async function getEmployeeCalendar(req, res) {
+    const { code } = req.params;
+    const period = req.query.period;
+    if (typeof period !== 'string' || !/^[1-9]\d{3}(?:-(?:0[1-9]|1[0-2]))?$/.test(period)) {
+        return res.status(400).json({ error: 'Select a valid month or year.' });
+    }
+    const employee = await Employee.findByPk(code, {
+        attributes: ['employee_code', 'first_name', 'last_name', 'joining_date']
+    });
+    if (!employee) return res.sendStatus(404);
+    const startDate = period.length === 4 ? period + '-01-01' : period + '-01';
+    const start = new Date(startDate + 'T00:00:00Z');
+    const end = new Date(start);
+    end.setUTCMonth(end.getUTCMonth() + (period.length === 4 ? 12 : 1));
+    const endDate = end.toISOString().slice(0, 10);
+    const today = getTodayStr();
+    const [punches, leaves, firstRecord] = await Promise.all([
+        Attendance.findAll({ where: { employee_code: code, date: { [Op.gte]: startDate, [Op.lt]: endDate } },
+            attributes: { exclude: photos }, raw: true }),
+        db.LeaveRequest.findAll({ where: { employee_code: code, status: 'Approved',
+            start_date: { [Op.lt]: endDate }, end_date: { [Op.gte]: startDate } },
+            attributes: ['start_date', 'end_date'], raw: true }),
+        employee.joining_date ? null : Attendance.min('date', { where: { employee_code: code } })
+    ]);
+    const firstDay = employee.joining_date || firstRecord || today;
+    const byDate = new Map(punches.map(punch => [punch.date, punch]));
+    const data = [];
+    for (const day = new Date(start); day < end; day.setUTCDate(day.getUTCDate() + 1)) {
+        const date = day.toISOString().slice(0, 10);
+        if (date > today) break;
+        const record = byDate.get(date);
+        const onLeave = leaves.some(leave => leave.start_date <= date && date <= leave.end_date);
+        if (!record && !onLeave && date < firstDay) continue;
+        const status = record?.punch_in ? record.status : isSunday(date) ? 'Holiday'
+            : onLeave ? 'On Leave' : record?.status ?? 'Absent';
+        data.push({ ...record, date, status, late: Boolean(record?.punch_in && isAfterTime(record.punch_in, '09:30')) });
+    }
+    res.json({ employee, data: data.reverse(), summary: buildSummary(data) });
+}
+
 const getAllEmployeeAttendance = async (req, res) => {
     try {
         const page = parseInt(req.query.page, 10) || 1;
@@ -395,7 +435,9 @@ const getAllEmployeeAttendance = async (req, res) => {
         }
 
         const allForDate = await getTeamAttendance(targetDate, ['month', 'year'].includes(req.query.period) ? req.query.period : 'day');
-        const filtered = status ? allForDate.filter(record => record.status === status) : allForDate;
+        const search = typeof req.query.search === 'string' ? req.query.search.trim().toLowerCase() : '';
+        const filtered = allForDate.filter(record => (!status || record.status === status) &&
+            (!search || `${record.employee_code} ${record.employee.first_name} ${record.employee.last_name}`.toLowerCase().includes(search)));
         res.json({
             data: filtered.slice(offset, offset + limit), summary: buildSummary(allForDate),
             pagination: { page, total: filtered.length, totalPages: Math.ceil(filtered.length / limit) || 1 }
@@ -504,6 +546,7 @@ const markAttendance = async (req, res) => {
 
 module.exports = {
     getTeamAttendance,
+    getEmployeeCalendar,
     punchIn,
     punchOut,
     getTodayAttendance,
