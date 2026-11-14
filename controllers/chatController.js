@@ -260,6 +260,27 @@ function validateAttachment({ name, type, data }) {
     return { attachment_name: fileName || 'attachment', attachment_type: type, attachment_data: data };
 }
 
+async function postMessage(req, res) {
+    const { receiverCode, message, attachment } = req.body ?? {};
+    if (typeof receiverCode !== 'string' || !receiverCode.trim() || receiverCode.length > 100) {
+        return res.status(400).json({ error: 'Choose a valid recipient.' });
+    }
+    try {
+        const saved = await saveMessage({
+            senderCode: req.user.employee_code, receiverCode, message,
+            attachment: attachment && { name: attachment.name, type: attachment.type,
+                data: typeof attachment.data === 'string' ? Buffer.from(attachment.data, 'base64') : null }
+        });
+        const { attachment_data, ...result } = saved.get({ plain: true });
+        const io = req.app.get('io');
+        io.to([`user:${result.sender_code}`, `user:${result.receiver_code}`]).emit('receive_message', result);
+        res.status(201).json({ message: result });
+    } catch (error) {
+        if (error.name.startsWith('Sequelize')) throw error;
+        res.status(400).json({ error: error.message });
+    }
+}
+
 async function getAttachment(req, res) {
     if (!/^\d{1,10}$/.test(req.params.id) || Number(req.params.id) > 2147483647) return res.sendStatus(404);
     const code = req.user.employee_code;
@@ -274,6 +295,7 @@ async function getAttachment(req, res) {
 
 module.exports = {
     getAttachment,
+    postMessage,
     getContacts,
     getConversations,
     getHistory,

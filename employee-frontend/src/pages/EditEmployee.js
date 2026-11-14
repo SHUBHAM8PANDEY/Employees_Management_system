@@ -10,6 +10,8 @@ const EditEmployee = () => {
         first_name: '',
         last_name: '',
         email: '',
+        date_of_birth: '',
+        joining_date: '',
         role: 'Employee'
     });
     const [loading, setLoading] = useState(false);
@@ -31,6 +33,8 @@ const EditEmployee = () => {
                 first_name: response.data.first_name || '',
                 last_name: response.data.last_name || '',
                 email: response.data.email || '',
+                date_of_birth: response.data.date_of_birth || '',
+                joining_date: response.data.joining_date || '',
                 role: response.data.role || 'Employee'
             });
         } catch (err) {
@@ -133,6 +137,12 @@ const EditEmployee = () => {
                     />
                 </div>
 
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
+                    <label>Date of birth <input type="date" required value={formData.date_of_birth}
+                        onChange={event => setFormData({ ...formData, date_of_birth: event.target.value })} /></label>
+                    <label>Joining date <input type="date" required value={formData.joining_date}
+                        onChange={event => setFormData({ ...formData, joining_date: event.target.value })} /></label>
+                </div>
                 <div style={{ marginBottom: '16px' }}>
                     <label style={{ display: 'block', fontWeight: '600', marginBottom: '4px' }}>
                         Email *

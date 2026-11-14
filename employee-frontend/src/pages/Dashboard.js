@@ -36,6 +36,7 @@ const Dashboard = () => {
     const [myLeaves, setMyLeaves] = useState([]);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(true);
+    const [deliveryNotice, setDeliveryNotice] = useState('');
     const [activeTab, setActiveTab] = useState(userRole === 'Admin' || userRole === 'HR' ? 'employees' : 'my-profile');
     const [searchParams] = useSearchParams();
     useEffect(() => {
@@ -245,11 +246,12 @@ const Dashboard = () => {
                 );
             }
             
-            alert(`✅ Leave ${selectedAction} with comment!`);
+            const email = { sent: 'Email sent.', failed: 'Email delivery failed.', skipped: 'Email was skipped.' };
+            setDeliveryNotice(`Leave ${selectedAction.toLowerCase()}. ${email[response.data.emailStatus] || ''}`);
             setShowCommentModal(false);
             fetchData();
         } catch (err) {
-            alert('❌ Failed to update leave!');
+            setDeliveryNotice(err.response?.data?.error || 'Could not update leave.');
         }
         setProcessingAction(false);
     };
@@ -333,7 +335,7 @@ const Dashboard = () => {
             setShowEditLeaveModal(false);
             fetchData();
         } catch (err) {
-            alert('❌ Failed to update leave!');
+            setDeliveryNotice(err.response?.data?.error || 'Could not update leave.');
         }
     };
 
@@ -482,6 +484,7 @@ const Dashboard = () => {
             <div className={styles.dashboard}>
                 {error && <div className={styles.error}>❌ {error}</div>}
 
+                {deliveryNotice && <p role="status">{deliveryNotice}</p>}
                 <div className={styles.tabs}>
                     <button onClick={() => setActiveTab('employees')} className={`${styles.tabBtn} ${activeTab === 'employees' ? styles.tabBtnActive : ''}`}>
                         👥 Employees ({empTotal})

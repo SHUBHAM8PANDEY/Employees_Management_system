@@ -184,18 +184,23 @@ const Chat = () => {
 
     const handleSend = async () => {
         if ((!newMessage.trim() && !attachment) || sending || !selectedContact) return;
-        const socket = socketRef.current;
-        if (!socket?.connected) return setError('Chat is reconnecting. Please try again.');
         setSending(true);
         setError('');
         const receiverCode = selectedContact.employee_code;
         try {
-            const file = attachment && {
-                name: attachment.name, type: attachment.type, data: await attachment.arrayBuffer()
-            };
-            const response = await socket.timeout(20000).emitWithAck('send_message', {
+            let file;
+            if (attachment) {
+                const encoded = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result.split(',')[1]);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(attachment);
+                });
+                file = { name: attachment.name, type: attachment.type, data: encoded };
+            }
+            const { data: response } = await axios.post(`${API_BASE}/api/chat/messages`, {
                 message: newMessage.trim(), receiverCode, attachment: file
-            });
+            }, { headers: { Authorization: `Bearer ${token}` } });
             if (response?.error) throw new Error(response.error);
             setNewMessage('');
             setAttachment(null);
@@ -205,7 +210,7 @@ const Chat = () => {
             }
             fetchConversations();
         } catch (error) {
-            setError(error.message || 'Could not send message.');
+            setError(error.response?.data?.error || 'Could not send message. Please try again.');
         } finally {
             setSending(false);
         }
@@ -354,7 +359,7 @@ const Chat = () => {
                     </div>
                 ) : (
                     <>
-                        {error && <div className={styles.error}>{error}</div>}
+                        {error && <div role="alert" className={styles.error}>{error}</div>}
                         <div className={styles.chatHead}>
                             <Avatar
                                 src={selectedContact.profile_picture}
@@ -389,7 +394,7 @@ const Chat = () => {
                                     >
                                         <div>{msg.message}</div>
                                         {msg.attachment_name && (
-                                            <button type="button" onClick={() => downloadAttachment(msg)}>
+                                            <button type="button" className={styles.fileButton} onClick={() => downloadAttachment(msg)}>
                                                 Download {msg.attachment_name}
                                             </button>
                                         )}
@@ -406,8 +411,8 @@ const Chat = () => {
                             <div ref={messagesEndRef} />
                         </div>
 
-                        <div>
-                            <label>
+                        <div className={styles.attachBar}>
+                            <label className={styles.attachButton}>
                                 Attach PDF or image
                                 <input type="file" accept="application/pdf,image/jpeg,image/png,image/webp"
                                     disabled={sending} onChange={event => {
@@ -435,6 +440,7 @@ const Chat = () => {
                                 type="button"
                                 className={styles.sendBtn}
                                 onClick={handleSend}
+                                aria-label="Send message"
                                 disabled={(!newMessage.trim() && !attachment) || sending}
                             >
                                 Send

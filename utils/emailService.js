@@ -14,14 +14,15 @@ const transporter = nodemailer.createTransport({
 const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, char =>
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
 
-const sendEmail = async (to, subject, html, attachments = []) => {
+const sendEmail = async (to, subject, html, attachments = [], idempotencyKey) => {
     if (!mailConfigured()) throw new Error('Email provider is not configured');
     if (process.env.RESEND_API_KEY && process.env.EMAIL_FROM) {
         const response = await fetch('https://api.resend.com/emails', {
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                ...(idempotencyKey && { 'Idempotency-Key': idempotencyKey })
             },
             body: JSON.stringify({
                 from: process.env.EMAIL_FROM, to: [to], subject, html,

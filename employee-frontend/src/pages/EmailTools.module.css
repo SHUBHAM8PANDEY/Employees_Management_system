@@ -1,0 +1,36 @@
+.panel {
+    width: min(100%, 720px);
+    padding: clamp(1rem, 4vw, 2rem);
+    border: 1px solid #dbe3ef;
+    border-radius: 18px;
+    background: #fff;
+    color: #152238;
+    box-shadow: 0 12px 32px #15223810;
+}
+.panel h2 { margin: 0; }
+.panel header p { color: #52647a; margin: .5rem 0 1.5rem; }
+.panel form label { display: grid; gap: .5rem; font-weight: 600; }
+.panel input, .panel textarea {
+    box-sizing: border-box;
+    width: 100%;
+    border: 1px solid #bcc9da;
+    border-radius: 9px;
+    padding: .75rem;
+    font: inherit;
+    font-weight: 400;
+}
+.panel textarea { min-height: 10rem; resize: vertical; }
+.panel button {
+    border: 0;
+    border-radius: 9px;
+    padding: .75rem 1.25rem;
+    background: #234ac5;
+    color: white;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+.panel button:disabled { opacity: .65; cursor: wait; }
+.error, .success { padding: .75rem; border-radius: 8px; }
+.error { background: #fff1ef; color: #8e281d; }
+.success { background: #e8f7ed; color: #166036; }

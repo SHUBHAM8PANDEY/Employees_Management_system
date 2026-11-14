@@ -9,6 +9,8 @@ const AddEmployee = () => {
         first_name: '',
         last_name: '',
         email: '',
+        date_of_birth: '',
+        joining_date: '',
         password: '123456',
         role: 'Employee',
         addresses: [{ address_line: '', city: '' }],
@@ -136,6 +138,12 @@ const AddEmployee = () => {
                     </div>
                 </div>
 
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
+                    <label>Date of birth <input type="date" required value={formData.date_of_birth}
+                        onChange={event => setFormData({ ...formData, date_of_birth: event.target.value })} /></label>
+                    <label>Joining date <input type="date" required value={formData.joining_date}
+                        onChange={event => setFormData({ ...formData, joining_date: event.target.value })} /></label>
+                </div>
                 <div style={{ marginTop: '12px' }}>
                     <label style={{ display: 'block', fontWeight: '600', marginBottom: '4px', fontSize: '13px' }}>Email *</label>
                     <input

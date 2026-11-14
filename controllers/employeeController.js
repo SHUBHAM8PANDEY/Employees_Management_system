@@ -12,6 +12,20 @@ const { generateEmployeeCode, isEmployeeCodeUnique } = require('../utils/generat
 const auditLogger = require('../utils/auditLogger');
 const notificationHelper = require('../utils/notificationHelper');
 
+function employeeDateFields(body, required = false) {
+    const fields = {};
+    const today = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Kolkata' }).format(new Date());
+    for (const name of ['date_of_birth', 'joining_date']) {
+        const value = body[name];
+        if (value === undefined && !required) continue;
+        const date = typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) ? new Date(value) : null;
+        if (!date || !Number.isFinite(date.getTime()) || date.toISOString().slice(0, 10) !== value ||
+            value < '1900-01-01' || (name === 'date_of_birth' && value > today)) return null;
+        fields[name] = value;
+    }
+    return fields;
+}
+
 // ============================================
 // ADD EMPLOYEE
 // ============================================
@@ -28,6 +42,11 @@ const addEmployee = async (req, res) => {
             qualifications = [],
             skills = []
         } = req.body;
+
+        const dates = employeeDateFields(req.body, true);
+        if (!dates || dates.date_of_birth > dates.joining_date) {
+            return res.status(400).json({ error: 'Enter a valid date of birth and joining date.' });
+        }
 
         console.log('📝 Adding employee:', { first_name, last_name, email });
 
@@ -82,7 +101,8 @@ const addEmployee = async (req, res) => {
             employee_code: empCode,
             first_name,
             last_name,
-            email
+            email,
+            ...dates
         });
         console.log(`✅ Employee created for ${empCode}`);
 
@@ -431,6 +451,8 @@ const getMyProfile = async (req, res) => {
             first_name: employee.first_name,
             last_name: employee.last_name,
             email: employee.email,
+            date_of_birth: employee.date_of_birth,
+            joining_date: employee.joining_date,
             role: user?.role || 'Employee',
             leaveBalance: leaveBalance,
             EmployeeAddresses: employee.EmployeeAddresses || [],
@@ -470,7 +492,11 @@ const updateEmployee = async (req, res) => {
 
         const oldData = employee.toJSON();
 
-        await employee.update({ first_name, last_name, email });
+        const dates = employeeDateFields(req.body);
+        if (!dates || (dates.date_of_birth ?? employee.date_of_birth) > (dates.joining_date ?? employee.joining_date)) {
+            return res.status(400).json({ error: 'Enter a valid date of birth and joining date.' });
+        }
+        await employee.update({ first_name, last_name, email, ...dates });
 
         await User.update(
             { email: email },

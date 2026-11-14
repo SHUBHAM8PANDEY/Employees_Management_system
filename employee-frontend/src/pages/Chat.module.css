@@ -313,3 +313,35 @@
         max-height: 240px;
     }
 }
+
+.attachBar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .65rem;
+    padding: .55rem 1rem;
+}
+.attachButton, .fileButton {
+    display: inline-flex;
+    align-items: center;
+    position: relative;
+    padding: .5rem .75rem;
+    border: 1px solid #7383aa;
+    border-radius: .6rem;
+    background: #e9efff;
+    color: #172f68;
+    font: inherit;
+    cursor: pointer;
+    overflow-wrap: anywhere;
+}
+.attachButton input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+.attachButton:focus-within, .fileButton:focus-visible {
+    outline: 2px solid #416adb;
+    outline-offset: 2px;
+}

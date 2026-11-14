@@ -14,7 +14,7 @@ const configuredOrigins = process.env.FRONTEND_ORIGINS || (process.env.NODE_ENV 
     : 'http://localhost:3000,http://127.0.0.1:3000');
 const frontendOrigins = configuredOrigins.split(',').map(origin => origin.trim()).filter(Boolean);
 app.use(cors({ origin: frontendOrigins }));
-app.use(express.json({ limit: '5mb' }));
+app.use(express.json({ limit: '6mb' }));
 app.use(express.urlencoded({ extended: true, limit: '5mb' }));
 
 const db = require('./models');
@@ -198,6 +198,7 @@ const io = new Server(server, {
 
 const { setupSocketIO } = require('./socket/chatHandler');
 setupSocketIO(io);
+app.set('io', io);
 
 // ============================================
 // START SERVER
@@ -208,9 +209,19 @@ db.sequelize.authenticate()
         ALTER TABLE public.chat_messages
             ADD COLUMN IF NOT EXISTS attachment_name varchar(255),
             ADD COLUMN IF NOT EXISTS attachment_type varchar(100),
-            ADD COLUMN IF NOT EXISTS attachment_data bytea
+            ADD COLUMN IF NOT EXISTS attachment_data bytea;
+        ALTER TABLE public.employees
+            ADD COLUMN IF NOT EXISTS date_of_birth date,
+            ADD COLUMN IF NOT EXISTS joining_date date;
+        CREATE TABLE IF NOT EXISTS public.employee_greetings (
+            employee_code varchar(100) REFERENCES public.employees(employee_code) ON DELETE CASCADE ON UPDATE CASCADE,
+            kind text NOT NULL,
+            greeting_date date NOT NULL,
+            PRIMARY KEY (employee_code, kind, greeting_date)
+        )
     `))
     .then(() => server.listen(PORT, () => {
+    require('./jobs/employeeGreetings').startEmployeeGreetings();
     console.log(`\n🚀 Server running on port ${PORT}`);
     console.log(`\n🔐 Security Features:`);
     console.log(`   - Token Verification ✅`);

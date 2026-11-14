@@ -356,6 +356,7 @@ const updateStatus = async (req, res) => {
                 color: 'green'
             });
 
+            let emailStatus = 'skipped';
             // Send email
             try {
                 if (employee && employee.email) {
@@ -373,12 +374,15 @@ const updateStatus = async (req, res) => {
                         finalComments
                     );
                     await sendEmail(employee.email, subject, html);
+                    emailStatus = 'sent';
                 }
             } catch (emailError) {
-                console.error('Email sending failed:', emailError);
+                emailStatus = 'failed';
+                console.error('Email sending failed:', emailError.message);
             }
 
             res.json({
+                emailStatus,
                 message: `✅ Leave approved! ${requestedDays} ${balanceKey} day(s) deducted.`,
                 request: request
             });
@@ -415,6 +419,7 @@ const updateStatus = async (req, res) => {
                 color: 'red'
             });
 
+            let emailStatus = 'skipped';
             // Send email
             try {
                 if (employee && employee.email) {
@@ -432,12 +437,15 @@ const updateStatus = async (req, res) => {
                         finalComments
                     );
                     await sendEmail(employee.email, subject, html);
+                    emailStatus = 'sent';
                 }
             } catch (emailError) {
-                console.error('Email sending failed:', emailError);
+                emailStatus = 'failed';
+                console.error('Email sending failed:', emailError.message);
             }
 
             res.json({
+                emailStatus,
                 message: '❌ Leave rejected!',
                 request: request
             });
