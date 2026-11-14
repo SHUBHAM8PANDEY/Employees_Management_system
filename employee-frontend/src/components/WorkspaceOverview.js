@@ -1,106 +1,96 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { ArrowUpRight, Cake, CalendarCheck, CalendarDays, Clock3, RefreshCw, UserMinus, Users } from 'lucide-react';
+import { ArrowUpRight, CalendarCheck, CalendarDays, Clock3, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { API_BASE } from '../config';
 import { Skeleton } from './Skeleton';
 import styles from './WorkspaceOverview.module.css';
 
-const dateLabel = (date, options = { month: 'short', day: 'numeric' }) =>
-    new Intl.DateTimeFormat('en-IN', { timeZone: 'UTC', ...options }).format(new Date(date + 'T00:00:00Z'));
-const segments = [['present', 'Present'], ['absent', 'Absent'], ['leave', 'On leave']];
-
-function OverviewList({ title, link, items, empty, renderItem }) {
-    return <section className="ui-panel">
-        <header className={styles.sectionHead}><h3>{title}</h3>
-            {link && <Link to={link} aria-label={`Open ${title}`}><ArrowUpRight size={17} /></Link>}</header>
-        {items.length ? <ul className={styles.list}>{items.map(renderItem)}</ul> : <p className="ui-muted">{empty}</p>}
-    </section>;
-}
+const colors = ['#634ed4', '#20a78b', '#e6a550', '#e17686', '#8995b4'];
 
 export default function WorkspaceOverview({ token }) {
-    const [data, setData] = useState(null);
-    const [days, setDays] = useState('7');
-    const [revision, setRevision] = useState(0);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
-
+    const [state, setState] = useState(null);
     useEffect(() => {
         const controller = new AbortController();
-        const load = async () => {
-            setLoading(true);
-            setError('');
-            try {
-                const response = await axios.get(`${API_BASE}/api/reports/workspace-overview`, {
-                    params: { days }, headers: { Authorization: `Bearer ${token}` },
-                    signal: controller.signal, timeout: 15000
-                });
-                if (!controller.signal.aborted) setData(response.data);
-            } catch {
-                if (!controller.signal.aborted) setError('Could not refresh the overview. Try again.');
-            } finally {
-                if (!controller.signal.aborted) setLoading(false);
-            }
-        };
-        void load();
-        const timer = setInterval(() => { if (!document.hidden) void load(); }, 60000);
-        return () => { controller.abort(); clearInterval(timer); };
-    }, [days, revision, token]);
+        const config = { headers: { Authorization: `Bearer ${token}` }, signal: controller.signal };
+        Promise.allSettled([
+            axios.get(`${API_BASE}/api/attendance/admin/all?limit=1`, config),
+            axios.get(`${API_BASE}/api/reports/statistics`, config),
+            axios.get(`${API_BASE}/api/employee/all?limit=1`, config),
+            axios.get(`${API_BASE}/api/reports/workspace-overview`, config)
+        ]).then(([attendance, leave, employees, overview]) => {
+            if (!controller.signal.aborted) setState({
+                attendance: attendance.value?.data?.summary,
+                leave: leave.value?.data,
+                employees: overview.value?.data?.totals.employees ?? employees.value?.data?.pagination?.total,
+                overview: overview.value?.data
+            });
+        });
+        return () => controller.abort();
+    }, [token]);
 
-    const peak = Math.max(1, ...(data?.history || []).map(day => day.present + day.absent + day.leave));
+    const attendance = state?.attendance;
+    const trends = (state?.leave?.monthlyTrends || []).filter(entry => entry.month);
+    const peak = Math.max(1, ...trends.map(entry => Number(entry.count)));
+    const distribution = attendance ? [
+        ['Present', attendance.present], ['Absent', attendance.absent], ['On leave', attendance.onLeave],
+        ['Partial day', attendance.halfDay + attendance.shortLeave], ['Holiday', attendance.holiday]
+    ] : [];
+    const total = distribution.reduce((sum, [, value]) => sum + value, 0);
+    let offset = 0;
+    const ring = distribution.map(([, value], index) => {
+        const start = offset;
+        offset += value * 100 / Math.max(total, 1);
+        return `${colors[index]} ${start}% ${offset}%`;
+    }).join(', ');
+
     return <section className={styles.overview} aria-labelledby="overview-title">
-        <header className={styles.hero}>
-            <div><h2 id="overview-title">Workforce overview</h2>
-                {data && <p>{dateLabel(data.today, { dateStyle: 'full' })} · India time</p>}</div>
-            <button type="button" className="ui-button" disabled={loading} onClick={() => setRevision(previous => previous + 1)}>
-                <RefreshCw size={16} /> Refresh
-            </button>
-        </header>
-        {error && <p role="alert">{error}</p>}
-        {!data && loading && <Skeleton label="Loading workforce overview" rows={5} />}
-        {data && <>
+        <div className={styles.hero}>
+            <div><p>People operations</p><h2 id="overview-title">Workforce overview</h2>
+                <span>{new Intl.DateTimeFormat('en-IN', { dateStyle: 'full', timeZone: 'Asia/Kolkata' }).format(new Date())}</span></div>
+            <Link to="/attendance" className="ui-button">Open attendance <ArrowUpRight size={15} /></Link>
+        </div>
+        {!state ? <Skeleton label="Loading workforce statistics" rows={3} /> : <>
             <div className={styles.metrics}>
                 {[
-                    ['Employees', 'employees', Users, '/dashboard?tab=employees'],
-                    ['Present today', 'present', CalendarCheck, '/attendance'],
-                    ['Absent today', 'absent', UserMinus, '/attendance'],
-                    ['Pending leave', 'pending', Clock3, '/dashboard?tab=leaves']
-                ].map(([label, key, Icon, to]) => <Link className={`ui-panel ${styles.metric}`} key={key} to={to}>
-                    <span><Icon size={18} />{label}<ArrowUpRight size={15} /></span>
-                    <strong>{data.totals[key]}</strong>
-                </Link>)}
+                    ['Employees', state.employees, Users], ['Present today', attendance?.present, CalendarCheck],
+                    ['On leave today', attendance?.onLeave, CalendarDays], ['Pending requests', state.leave?.pendingLeaves, Clock3]
+                ].map(([label, value, Icon]) => <div className="ui-panel" key={label}>
+                    <Icon size={19} /><strong>{value ?? '—'}</strong><span>{label}</span>
+                </div>)}
             </div>
-            <div className={styles.chartRow}>
+            <div className={styles.charts}>
                 <section className="ui-panel">
-                    <header className={styles.sectionHead}><h3>Attendance summary</h3><select aria-label="Attendance period" value={days} onChange={event => setDays(event.target.value)}>
-                        <option value="7">Last 7 days</option><option value="14">Last 14 days</option>
-                    </select></header>
-                    <ul className={styles.legend}>{segments.map(([key, label]) => <li key={key}><i className={styles[key]} />{label}</li>)}</ul>
-                    <ul className={styles.chart} aria-label="Daily attendance totals">
-                        {data.history.map(day => {
-                            const label = `${dateLabel(day.date)}: ${day.present} present, ${day.absent} absent, ${day.leave} on leave`;
-                            return <li key={day.date} title={label} aria-label={label} tabIndex={0}>
-                                <div className={styles.bar}>{segments.map(([key]) =>
-                                    <span key={key} className={styles[key]} style={{ height: `${day[key] / peak * 100}%` }} />)}</div>
-                                <small>{dateLabel(day.date)}</small>
-                            </li>;
-                        })}
-                    </ul>
+                    <h3>Attendance today</h3>
+                    {attendance ? <div className={styles.attendanceChart}>
+                        <div aria-hidden="true" className={styles.ring} style={total ? { background: `conic-gradient(${ring})` } : undefined}>
+                            <strong>{total}<small>Employees</small></strong>
+                        </div>
+                        <ul>{distribution.map(([label, value], index) => <li key={label}>
+                            <i style={{ background: colors[index] }} />{label}<b>{value}</b></li>)}</ul>
+                    </div> : <p className="ui-muted">Attendance totals unavailable.</p>}
                 </section>
-                <OverviewList title="Upcoming days off" items={data.daysOff} empty="No upcoming days off recorded."
-                    renderItem={item => <li key={item.date}><CalendarDays size={17} /><div><strong>{item.label}</strong><small>{dateLabel(item.date)}</small></div></li>} />
+                <section className="ui-panel">
+                    <h3>Leave requests by month</h3>
+                    {trends.length ? <div className={styles.trends}>
+                        {trends.map(({ month, count }) => <div key={month} className={styles.barRow}>
+                            <span>{month}</span><div aria-hidden="true"><i style={{ width: `${Number(count) / peak * 100}%` }} /></div><b>{count}</b>
+                        </div>)}
+                    </div> : <p className="ui-muted">{state.leave ? 'No dated leave requests.' : 'Leave trends unavailable.'}</p>}
+                </section>
             </div>
-            <div className={styles.listRow}>
-                <OverviewList title="Birthdays & anniversaries" items={data.upcoming} empty="No milestones in the next 45 days."
-                    renderItem={item => <li key={`${item.code}/${item.kind}/${item.date}`}><Cake size={17} /><div><strong>{item.name}</strong>
-                        <small>{item.kind}{item.years ? ` · ${item.years} yr` : ''} · {dateLabel(item.date)}</small></div></li>} />
-                <OverviewList title="Pending leave requests" link="/dashboard?tab=leaves" items={data.pending} empty="No leave requests awaiting review."
-                    renderItem={item => <li key={item.id}><Clock3 size={17} /><div><strong>{item.name}</strong>
-                        <small>{item.leave_type} · {dateLabel(item.start_date)} – {dateLabel(item.end_date)}</small></div></li>} />
-                <OverviewList title="Recent punch-ins" link="/attendance" items={data.arrivals} empty="No punch-ins recorded today."
-                    renderItem={item => <li key={item.code}><CalendarCheck size={17} /><div><strong>{item.name}</strong>
-                        <small>{new Intl.DateTimeFormat('en-IN', { timeStyle: 'short', timeZone: 'Asia/Kolkata' }).format(new Date(item.time))} · {item.mode || 'Office'}{item.late ? ' · Late' : ''}</small></div></li>} />
-            </div>
+            {state.overview && <div className={styles.charts}>
+                <section className="ui-panel"><h3>Upcoming milestones</h3>
+                    {state.overview.upcoming.length ? <ul className={styles.activity}>{state.overview.upcoming.map(item =>
+                        <li key={item.code + item.kind + item.date}><strong>{item.name}</strong><span>{item.kind} · {item.date}</span></li>
+                    )}</ul> : <p className="ui-muted">No upcoming milestones.</p>}
+                </section>
+                <section className="ui-panel"><h3>Pending leave requests</h3>
+                    {state.overview.pending.length ? <ul className={styles.activity}>{state.overview.pending.map(item =>
+                        <li key={item.id}><strong>{item.name}</strong><span>{item.leave_type} · {item.start_date}</span></li>
+                    )}</ul> : <p className="ui-muted">No pending leave requests.</p>}
+                </section>
+            </div>}
         </>}
     </section>;
 }
