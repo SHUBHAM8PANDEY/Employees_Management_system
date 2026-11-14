@@ -1,6 +1,8 @@
 const nodemailer = require('nodemailer');
 
-const mailConfigured = () => Boolean((process.env.RESEND_API_KEY && process.env.EMAIL_FROM) || (process.env.EMAIL_USER && process.env.EMAIL_PASS));
+const smtpUser = process.env.SMTP_USER || process.env.EMAIL_USER;
+const smtpPass = process.env.SMTP_PASS || process.env.EMAIL_PASS;
+const mailConfigured = () => Boolean((process.env.RESEND_API_KEY && process.env.EMAIL_FROM) || (smtpUser && smtpPass));
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST || 'smtp.gmail.com',
     port: Number(process.env.SMTP_PORT || 465),
@@ -8,7 +10,7 @@ const transporter = nodemailer.createTransport({
     requireTLS: true,
     connectionTimeout: 10000,
     socketTimeout: 15000,
-    auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
+    auth: { user: smtpUser, pass: smtpPass }
 });
 
 const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, char =>
@@ -37,7 +39,7 @@ const sendEmail = async (to, subject, html, attachments = [], idempotencyKey) =>
     }
     try {
         const mailOptions = {
-            from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
+            from: process.env.EMAIL_FROM || smtpUser,
             to,
             subject,
             html,
@@ -135,6 +137,7 @@ const getLeaveStatusEmailTemplate = (employeeName, leaveDetails, status, comment
 };
 
 module.exports = {
+    verifySmtp: () => transporter.verify(),
     mailConfigured, escapeHtml,
     sendEmail,
     getLeaveStatusEmailTemplate

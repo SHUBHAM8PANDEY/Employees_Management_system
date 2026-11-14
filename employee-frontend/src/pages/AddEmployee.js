@@ -139,7 +139,7 @@ const AddEmployee = () => {
                 </div>
 
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
-                    <label>Date of birth <input type="date" required value={formData.date_of_birth}
+                    <label>Date of birth (DOB) <input type="date" max={new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Kolkata' }).format()} required value={formData.date_of_birth}
                         onChange={event => setFormData({ ...formData, date_of_birth: event.target.value })} /></label>
                     <label>Joining date <input type="date" required value={formData.joining_date}
                         onChange={event => setFormData({ ...formData, joining_date: event.target.value })} /></label>

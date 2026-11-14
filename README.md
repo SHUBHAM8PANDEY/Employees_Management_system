@@ -16,7 +16,7 @@ Sessions expire 24 hours after sign-in. Signing out or forcing logout revokes th
 
 ## Email and chat files
 
-For Render, set `RESEND_API_KEY` and `EMAIL_FROM` to a verified sender address. The HTTPS API works on Render Free, which blocks standard outbound SMTP ports. On an SMTP-capable host, set `EMAIL_USER`, `EMAIL_PASS`, and optionally `SMTP_HOST` and `SMTP_PORT`.
+For Render, set `RESEND_API_KEY` and `EMAIL_FROM` to a verified sender address. The HTTPS API works on Render Free, which blocks standard outbound SMTP ports. On an SMTP-capable host, set `SMTP_USER`, `SMTP_PASS`, and optionally `SMTP_HOST` and `SMTP_PORT`.
 
 Chat accepts PDF, JPEG, PNG and WebP files up to 4 MB. Files are stored in Neon and can be downloaded by the sender and recipient. Backend startup adds the attachment columns to an existing database.
 
