@@ -7,7 +7,7 @@ import styles from './UserMenu.module.css';
 
 
 
-const UserMenu = () => {
+const UserMenu = ({ role }) => {
     const navigate = useNavigate();
     const fileRef = useRef(null);
     const menuRef = useRef(null);
@@ -18,7 +18,6 @@ const UserMenu = () => {
 
     const firstName = localStorage.getItem('first_name') || '';
     const lastName = localStorage.getItem('last_name') || '';
-    const role = localStorage.getItem('role') || 'Employee';
     const email = localStorage.getItem('email') || '';
 
     useEffect(() => {

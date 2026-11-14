@@ -65,65 +65,10 @@ const EmployeeLeave = () => {
         setLoading(false);
     };
 
-    const handleLogout = () => {
-        localStorage.clear();
-        navigate('/');
-        window.location.reload();
-    };
+
 
     return (
-        <div style={{ padding: '90px 40px 40px', background: 'var(--ui-subtle)', minHeight: '100vh' }}>
-            {/* Header */}
-            <div style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                height: '70px',
-                background: 'linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%)',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: '0 40px',
-                zIndex: 999
-            }}>
-                <h1 style={{ color: 'white', fontSize: '20px', fontWeight: '800' }}>
-                    🌐 HR<span style={{ color: '#818cf8' }}>Dashboard</span>
-                </h1>
-                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                    <span style={{ color: '#94a3b8', fontSize: '14px' }}>
-                        👤 {localStorage.getItem('first_name') || 'Employee'}
-                    </span>
-                    <button
-                        onClick={() => navigate('/dashboard')}
-                        style={{
-                            background: '#4f46e5',
-                            color: 'white',
-                            border: 'none',
-                            padding: '8px 16px',
-                            borderRadius: '8px',
-                            cursor: 'pointer',
-                            fontWeight: '600'
-                        }}
-                    >
-                        📊 Dashboard
-                    </button>
-                    <button
-                        onClick={handleLogout}
-                        style={{
-                            background: '#ef4444',
-                            color: 'white',
-                            border: 'none',
-                            padding: '8px 20px',
-                            borderRadius: '8px',
-                            cursor: 'pointer',
-                            fontWeight: '600'
-                        }}
-                    >
-                        Sign Out
-                    </button>
-                </div>
-            </div>
+        <div className="ui-page-stack">
 
             {error && (
                 <div style={{

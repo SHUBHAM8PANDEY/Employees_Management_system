@@ -3,12 +3,12 @@ import { Skeleton } from '../components/Skeleton';
 import { API_BASE } from '../config';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useOutletContext, useNavigate, useSearchParams } from 'react-router-dom';
 import styles from './Dashboard.module.css';
 
 const Dashboard = () => {
     const navigate = useNavigate();
-    const userRole = localStorage.getItem('role') || 'Employee';
+    const userRole = useOutletContext();
     
     // ✅ Check if user is logged in - redirect if not
     useEffect(() => {
@@ -21,7 +21,7 @@ const Dashboard = () => {
 
     // ✅ Role-based redirect
     useEffect(() => {
-        const role = localStorage.getItem('role');
+        const role = userRole;
         const currentPath = window.location.pathname;
         
         if (role === 'Employee' && currentPath === '/dashboard') {

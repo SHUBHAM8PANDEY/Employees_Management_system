@@ -97,7 +97,7 @@ const ProtectedRoute = () => {
     }
 
     return (
-        <AppLayout>
+        <AppLayout role={role}>
             <Suspense fallback={<Skeleton label="Loading page" />}>
                 <Outlet context={role} />
             </Suspense>

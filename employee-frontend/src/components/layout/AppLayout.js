@@ -5,8 +5,7 @@ import NotificationBell from '../NotificationBell';
 import UserMenu from '../UserMenu';
 import styles from './AppLayout.module.css';
 
-export default function AppLayout({ children }) {
-    const role = localStorage.getItem('role');
+export default function AppLayout({ children, role }) {
     const isHr = ['Admin', 'HR'].includes(role);
     const home = isHr ? '/dashboard' : '/employee-dashboard';
     const location = useLocation();
@@ -124,7 +123,7 @@ export default function AppLayout({ children }) {
                                 localStorage.setItem('hrms-theme', next);
                                 window.dispatchEvent(new Event('hrms-theme-change'));
                             }}>{theme === 'dark' ? <Sun size={19} /> : <Moon size={19} />}</button>
-                        <NotificationBell /><UserMenu />
+                        <NotificationBell /><UserMenu role={role} />
                     </div>
                 </header>
                 <main id="main-content" className={`${styles.content} ${location.pathname === '/chat' ? styles.contentFlush : ''}`}>{children}</main>

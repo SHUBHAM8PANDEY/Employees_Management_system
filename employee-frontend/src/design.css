@@ -32,3 +32,7 @@ button, input, select, textarea { font-family: inherit; }
 
 .ui-choice-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
 .ui-choice-row button[aria-pressed="true"] { background: var(--ui-tint); color: var(--ui-accent); border-color: var(--ui-accent); }
+
+.ui-page-stack { display: grid; gap: 1rem; min-width: 0; }
+.ui-page-stack :is(h2,h3) { color: var(--ui-text); }
+.ui-page-stack > * { min-width: 0; }

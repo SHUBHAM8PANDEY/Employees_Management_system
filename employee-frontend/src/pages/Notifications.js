@@ -2,14 +2,13 @@ import { API_BASE } from '../config';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import styles from './Dashboard.module.css';
 
 const Notifications = () => {
     const navigate = useNavigate();
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [total, setTotal] = useState(0);
-    const [limit, setLimit] = useState(20);
+    const [limit] = useState(20);
     const [offset, setOffset] = useState(0);
 
     useEffect(() => {
@@ -75,11 +74,7 @@ const Notifications = () => {
         }
     };
 
-    const handleLogout = () => {
-        localStorage.clear();
-        navigate('/');
-        window.location.reload();
-    };
+
 
     const getNotificationColor = (color) => {
         const colors = {
@@ -93,59 +88,11 @@ const Notifications = () => {
     };
 
     return (
-        <div style={{ padding: 0, background: 'var(--ui-bg)', minHeight: '100vh' }}>
-            {/* Header */}
-            <div style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                height: '68px',
-                background: 'var(--ui-surface)',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: '0 32px',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
-                zIndex: 999,
-                borderBottom: '1px solid #e9edf4'
-            }}>
-                <h1 style={{ fontSize: '20px', fontWeight: '800', color: '#1a1a2e' }}>
-                    🌐 <span style={{ color: '#4f46e5' }}>HR</span>Dashboard
-                </h1>
-                <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-                    <span style={{ fontSize: '14px', color: 'var(--ui-muted)' }}>
-                        👤 {localStorage.getItem('first_name') || 'Admin'}
-                    </span>
-                    <button
-                        onClick={() => navigate('/dashboard')}
-                        style={{
-                            padding: '8px 16px',
-                            background: 'var(--ui-subtle)',
-                            color: 'var(--ui-text)',
-                            border: 'none',
-                            borderRadius: '8px',
-                            cursor: 'pointer',
-                            fontWeight: '600'
-                        }}
-                    >
-                        📊 Dashboard
-                    </button>
-                    <button onClick={handleLogout} style={{
-                        padding: '8px 20px',
-                        background: '#ef4444',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '8px',
-                        cursor: 'pointer',
-                        fontWeight: '600'
-                    }}>Sign Out</button>
-                </div>
-            </div>
+        <div className="ui-page-stack">
 
-            <div style={{ background: 'var(--ui-surface)', padding: '24px', borderRadius: '16px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                    <h2>🔔 All Notifications</h2>
+            <div className="ui-panel">
+                <div className="ui-heading">
+                    <h2>Inbox</h2>
                     <button
                         onClick={markAllAsRead}
                         style={{

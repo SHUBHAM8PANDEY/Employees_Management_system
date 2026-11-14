@@ -1,7 +1,7 @@
 import { API_BASE } from '../config';
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useOutletContext, useNavigate } from 'react-router-dom';
 import styles from './Attendance.module.css';
 import AttendanceExport from '../components/AttendanceExport';
 
@@ -24,7 +24,7 @@ function PunchLocation({ latitude, longitude, fallback }) {
 
 const Attendance = () => {
     const navigate = useNavigate();
-    const userRole = localStorage.getItem('role') || 'Employee';
+    const userRole = useOutletContext();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const token = localStorage.getItem('token');
