@@ -1,21 +1,23 @@
-import Reports from './components/Reports';
-import EmailTools from './pages/EmailTools';
 import { API_BASE } from './config';
-import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import React, { lazy, Suspense, useEffect, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useOutletContext } from 'react-router-dom';
 import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import AddEmployee from './pages/AddEmployee';
-import EditEmployee from './pages/EditEmployee';
-import EmployeeLeave from './pages/EmployeeLeave';
-import AuditLogs from './pages/AuditLogs';
-import Notifications from './pages/Notifications';
-import Attendance from './pages/Attendance';
-import Chat from './pages/Chat';
-import AppLayout from './components/layout/AppLayout';
 import axios from 'axios';
+import AppLayout from './components/layout/AppLayout';
 import { connectSocket, disconnectSocket } from './utils/socket';
 
+
+
+const Reports = lazy(() => import('./components/Reports'));
+const EmailTools = lazy(() => import('./pages/EmailTools'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const AddEmployee = lazy(() => import('./pages/AddEmployee'));
+const EditEmployee = lazy(() => import('./pages/EditEmployee'));
+const EmployeeLeave = lazy(() => import('./pages/EmployeeLeave'));
+const AuditLogs = lazy(() => import('./pages/AuditLogs'));
+const Notifications = lazy(() => import('./pages/Notifications'));
+const Attendance = lazy(() => import('./pages/Attendance'));
+const Chat = lazy(() => import('./pages/Chat'));
 
 
 const checkAuth = async (token) => {
@@ -42,7 +44,7 @@ const checkAuth = async (token) => {
     }
 };
 
-const ProtectedRoute = ({ children, allowedRoles }) => {
+const ProtectedRoute = () => {
     const [session, setSession] = useState(null);
     const token = localStorage.getItem('token');
     const role = session?.role;
@@ -66,7 +68,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
                 return;
             }
             localStorage.setItem('role', result.role);
-            setSession(result);
+            setSession(previous => previous?.role === result.role && previous.expiresAt === result.expiresAt ? previous : result);
             connectSocket(token);
             clearTimeout(timeout);
             timeout = setTimeout(endSession, Math.max(0, result.expiresAt - Date.now()));
@@ -91,26 +93,20 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
         );
     }
 
-    if (allowedRoles && !allowedRoles.includes(role)) {
-        if (role === 'Admin' || role === 'HR') {
-            return <Navigate to="/dashboard" replace />;
-        }
-        if (role === 'Employee') {
-            return <Navigate to="/employee-dashboard" replace />;
-        }
-        return <Navigate to="/" replace />;
-    }
-
-    return children;
+    return (
+        <AppLayout>
+            <Suspense fallback={<div className="app-loading" role="status">Loading page…</div>}>
+                <Outlet context={role} />
+            </Suspense>
+        </AppLayout>
+    );
 };
 
-const withLayout = (Component, roles) => (
-    <ProtectedRoute allowedRoles={roles}>
-        <AppLayout>
-            <Component />
-        </AppLayout>
-    </ProtectedRoute>
-);
+const RolePage = ({ component: Component, roles }) => {
+    const role = useOutletContext();
+    if (roles.includes(role)) return <Component />;
+    return <Navigate to={['Admin', 'HR'].includes(role) ? '/dashboard' : '/employee-dashboard'} replace />;
+};
 
 function App() {
     useEffect(() => {
@@ -129,17 +125,19 @@ function App() {
             <Routes>
                 <Route path="/" element={<Login />} />
 
-                <Route path="/dashboard" element={withLayout(Dashboard, ['Admin', 'HR'])} />
-                <Route path="/employee-dashboard" element={withLayout(Dashboard, ['Employee'])} />
-                <Route path="/add-employee" element={withLayout(AddEmployee, ['Admin', 'HR'])} />
-                <Route path="/edit-employee/:code" element={withLayout(EditEmployee, ['Admin', 'HR'])} />
-                <Route path="/reports" element={withLayout(Reports, ['Admin', 'HR'])} />
-                <Route path="/email" element={withLayout(EmailTools, ['Admin', 'HR'])} />
-                <Route path="/audit-logs" element={withLayout(AuditLogs, ['Admin', 'HR'])} />
-                <Route path="/employee-leave" element={withLayout(EmployeeLeave, ['Employee', 'Admin', 'HR'])} />
-                <Route path="/attendance" element={withLayout(Attendance, ['Admin', 'HR', 'Employee'])} />
-                <Route path="/notifications" element={withLayout(Notifications, ['Admin', 'HR', 'Employee'])} />
-                <Route path="/chat" element={withLayout(Chat, ['Admin', 'HR', 'Employee'])} />
+                <Route element={<ProtectedRoute />}>
+                    <Route path="/dashboard" element={<RolePage component={Dashboard} roles={['Admin', 'HR']} />} />
+                    <Route path="/employee-dashboard" element={<RolePage component={Dashboard} roles={['Employee']} />} />
+                    <Route path="/add-employee" element={<RolePage component={AddEmployee} roles={['Admin', 'HR']} />} />
+                    <Route path="/edit-employee/:code" element={<RolePage component={EditEmployee} roles={['Admin', 'HR']} />} />
+                    <Route path="/reports" element={<RolePage component={Reports} roles={['Admin', 'HR']} />} />
+                    <Route path="/email" element={<RolePage component={EmailTools} roles={['Admin', 'HR']} />} />
+                    <Route path="/audit-logs" element={<RolePage component={AuditLogs} roles={['Admin', 'HR']} />} />
+                    <Route path="/employee-leave" element={<RolePage component={EmployeeLeave} roles={['Employee', 'Admin', 'HR']} />} />
+                    <Route path="/attendance" element={<RolePage component={Attendance} roles={['Admin', 'HR', 'Employee']} />} />
+                    <Route path="/notifications" element={<RolePage component={Notifications} roles={['Admin', 'HR', 'Employee']} />} />
+                    <Route path="/chat" element={<RolePage component={Chat} roles={['Admin', 'HR', 'Employee']} />} />
+                </Route>
 
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

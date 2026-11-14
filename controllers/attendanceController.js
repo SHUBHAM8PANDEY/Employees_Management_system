@@ -187,7 +187,8 @@ const getTodayAttendance = async (req, res) => {
         const today = getTodayStr();
 
         const attendance = await Attendance.findOne({
-            where: { employee_code: employeeCode, date: today }
+            where: { employee_code: employeeCode, date: today },
+            attributes: { exclude: photos }
         });
 
         const isPunchedIn = !!(attendance && attendance.punch_in);

@@ -41,10 +41,15 @@ const exportLeaveReportExcel = async (req, res) => {
 // Get leave statistics
 const getLeaveStatistics = async (req, res) => {
     try {
-        const totalLeaves = await LeaveRequest.count();
-        const pendingLeaves = await LeaveRequest.count({ where: { status: 'Pending' } });
-        const approvedLeaves = await LeaveRequest.count({ where: { status: 'Approved' } });
-        const rejectedLeaves = await LeaveRequest.count({ where: { status: 'Rejected' } });
+        const statuses = await LeaveRequest.findAll({
+            attributes: ['status', [db.Sequelize.fn('COUNT', db.Sequelize.col('id')), 'count']],
+            group: ['status'], raw: true
+        });
+        const counts = new Map(statuses.map(row => [row.status, Number(row.count)]));
+        const totalLeaves = statuses.reduce((total, row) => total + Number(row.count), 0);
+        const pendingLeaves = counts.get('Pending') || 0;
+        const approvedLeaves = counts.get('Approved') || 0;
+        const rejectedLeaves = counts.get('Rejected') || 0;
 
         // Leave by type
         const leaveByType = await LeaveRequest.findAll({
@@ -83,12 +88,13 @@ const getLeaveStatistics = async (req, res) => {
 // Get employee leave summary
 const getEmployeeLeaveSummary = async (req, res) => {
     try {
-        const employees = await Employee.findAll();
-
-        const summary = await Promise.all(employees.map(async (emp) => {
-            const leaveLimit = await LeaveLimit.findOne({
-                where: { employee_code: emp.employee_code }
-            });
+        const [employees, limits] = await Promise.all([
+            Employee.findAll({ attributes: ['employee_code', 'first_name', 'last_name', 'email'] }),
+            LeaveLimit.findAll()
+        ]);
+        const limitsByEmployee = new Map(limits.map(limit => [limit.employee_code, limit]));
+        const summary = employees.map(emp => {
+            const leaveLimit = limitsByEmployee.get(emp.employee_code);
 
             const sickTaken = leaveLimit?.sick_taken || 0;
             const sickLimit = leaveLimit?.sick_limit || 12;
@@ -107,7 +113,7 @@ const getEmployeeLeaveSummary = async (req, res) => {
                     paid: { total: paidLimit, taken: paidTaken, left: paidLimit - paidTaken }
                 }
             };
-        }));
+        });
 
         res.json(summary);
     } catch (error) {
