@@ -367,5 +367,7 @@
     .composer, .chatHeadInfo, .bubble { min-width: 0; overflow-wrap: anywhere; }
 }
 
-.sentTick, .readTicks { font-weight: 700; margin-inline-end: .25rem; }
-.readTicks { color: #075ce5; letter-spacing: -.15em; }
+.sent .bubbleMeta { opacity: 1; }
+.sentTick, .readTicks { display: inline-flex; vertical-align: middle; margin-inline-end: .3rem; }
+.sentTick { color: #e2e8f0; }
+.readTicks { color: #a5e7ff; }

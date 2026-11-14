@@ -485,7 +485,12 @@ const Chat = () => {
                                                 aria-label={msg.is_read ? 'Read' : 'Sent'}
                                                 title={msg.is_read ? 'Read' : 'Sent'}
                                                 className={msg.is_read ? styles.readTicks : styles.sentTick}>
-                                                {msg.is_read ? '✓✓' : '✓'}
+                                                <svg aria-hidden="true" viewBox="0 0 22 16" width="22" height="16"
+                                                    fill="none" stroke="currentColor" strokeWidth="2"
+                                                    strokeLinecap="round" strokeLinejoin="round">
+                                                    <path d="M2 8l4 4L15 3" />
+                                                    {msg.is_read && <path d="M10 11l1 1L20 3" />}
+                                                </svg>
                                             </span>}
                                             {new Date(msg.created_at).toLocaleTimeString('en-IN', {
                                                 hour: '2-digit',
