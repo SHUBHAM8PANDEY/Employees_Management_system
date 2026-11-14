@@ -2,7 +2,7 @@
 // ATTENDANCE RULES ENGINE
 // ============================================
 
-const ATTENDANCE_RULES = { FULL_DAY_HOURS: 9, CUTOFF_EARLY: '09:30', AUTO_PUNCH_OUT: '21:30' };
+const ATTENDANCE_RULES = { FULL_DAY_HOURS: 9, HALF_DAY_HOURS: 4.5, CUTOFF_EARLY: '09:30', AUTO_PUNCH_OUT: '21:30' };
 const attendanceDate = date => new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Kolkata' }).format(date);
 const getTimeString = date => new Intl.DateTimeFormat('en-GB', {
     timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hourCycle: 'h23'
@@ -27,10 +27,11 @@ function calculateAttendanceStatus(punchIn, punchOut) {
     const hours = Math.max(0, (new Date(punchOut) - start) / 3600000);
     const fullDay = hours >= ATTENDANCE_RULES.FULL_DAY_HOURS;
     return {
-        status: fullDay ? 'Present' : 'Half Day',
+        status: fullDay ? 'Present' : hours >= ATTENDANCE_RULES.HALF_DAY_HOURS ? 'Half Day' : 'Short Leave',
         totalHours: Math.round(hours * 100) / 100,
         isLate,
-        reason: fullDay ? 'Completed at least 9 hours' : 'Worked fewer than 9 hours'
+        reason: fullDay ? 'Completed at least 9 hours' : hours >= ATTENDANCE_RULES.HALF_DAY_HOURS
+            ? 'Worked at least 4 hours 30 minutes and fewer than 9 hours' : 'Worked fewer than 4 hours 30 minutes'
     };
 }
 

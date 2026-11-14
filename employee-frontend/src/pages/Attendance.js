@@ -591,7 +591,7 @@ const Attendance = () => {
                 
 {(
     <div className={styles.autoPunchoutWarning}>
-        9:30 AM IST cutoff · 9 hours for full day · Auto punch-out at 9:30 PM IST
+        Late after 9:30 AM IST · Under 4h 30m: Short Leave · 4h 30m to under 9h: Half Day · 9h or more: Present · Auto punch-out at 9:30 PM IST
     </div>
 )}
 

@@ -1,3 +1,4 @@
+import styles from './AddEmployee.module.css';
 import { API_BASE } from '../config';
 import React, { useState } from 'react';
 import axios from 'axios';
@@ -94,7 +95,7 @@ const AddEmployee = () => {
     };
 
     return (
-        <div style={{ padding: 0, maxWidth: '700px', margin: '0 auto' }}>
+        <div className={styles.page}>
             <h2 style={{ color: 'var(--ui-text)', marginBottom: '20px' }}>➕ Add New Employee</h2>
 
             {error && (
@@ -109,84 +110,43 @@ const AddEmployee = () => {
                 </div>
             )}
 
-            <form onSubmit={handleSubmit} style={{
-                background: 'var(--ui-surface)',
-                padding: '24px',
-                borderRadius: '12px',
-                border: '1px solid #e2e8f0'
-            }}>
-                {/* Basic Info */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                    <div>
-                        <label style={{ display: 'block', fontWeight: '600', marginBottom: '4px', fontSize: '13px' }}>First Name *</label>
-                        <input
-                            type="text"
-                            value={formData.first_name}
-                            onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-                            required
-                            style={{ width: '100%', padding: '10px', border: '1px solid #e2e8f0', borderRadius: '8px' }}
-                        />
+            <form onSubmit={handleSubmit} className={`ui-panel ${styles.form}`}>
+                <fieldset>
+                    <legend>Personal details</legend>
+                    <div className={styles.fields}>
+                        <label>First name <input required autoComplete="given-name" value={formData.first_name}
+                            onChange={event => setFormData({ ...formData, first_name: event.target.value })} /></label>
+                        <label>Last name <input required autoComplete="family-name" value={formData.last_name}
+                            onChange={event => setFormData({ ...formData, last_name: event.target.value })} /></label>
+                        <label>Date of birth <input type="date" required value={formData.date_of_birth}
+                            max={new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Kolkata' }).format()}
+                            onChange={event => setFormData({ ...formData, date_of_birth: event.target.value })} /></label>
                     </div>
-                    <div>
-                        <label style={{ display: 'block', fontWeight: '600', marginBottom: '4px', fontSize: '13px' }}>Last Name *</label>
-                        <input
-                            type="text"
-                            value={formData.last_name}
-                            onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-                            required
-                            style={{ width: '100%', padding: '10px', border: '1px solid #e2e8f0', borderRadius: '8px' }}
-                        />
+                </fieldset>
+                <fieldset>
+                    <legend>Contact details</legend>
+                    <div className={styles.fields}>
+                        <label>Work email <input type="email" required value={formData.email}
+                            onChange={event => setFormData({ ...formData, email: event.target.value })} /></label>
+                        <label>Mobile number <input type="tel" autoComplete="tel" value={formData.mobile_number}
+                            placeholder="+91 98765 43210" maxLength={24}
+                            onChange={event => setFormData({ ...formData, mobile_number: event.target.value })} /></label>
                     </div>
-                </div>
-
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
-                    <label>Date of birth (DOB) <input type="date" max={new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Kolkata' }).format()} required value={formData.date_of_birth}
-                        onChange={event => setFormData({ ...formData, date_of_birth: event.target.value })} /></label>
-                    <label>Joining date <input type="date" required value={formData.joining_date}
-                        onChange={event => setFormData({ ...formData, joining_date: event.target.value })} /></label>
-                </div>
-                <div style={{ marginBottom: '1rem' }}>
-                    <label>Mobile number <input type="tel" autoComplete="tel" inputMode="tel"
-                        placeholder="+91 98765 43210" maxLength={24} value={formData.mobile_number}
-                        onChange={event => setFormData({ ...formData, mobile_number: event.target.value })} /></label>
-                </div>
-                <div style={{ marginTop: '12px' }}>
-                    <label style={{ display: 'block', fontWeight: '600', marginBottom: '4px', fontSize: '13px' }}>Email *</label>
-                    <input
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        required
-                        style={{ width: '100%', padding: '10px', border: '1px solid #e2e8f0', borderRadius: '8px' }}
-                    />
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '12px' }}>
-                    <div>
-                        <label style={{ display: 'block', fontWeight: '600', marginBottom: '4px', fontSize: '13px' }}>Role</label>
-                        <select
-                            value={formData.role}
-                            onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                            style={{ width: '100%', padding: '10px', border: '1px solid #e2e8f0', borderRadius: '8px' }}
-                        >
-                            <option value="Employee">👤 Employee</option>
-                            <option value="Admin">👑 Admin</option>
-                            <option value="HR">👔 HR</option>
-                        </select>
+                </fieldset>
+                <fieldset>
+                    <legend>Employment and account</legend>
+                    <div className={styles.fields}>
+                        <label>Joining date <input type="date" required value={formData.joining_date} min={formData.date_of_birth || undefined}
+                            onChange={event => setFormData({ ...formData, joining_date: event.target.value })} /></label>
+                        <label>Role <select value={formData.role}
+                            onChange={event => setFormData({ ...formData, role: event.target.value })}>
+                            <option value="Employee">Employee</option><option value="Admin">Admin</option><option value="HR">HR</option>
+                        </select></label>
+                        <label>Initial password <input type="text" value={formData.password}
+                            onChange={event => setFormData({ ...formData, password: event.target.value })} />
+                            <small>Default: 123456</small></label>
                     </div>
-                    <div>
-                        <label style={{ display: 'block', fontWeight: '600', marginBottom: '4px', fontSize: '13px' }}>Password</label>
-                        <input
-                            type="text"
-                            value={formData.password}
-                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                            style={{ width: '100%', padding: '10px', border: '1px solid #e2e8f0', borderRadius: '8px' }}
-                        />
-                        <small style={{ color: 'var(--ui-muted)' }}>Default: 123456</small>
-                    </div>
-                </div>
-
-                <hr style={{ margin: '20px 0', borderColor: '#e2e8f0' }} />
+                </fieldset>
 
                 {/* Addresses */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
