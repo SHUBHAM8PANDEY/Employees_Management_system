@@ -1,0 +1,217 @@
+
+
+.exportModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.6);
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 20px;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.exportContent {
+    background: white;
+    padding: 32px;
+    border-radius: 20px;
+    max-width: 500px;
+    width: 100%;
+    animation: slideUp 0.35s ease;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15);
+}
+
+.exportHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid #e9edf4;
+}
+
+.exportHeader h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #0a0a23;
+    margin: 0;
+}
+
+.closeBtn {
+    background: #f1f5f9;
+    color: #475569;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 16px;
+    transition: all 0.2s;
+}
+.closeBtn:hover {
+    background: #e2e8f0;
+}
+
+.error {
+    background: #fee2e2;
+    color: #b91c1c;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-size: 13px;
+}
+
+.loading {
+    text-align: center;
+    padding: 30px;
+    color: #64748b;
+}
+
+.exportBody {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.employeeInfo {
+    background: #f8fafc;
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: 1px solid #e9edf4;
+}
+.employeeInfo p {
+    margin: 4px 0;
+    font-size: 14px;
+    color: #334155;
+}
+.employeeInfo strong {
+    color: #0a0a23;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.formGroup label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+}
+
+.selectInput {
+    padding: 10px 14px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 14px;
+    background: white;
+    outline: none;
+    transition: all 0.2s;
+}
+.selectInput:focus {
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.08);
+}
+
+.formatOptions {
+    display: flex;
+    gap: 10px;
+}
+
+.formatBtn {
+    flex: 1;
+    padding: 10px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    background: white;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+.formatBtn:hover {
+    border-color: #4f46e5;
+}
+.formatBtn.active {
+    border-color: #4f46e5;
+    background: #eef2ff;
+    color: #4f46e5;
+}
+
+.exportBtn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 4px;
+}
+.exportBtn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(79, 70, 229, 0.3);
+}
+.exportBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+    .exportContent {
+        padding: 20px;
+        margin: 10px;
+    }
+    .formatOptions {
+        flex-direction: column;
+    }
+}
+
+/* Add at the end of file */
+
+.exportBtn {
+    padding: 8px 16px;
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 12px;
+    transition: all 0.2s;
+}
+.exportBtn:hover {
+    background: rgba(16, 185, 129, 0.2);
+    transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+    .exportBtn {
+        font-size: 10px;
+        padding: 4px 10px;
+    }
+}
