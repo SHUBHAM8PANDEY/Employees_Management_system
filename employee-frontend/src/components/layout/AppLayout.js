@@ -1,3 +1,4 @@
+import useMessageAlerts from '../../utils/useMessageAlerts';
 import React, { useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { Activity, ArrowUpRight, CalendarCheck, CalendarDays, ChartNoAxesCombined, ChevronDown, LayoutDashboard, Mail, Menu, MessageCircle, Moon, PanelLeftClose, PanelLeftOpen, Search, ShieldCheck, Sun, UserPlus, Users, Bell, X, Settings as SettingsIcon } from 'lucide-react';
@@ -10,6 +11,7 @@ export default function AppLayout({ children, role }) {
     const home = isHr ? '/dashboard' : '/employee-dashboard';
     const location = useLocation();
     const navigate = useNavigate();
+    const alerts = useMessageAlerts(location.pathname);
     const searchInput = useRef(null);
     const [query, setQuery] = useState('');
     const [searchOpen, setSearchOpen] = useState(false);
@@ -77,6 +79,8 @@ export default function AppLayout({ children, role }) {
                             onClick={() => setDrawer(false)} title={name}
                             className={`${styles.navLink} ${currentPath === path ? styles.active : ''}`}>
                             <Icon size={18} aria-hidden="true" /><span>{name}</span>
+                            {path === '/chat' && alerts.count > 0 && <b className={styles.unread}
+                                aria-label={`${alerts.count} unread messages`}>{alerts.count > 99 ? '99+' : alerts.count}</b>}
                         </NavLink>)}
                     </div>)}
                 </nav>
@@ -123,6 +127,8 @@ export default function AppLayout({ children, role }) {
                                 localStorage.setItem('hrms-theme', next);
                                 window.dispatchEvent(new Event('hrms-theme-change'));
                             }}>{theme === 'dark' ? <Sun size={19} /> : <Moon size={19} />}</button>
+                        {alerts.permission === 'default' && <button type="button" className={styles.iconButton}
+                            title="Enable device message alerts" aria-label="Enable device message alerts" onClick={alerts.enable}><Bell size={18} /></button>}
                         <NotificationBell /><UserMenu role={role} />
                     </div>
                 </header>

@@ -6,6 +6,7 @@ jest.mock('react-router-dom', () => ({
     useLocation: () => ({ pathname: '/employee-leave', search: '' }),
     useNavigate: () => jest.fn()
 }), { virtual: true });
+jest.mock('./utils/useMessageAlerts', () => () => ({ count: 0 }));
 jest.mock('./components/NotificationBell', () => () => null);
 jest.mock('./components/UserMenu', () => () => null);
 

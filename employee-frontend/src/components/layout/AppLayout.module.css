@@ -55,3 +55,7 @@
     .search svg { flex: none; }
     .iconButton { width: 34px; height: 34px; }
 }
+
+.navLink { position: relative; }
+.unread { margin-left: auto; border-radius: 999px; background: var(--ui-primary); color: white; padding: 2px 6px; font-size: .65rem; }
+@media (min-width: 851px) { .collapsed .unread { position: absolute; top: 2px; right: 0; } }

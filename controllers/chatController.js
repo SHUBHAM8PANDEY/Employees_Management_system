@@ -320,6 +320,7 @@ async function acknowledgeRead(req, filter) {
     for (const [sender, ids] of idsBySender) {
         io?.to(`user:${sender}`).emit('messages_read', { ids });
     }
+    if (messages.length) io?.to(`user:${req.user.employee_code}`).emit('unread_changed');
     return messages;
 }
 
