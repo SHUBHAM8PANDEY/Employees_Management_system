@@ -233,12 +233,22 @@ const saveMessage = async ({ senderCode, receiverCode, message, attachment }) =>
         throw new Error(`Invalid employee code(s): ${missing.join(', ')}`);
     }
 
-    return ChatMessage.create({
+    const { attachment_data, ...metadata } = file;
+    const values = {
         sender_code: senderCode,
         receiver_code: receiverCode,
         message: text,
-        ...file,
+        ...metadata,
         is_read: false
+    };
+    if (!attachment_data) return ChatMessage.create(values);
+    return db.sequelize.transaction(async transaction => {
+        const saved = await ChatMessage.create(values, { transaction });
+        await db.sequelize.query(
+            'INSERT INTO public.chat_files (message_id, content) VALUES ($id, $content)',
+            { bind: { id: saved.id, content: attachment_data }, transaction }
+        );
+        return saved;
     });
 };
 
@@ -268,7 +278,9 @@ async function postMessage(req, res) {
     try {
         const saved = await saveMessage({
             senderCode: req.user.employee_code, receiverCode, message,
-            attachment: attachment && { name: attachment.name, type: attachment.type,
+            attachment: req.file ? {
+                name: req.file.originalname, type: req.file.mimetype, data: req.file.buffer
+            } : attachment && { name: attachment.name, type: attachment.type,
                 data: typeof attachment.data === 'string' ? Buffer.from(attachment.data, 'base64') : null }
         });
         const { attachment_data, ...result } = saved.get({ plain: true });
@@ -287,10 +299,15 @@ async function getAttachment(req, res) {
     const message = await ChatMessage.findOne({
         where: { id: req.params.id, [Op.or]: [{ sender_code: code }, { receiver_code: code }] }
     });
-    if (!message?.attachment_data) return res.sendStatus(404);
+    if (!message?.attachment_name) return res.sendStatus(404);
+    const [rows] = await db.sequelize.query(
+        'SELECT content FROM public.chat_files WHERE message_id = $id', { bind: { id: message.id } }
+    );
+    const content = rows[0]?.content ?? message.attachment_data;
+    if (!content) return res.sendStatus(404);
     res.set('Cache-Control', 'private, no-store');
     res.set('X-Content-Type-Options', 'nosniff');
-    res.attachment(message.attachment_name).type(message.attachment_type).send(message.attachment_data);
+    res.attachment(message.attachment_name).type(message.attachment_type).send(content);
 }
 
 module.exports = {

@@ -23,3 +23,5 @@ Chat accepts PDF, JPEG, PNG and WebP files up to 4 MB. Files are stored in Neon 
 ## Automated employee greetings
 
 Fill in date of birth and joining date in Add Employee or Edit Employee. Existing records with missing dates can be updated there. The backend checks on startup and every 15 minutes in Asia/Kolkata. Birthday greetings repeat yearly and work anniversaries start after the first completed year. February 29 dates are observed on February 28 in non-leap years. Keep Render running continuously for same-day delivery and configure the email provider above.
+
+Chat uploads use multipart `POST /api/chat/files`. Chat messages store attachment metadata, and Neon stores the file bytes in `chat_files` linked by message ID. Deploy the backend before the frontend so the upload route and database table are available.

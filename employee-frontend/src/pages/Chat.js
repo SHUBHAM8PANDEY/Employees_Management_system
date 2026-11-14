@@ -195,33 +195,29 @@ const Chat = () => {
         setError('');
         const receiverCode = selectedContact.employee_code;
         try {
-            let file;
-            if (attachment) {
-                const encoded = await new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result.split(',')[1]);
-                    reader.onerror = reject;
-                    reader.readAsDataURL(attachment);
-                });
-                file = { name: attachment.name, type: attachment.type, data: encoded };
-            }
             const message = newMessage.trim();
             let response;
             try {
-                ({ data: response } = await axios.post(`${API_BASE}/api/chat/messages`, {
-                    message, receiverCode, attachment: file
-                }, { headers: { Authorization: `Bearer ${token}` } }));
+                const headers = { Authorization: `Bearer ${token}` };
+                if (attachment) {
+                    const form = new FormData();
+                    form.append('receiverCode', receiverCode);
+                    form.append('message', message);
+                    form.append('file', attachment);
+                    ({ data: response } = await axios.post(`${API_BASE}/api/chat/files`, form, { headers }));
+                } else {
+                    ({ data: response } = await axios.post(`${API_BASE}/api/chat/messages`, { message, receiverCode }, { headers }));
+                }
             } catch (error) {
                 if (error.response?.status !== 404 || error.response.data?.error) throw error;
+                if (attachment) throw new Error('File upload API is missing. Deploy the latest backend on Render and check the Vercel API URL.');
                 const socket = socketRef.current;
                 if (!socket?.connected) {
                     throw new Error('Chat API is unavailable and live chat is disconnected. Check the backend deployment.');
                 }
                 // The previous backend accepts messages over Socket.IO.
                 response = await socket.timeout(20000).emitWithAck('send_message', {
-                    message, receiverCode, attachment: attachment && {
-                        name: attachment.name, type: attachment.type, data: await attachment.arrayBuffer()
-                    }
+                    message, receiverCode
                 });
             }
             if (response?.error) throw new Error(response.error);
