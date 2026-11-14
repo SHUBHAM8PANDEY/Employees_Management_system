@@ -23,6 +23,7 @@ module.exports = (sequelize, DataTypes) => {
             unique: true,
             field: 'email'
         },
+        mobile_number: DataTypes.STRING(16),
         date_of_birth: DataTypes.DATEONLY,
         joining_date: DataTypes.DATEONLY,
         profile_picture: {

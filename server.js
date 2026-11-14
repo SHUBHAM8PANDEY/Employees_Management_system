@@ -213,7 +213,8 @@ db.sequelize.authenticate()
             ALTER COLUMN punch_out_photo TYPE text;
         ALTER TABLE public.employees
             ADD COLUMN IF NOT EXISTS date_of_birth date,
-            ADD COLUMN IF NOT EXISTS joining_date date;
+            ADD COLUMN IF NOT EXISTS joining_date date,
+            ADD COLUMN IF NOT EXISTS mobile_number varchar(16);
         CREATE TABLE IF NOT EXISTS public.employee_greetings (
             employee_code varchar(100) REFERENCES public.employees(employee_code) ON DELETE CASCADE ON UPDATE CASCADE,
             kind text NOT NULL,

@@ -8,9 +8,23 @@ const EmployeeQualification = db.EmployeeQualification;
 const EmployeeSkill = db.EmployeeSkill;
 const bcrypt = require('bcryptjs');
 const { Op } = require('sequelize');
+const validator = require('sequelize').Validator;
 const { generateEmployeeCode, isEmployeeCodeUnique } = require('../utils/generateEmployeeCode');
 const auditLogger = require('../utils/auditLogger');
 const notificationHelper = require('../utils/notificationHelper');
+
+function employeeContact(body) {
+    const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
+    if (body.email !== undefined && (!email || email.length > 255 || !validator.isEmail(email))) {
+        return { error: 'Enter a valid email address.' };
+    }
+    const mobile = body.mobile_number;
+    const normalized = typeof mobile === 'string' ? mobile.trim().replace(/[ ()-]/g, '') : '';
+    if (mobile != null && mobile !== '' && !/^\+?[0-9]{10,15}$/.test(normalized)) {
+        return { error: 'Enter a mobile number with 10–15 digits, optionally starting with +.' };
+    }
+    return { email, mobile_number: mobile === undefined ? undefined : normalized || null };
+}
 
 function employeeDateFields(body, required = false) {
     const fields = {};
@@ -34,7 +48,6 @@ const addEmployee = async (req, res) => {
         const { 
             first_name, 
             last_name, 
-            email, 
             employee_code,
             password = '123456',
             role = 'Employee',
@@ -43,6 +56,8 @@ const addEmployee = async (req, res) => {
             skills = []
         } = req.body;
 
+        const { email, mobile_number, error: contactError } = employeeContact(req.body);
+        if (contactError) return res.status(400).json({ error: contactError });
         const dates = employeeDateFields(req.body, true);
         if (!dates || dates.date_of_birth > dates.joining_date) {
             return res.status(400).json({ error: 'Enter a valid date of birth and joining date.' });
@@ -71,7 +86,7 @@ const addEmployee = async (req, res) => {
 
         // Check if email already exists
         const existingEmployee = await Employee.findOne({
-            where: { email: email }
+            where: db.Sequelize.where(db.Sequelize.fn('lower', db.Sequelize.col('email')), email)
         });
 
         if (existingEmployee) {
@@ -102,6 +117,7 @@ const addEmployee = async (req, res) => {
             first_name,
             last_name,
             email,
+            mobile_number,
             ...dates
         });
         console.log(`✅ Employee created for ${empCode}`);
@@ -451,6 +467,7 @@ const getMyProfile = async (req, res) => {
             first_name: employee.first_name,
             last_name: employee.last_name,
             email: employee.email,
+            mobile_number: employee.mobile_number,
             date_of_birth: employee.date_of_birth,
             joining_date: employee.joining_date,
             role: user?.role || 'Employee',
@@ -475,13 +492,22 @@ const updateEmployee = async (req, res) => {
         const { 
             first_name, 
             last_name, 
-            email,
             password,
             addresses,
             qualifications,
             skills
         } = req.body;
 
+        const contact = employeeContact(req.body);
+        if (contact.error) return res.status(400).json({ error: contact.error });
+        const email = req.body.email === undefined ? undefined : contact.email;
+        if (email) {
+            const existing = await User.findOne({ where: {
+                employee_code: { [Op.ne]: code },
+                [Op.and]: db.Sequelize.where(db.Sequelize.fn('lower', db.Sequelize.col('email')), email)
+            } });
+            if (existing) return res.status(409).json({ error: 'This email address is already in use.' });
+        }
         const employee = await Employee.findOne({
             where: { employee_code: code }
         });
@@ -496,9 +522,9 @@ const updateEmployee = async (req, res) => {
         if (!dates || (dates.date_of_birth ?? employee.date_of_birth) > (dates.joining_date ?? employee.joining_date)) {
             return res.status(400).json({ error: 'Enter a valid date of birth and joining date.' });
         }
-        await employee.update({ first_name, last_name, email, ...dates });
+        await employee.update({ first_name, last_name, email, mobile_number: contact.mobile_number, ...dates });
 
-        await User.update(
+        if (email !== undefined) await User.update(
             { email: email },
             { where: { employee_code: code } }
         );

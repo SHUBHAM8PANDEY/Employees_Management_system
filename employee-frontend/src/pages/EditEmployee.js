@@ -10,6 +10,7 @@ const EditEmployee = () => {
         first_name: '',
         last_name: '',
         email: '',
+        mobile_number: '',
         date_of_birth: '',
         joining_date: '',
         role: 'Employee'
@@ -33,6 +34,7 @@ const EditEmployee = () => {
                 first_name: response.data.first_name || '',
                 last_name: response.data.last_name || '',
                 email: response.data.email || '',
+                mobile_number: response.data.mobile_number || '',
                 date_of_birth: response.data.date_of_birth || '',
                 joining_date: response.data.joining_date || '',
                 role: response.data.role || 'Employee'
@@ -142,6 +144,11 @@ const EditEmployee = () => {
                         onChange={event => setFormData({ ...formData, date_of_birth: event.target.value })} /></label>
                     <label>Joining date <input type="date" required value={formData.joining_date}
                         onChange={event => setFormData({ ...formData, joining_date: event.target.value })} /></label>
+                </div>
+                <div style={{ marginBottom: '1rem' }}>
+                    <label>Mobile number <input type="tel" autoComplete="tel" inputMode="tel"
+                        placeholder="+91 98765 43210" maxLength={24} value={formData.mobile_number}
+                        onChange={event => setFormData({ ...formData, mobile_number: event.target.value })} /></label>
                 </div>
                 <div style={{ marginBottom: '16px' }}>
                     <label style={{ display: 'block', fontWeight: '600', marginBottom: '4px' }}>
